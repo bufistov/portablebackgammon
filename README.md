@@ -1,6 +1,6 @@
 
 
-                                  Forumosa Backgammon Game (v0.4.5) 
+                                  Portable Backgammon Game (v0.4.5) 
                                   - BETA PRE-RELEASE FOR TESTERS -
                                             20/06/2010 
 
@@ -8,7 +8,7 @@
 INTRODUCTION:
 ------------------------------------------------------------------------------------------------
 
-Forumosa Backgammon is a Backgammon game split into 2 distinct sections:
+Portable Backgammon is a Backgammon game split into 2 distinct sections:
 
 - LOCAL PLAY - allows you to play against a friend at the same computer as you, or play against 
 yourself or a (very dumb) computer opponent.
@@ -108,7 +108,7 @@ networking simply wont work, we need to get the Servlet migrated onto a server w
 address (or a redirector service) and the ability to run Servlets for this to work properly.
 
 Now it will attempt to connect to the server, and identify your own IP address, if all goes
-well you will appear in the Forumosa Backgammon chat lobby, with a list of users on the right
+well you will appear in the Portable Backgammon chat lobby, with a list of users on the right
 and the chat text in the middle. 
 
 Chat text scrolls up in the main window, and new users appear on the right, currently everyones IP address
@@ -119,9 +119,9 @@ and will provide various services at some point (this is for a potental future v
  - linking people who wish to play
  - providing broadcasts from admin
  - registering names/new channels
- - providing news about forumosa and or taiwan
+ - providing news about stuff
  - allowing people to leave "messages" for each other on the gammon network
- - requesting "Backgammon rank" in the forumosa scoreboard
+ - requesting "Backgammon rank" in the scoreboard
 
  There is also a web version of the chat room (implemented as a Java Applet) so that Admin can enter
  the chat room (denoted by no IP tacked onto their name and a green or gold dot) to chat and help 
