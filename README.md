@@ -35,7 +35,7 @@ way if you need an Android app developer/freelancer contact me here www.garethmu
 
 Be sure to check out "additional things you can do" below for a list of keys you can press in game
 to see the debug window and other things like Bot VS Bot, and how fast they think etc. As a final
-note the one thing I'd love to see in this game it proper real hardcore Backgammon AI in my "bots"
+note the one thing I'd love to see in this game is proper real hardcore Backgammon AI in my "bots"
 who are currently dumb dumb creatures :)
 
 Enjoy,
