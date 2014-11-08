@@ -2,7 +2,8 @@
 
                                   Portable Backgammon Game (v0.4.5) 
                                   - BETA PRE-RELEASE FOR TESTERS -
-                                            20/06/2010 
+				      WWW.GARETHMURFIN.CO.UK
+                                           20/06/2010 
 
 
 INTRODUCTION:
@@ -15,10 +16,35 @@ yourself or a (very dumb) computer opponent.
 - NETWORK PLAY - allows you to meet a user in the chat lobby and challenge them to a game across
 the internet 
 
+*A quick note from the author added in 2014:
+
+I developed this in 2009 and have just decided to release the code, because I remember looking hard for
+some existing stuff when I wrote this. It has been designed with ease of porting in mind, I have actually
+got an Android port somewhere, that took me literally an afternoon to get going using this source. 
+The trick is to adjust only the HAL.java (High-level Abstraction Layer I think I called it :))
+file and keep the others as is - this file is supposed to contain the specifics and the others are
+meant to be generic and can be largely left alone.
+
+Writing a backgammon game seems like an easy task, but is actually pretty tough, there's no doubt
+plenty of bugs in here and stuff that could be improved, feel free to do that, I am pretty much
+done with this project, which is why I have decided to release the code and see what happens!
+If I recall this was delivered to my client and I said, hey test it see if theres any bugs theres
+bound to be, and he refused to test it until it was "bug free". Ultimately I didn't get my pay because
+I asked him to test his product and he refused, lol.. welcome to the world of freelancing, by the
+way if you need a freelancer contact me here www.garethmurfin.co.uk
+
+Be sure to check out "additional things you can do" below for a list of keys you can press in game
+to see the debug window and other things like Bot VS Bot, and how fast they think etc. As a final
+note the one thing I'd love to see in this game it proper real hardcore Backgammon AI in my "bots"
+who are currently dumb dumb creatures :)
+
+Enjoy,
+Gaz.
+
 STATE OF DEVELOPMENT:
 ------------------------------------------------------------------------------------------------
-Please note this program is still in the beta phase and has bugs in it, we are hoping this test 
-group can help us compile a list of bugs that we can fix. 
+Please note this program is still in the beta phase and has bugs in it, I am hoping the community can
+help compile a list of bugs that we can fix. 
 
 The local play is largely "bug free" but there is still some situations in which it behaves differently
 to as expected (ie, wrong), hopefully those of you who are Gammon fans can play against each other,
