@@ -31,7 +31,7 @@ done with this project, which is why I have decided to release the code and see 
 If I recall this was delivered to my client and I said, hey test it see if theres any bugs theres
 bound to be, and he refused to test it until it was "bug free". Ultimately I didn't get my pay because
 I asked him to test his product and he refused, lol.. welcome to the world of freelancing, by the
-way if you need a freelancer contact me here www.garethmurfin.co.uk
+way if you need an Android app developer/freelancer contact me here www.garethmurfin.co.uk 
 
 Be sure to check out "additional things you can do" below for a list of keys you can press in game
 to see the debug window and other things like Bot VS Bot, and how fast they think etc. As a final
@@ -40,6 +40,7 @@ who are currently dumb dumb creatures :)
 
 Enjoy,
 Gaz.
+
 
 STATE OF DEVELOPMENT:
 ------------------------------------------------------------------------------------------------
