@@ -2,8 +2,8 @@
 
                                   Portable Backgammon Game (v0.4.5) 
                                   - BETA PRE-RELEASE FOR TESTERS -
-				      WWW.GARETHMURFIN.CO.UK
-                                           20/06/2010 
+                                       WWW.GARETHMURFIN.CO.UK
+                                            20/06/2010 
 
 
 INTRODUCTION:
