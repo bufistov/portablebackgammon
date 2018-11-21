@@ -9,6 +9,8 @@
 INTRODUCTION:
 ------------------------------------------------------------------------------------------------
 
+Video: https://youtu.be/Azts7E8-UK4
+
 Portable Backgammon is a Backgammon game split into 2 distinct sections:
 
 - LOCAL PLAY - allows you to play against a friend at the same computer as you, or play against 
