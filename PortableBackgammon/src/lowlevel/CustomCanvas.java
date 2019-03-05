@@ -737,8 +737,8 @@ public static final int DEBUGRIGHT=2;
      _("Attempting to loadImages()");
      if (splashScreenLogo==null)
      {
-         splashScreenLogo      = hal.loadImage("/presentslogo.gif");
-         splashScreenLogoSmall = hal.loadImage("/presentslogosmall.gif");
+         splashScreenLogo      = hal.loadImage("/midokura-logo.png");
+         splashScreenLogoSmall = hal.loadImage("/midokura-logo-small.png");
          pointer               = hal.loadImage("/pointer.png");
          op                    = hal.loadImage("/op.png");
          admin                 =  hal.loadImage("/admin.png");
