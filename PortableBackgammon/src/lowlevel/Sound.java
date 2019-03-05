@@ -12,41 +12,33 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import javax.sound.sampled.*;
 /**
- *
- * @author Gaz
+ * Holds one audio file
  */
-public class Sound // Holds one audio file
-    {
+public class Sound {
  
-  public Sound(String filename)
-  {
-        if (CustomCanvas.SOUND_ON)
-        {
+    public Sound(String filename) {
+        if (CustomCanvas.SOUND_ON) {
             if (clip==null)
                 loadSound(filename);
             else
-                _("Sound already pre-cached - "+filename);
+                log("Sound already pre-cached - "+filename);
         }
-        else
-        {
-            _("NOT LOADING SINCE SOUND IS TURNED OFF.");
+        else {
+            log("NOT LOADING SINCE SOUND IS TURNED OFF.");
         }
-      
-    //loadStartupSound();
-    //playStartUpSound();
-    
-  }
 
-  File file;
-   AudioInputStream audioInputStream;
+        //loadStartupSound();
+        //playStartUpSound();
+    }
+
+    File file;
+    AudioInputStream audioInputStream;
     AudioFormat audioFormat;
     DataLine.Info dataLineInfo;
-     Clip clip ;
+    Clip clip ;
 
-
-
-       // USE THESE TO TEST AUDIO ON WINDOWS.
-  public void loadSound(String filename) {
+    // USE THESE TO TEST AUDIO ON WINDOWS.
+    public void loadSound(String filename) {
     //Runnable soundPlayer = new Runnable() {
      //  public void run() {
           try {
@@ -56,11 +48,11 @@ public class Sound // Holds one audio file
              // use one of the WAV of Windows installation
               file = new File(filename);//System.getenv("windir") + "/" +"media/tada.wav");
             //  String path=getClass().getResource(filename).getFile();// .toString();//new java.io.File(".").getCanonicalPath()+file;
-            //  _("path: ["+path+"]");
+            //  log("path: ["+path+"]");
 
 //            String path = getClass().getResource("/"+filename).getFile();
          //   path=path.replace("%20", " ");
-         //   _("path:   "+path);
+         //   log("path:   "+path);
 
             InputStream s = this.getClass().getResourceAsStream(filename);
 
@@ -75,72 +67,39 @@ public class Sound // Holds one audio file
           } catch (Exception e) {
              e.printStackTrace();
           }
-    //   }
-    //};
-   // Thread soundPlayingThread = new Thread(soundPlayer);
-   // soundPlayingThread.start();
- }
-  public void playSound()
-  {
-      if (CustomCanvas.SOUND_ON)
-        {
-              clip.setFramePosition(0);
-      clip.start();
+    }
+
+    public void playSound()
+    {
+        if (CustomCanvas.SOUND_ON) {
+            clip.setFramePosition(0);
+            clip.start();
         }
-        else
-        {
-            _("NOT PLAYING SINCE SOUND IS TURNED OFF.");
+        else {
+            log("NOT PLAYING SINCE SOUND IS TURNED OFF.");
         }
-      /*try{
-      clip.open(audioInputStream);
-      }catch(Exception e)
-      {
-          HAL._E("cant play sound "+e);
-      }*/
-    
-  }
+    }
 
-
-
-
-
-
-
-public void testSound()
-{
-_("TEST SOUND CALLED.");
-    //WINDOWS ONLY.
-   // loadStartupSound();
-   // playStartUpSound();
-}
-
-
-     // USE THESE TO TEST AUDIO ON WINDOWS.
-  public void loadStartupSound() {
-    //Runnable soundPlayer = new Runnable() {
-     //  public void run() {
+    // USE THESE TO TEST AUDIO ON WINDOWS.
+    public void loadStartupSound() {
           try {
-              File file=null;
-   AudioInputStream audioInputStream=null;
-    AudioFormat audioFormat=null;
-    DataLine.Info dataLineInfo=null;
-     Clip clip=null ;
-             // use one of the WAV of Windows installation
-              file = new File(System.getenv("windir") + "/" +"media/tada.wav");
-              audioInputStream = AudioSystem.getAudioInputStream(new FileInputStream(file));
-              audioFormat = audioInputStream.getFormat();
-             dataLineInfo = new DataLine.Info(Clip.class, audioFormat);
-              clip = (Clip) AudioSystem.getLine(dataLineInfo);
-             clip.open(audioInputStream);
+               File file=null;
+               AudioInputStream audioInputStream=null;
+               AudioFormat audioFormat=null;
+               DataLine.Info dataLineInfo=null;
+               Clip clip=null ;
+               // use one of the WAV of Windows installation
+               file = new File(System.getenv("windir") + "/" +"media/tada.wav");
+               audioInputStream = AudioSystem.getAudioInputStream(new FileInputStream(file));
+               audioFormat = audioInputStream.getFormat();
+               dataLineInfo = new DataLine.Info(Clip.class, audioFormat);
+               clip = (Clip) AudioSystem.getLine(dataLineInfo);
+               clip.open(audioInputStream);
              ////clip.start();
           } catch (Exception e) {
-             e.printStackTrace();
+              e.printStackTrace();
           }
-    //   }
-    //};
-   // Thread soundPlayingThread = new Thread(soundPlayer);
-   // soundPlayingThread.start();
- }
+    }
   public void playStartUpSound()
   {
       clip.start();
@@ -174,10 +133,7 @@ _("TEST SOUND CALLED.");
  }*/
 
 
-private void _(String s)
-    {
+    private void log(String s) {
         HAL.log("Sound{}:" + s);
     }
-
-
-    }
+}
