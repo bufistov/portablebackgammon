@@ -28,7 +28,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static boolean SOUND_ON=true;
     public static boolean showCollisions=false; // debug
     boolean PAINT_STATE=false;                  //debug
-    public static final String DEBUG_HEADER="Forumosa Backgammon game (DEBUG MODE):";
+    public static final String DEBUG_HEADER="Midokura Backgammon game (DEBUG MODE):";
         
     // possible states:
     public static final int SPLASH_SCREEN=0;
