@@ -176,7 +176,7 @@ _("TEST SOUND CALLED.");
 
 private void _(String s)
     {
-        HAL._("Sound{}:"+s);
+        HAL.log("Sound{}:" + s);
     }
 
 

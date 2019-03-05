@@ -82,7 +82,7 @@ public class Piece {
 
     private void _(String s)
     {
-        HAL._("Piece{}:"+s);
+        HAL.log("Piece{}:" + s);
     }
 
     public void drawPieceOnMouse(Graphics g, int x, int y)

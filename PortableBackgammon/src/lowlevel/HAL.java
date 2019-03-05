@@ -4,25 +4,9 @@
  */
 package lowlevel;
 import java.awt.*;
-import javax.swing.*;
-import javax.swing.*;
-import java.awt.Toolkit;
-import java.awt.Dimension;
 import java.util.*;
-import java.util.zip.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import java.io.*;
-import javax.swing.event.*;
-import javax.swing.*;
-import java.net.*;
-import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
-import javax.swing.*;
+
 /**
  *
  * @author Gaz
@@ -47,7 +31,7 @@ public class HAL {
         g.setColor(colour_);
     }
 
-     public void setColor(Graphics g, int c)
+     public static void setColor(Graphics g, int c)
      {
          Color cl = new Color(c);
          g.setColor(cl);
@@ -138,7 +122,7 @@ public class HAL {
     public Image loadImage(String path)
     {
         try {
-            _("LOADIMAGE: Attempting to load: "+path);
+            log("LOADIMAGE: Attempting to load: " + path);
             tempImage = ( new javax.swing.ImageIcon(getClass().getResource(path)).getImage() );
         } catch (Exception e) {
             _E("error loading image ("+path+") "+e.getMessage());
@@ -159,7 +143,7 @@ public class HAL {
 
     public static int LINES_THAT_FIT_VERTICALLY=30;//allow to scale. todo
     public static Vector systemOuts=new Vector(0);
-    public static void _(String s)
+    public static void log(String s)
     {
         if (CANVAS_LOGGING)
         {

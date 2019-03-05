@@ -5,24 +5,11 @@
 package lowlevel;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.*;
+
 import java.awt.Toolkit;
 import java.awt.Dimension;
-import java.util.*;
-import java.util.zip.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import java.io.*;
-import javax.swing.event.*;
-import javax.swing.*;
-import java.net.*;
-import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
-import javax.swing.*;
+
 /**
  *
  * @author Gaz
@@ -39,11 +26,11 @@ public class Main
      public static void main(String[] args)
      {
 
-         _("Main called, Backgammon starting.");
+         log("Main called, Backgammon starting.");
         frame = new JFrame();
         
         
-        _("insetY:"+insetY+", insetX"+insetX);
+        log("insetY:" + insetY + ", insetX" + insetX);
         canvas = new CustomCanvas(frame); // create our canvas object that has custom rendering in it.
         frame.getContentPane().add(canvas);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
@@ -55,7 +42,7 @@ public class Main
        // frame.getRootPane().setDoubleBuffered(true);
         frame.setVisible(true); // start AWT painting.
         frame.setTitle("Forumosa Backgammon "+CustomCanvas.VERSION);
-        _("Backgammon visible.");
+        log("Backgammon visible.");
 
 
         Insets insets = frame.getInsets();
@@ -133,8 +120,8 @@ frame.setCursor(transparentCursor);
       // Game logic here
      }
 
-     private static void _(String s)
+     private static void log(String s)
      {
-        HAL._("Main{}:"+s);
+        HAL.log("Main{}:" + s);
      }
 }

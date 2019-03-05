@@ -45,6 +45,6 @@ public class Player {
 
     private void _(String s)
     {
-        HAL._("Player{}:"+s);
+        HAL.log("Player{}:" + s);
     }
 }

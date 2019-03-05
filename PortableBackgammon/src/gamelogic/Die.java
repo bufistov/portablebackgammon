@@ -22,7 +22,7 @@ public class Die {
     int value=-1; //1 to 6
     public Die()
     {
-        _("Die made");
+        log("Die made");
         
         makeColourObjects(false);
     }
@@ -70,7 +70,7 @@ public class Die {
             originalValue=value;
         }
         
-        _("WARNING, SETVALUE ON DICE CALLED");
+        log("WARNING, SETVALUE ON DICE CALLED");
         value=newValue;
     }
 
@@ -80,9 +80,9 @@ public class Die {
         value=0;
     }
     
-    private void _(String s)
+    private void log(String s)
     {
-        HAL._("Die{}:"+s);
+        HAL.log("Die{}:" + s);
     }
 
     public static int DIE_WIDTH=0;
@@ -97,7 +97,7 @@ public class Die {
     {
         if (value<1)
         {
-            //_("Die not ready yet.");
+            //log("Die not ready yet.");
             return;
         }
         else

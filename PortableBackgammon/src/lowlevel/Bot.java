@@ -294,7 +294,7 @@ int destinationCounter;
 
     private void _(String s)
     {
-        HAL._("Bot{}:"+s);
+        HAL.log("Bot{}:" + s);
     }
 
    

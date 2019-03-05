@@ -577,7 +577,7 @@ public class Spike
     //wrapper around system outs
     private void _(String s)
     {
-        HAL._("Spike{}:"+s);
+        HAL.log("Spike{}:" + s);
     }
 
     public static void makeColourObjects(boolean forceRecreation)

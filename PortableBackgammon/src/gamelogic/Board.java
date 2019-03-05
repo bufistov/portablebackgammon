@@ -8,7 +8,7 @@ import lowlevel.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Enumeration;
-import java.util.NoSuchElementException;
+
 /**
  *
  * @author Gaz
@@ -36,7 +36,7 @@ public class Board
 
     public Board()
     {
-        _("Board made");
+        log("Board made");
         // make spikes, players, pieces etc
         makeAllGameVars();
         makeColourObjects(false);
@@ -76,19 +76,19 @@ public class Board
 
     private void makeAllGameVars()
     {
-        _("making players");
+        log("making players");
         whitePlayer =new Player(Player.WHITE,"name");
         blackPlayer =new Player(Player.BLACK,"name");
 
-        _("making spikes.");
+        log("making spikes.");
         spikes = new Vector();
         for (int i=1; i<25; i++)
         {
             spikes.add(new Spike(i));
         }
-        _("spikes done.");
+        log("spikes done.");
 
-        _("making dice");
+        log("making dice");
         die1 = new Die();
         die2 = new Die();
 
@@ -144,7 +144,7 @@ public class Board
            
             if (gameComplete)
             {
-                _("gameComplete");
+                log("gameComplete");
             }
             else
             {
@@ -197,7 +197,7 @@ public class Board
 
         if (gameComplete)
             {
-                _("gameComplete!");
+                log("gameComplete!");
             }
             else
             {
@@ -232,7 +232,7 @@ public class Board
             if (playGameOverSound)
             {
                 CustomCanvas.sfxGameOver.playSound();
-                _("PLAYING GAME OVER SOUND*************************");
+                log("PLAYING GAME OVER SOUND*************************");
                 playGameOverSound=false;
             }
             CustomCanvas.tellPlayers(gameCompleteString);
@@ -308,13 +308,13 @@ public class Board
                 //however if they cant get off the bar at all then we set both dies to used since they #d be stuck on the bar otherwise
                 //so we keep a flag of it til bottom
                 cantGetOfBarWithDie1=true;
-                _("NO OPTIONS FOR GETTING OFF BAR WITH DIE1");
+                log("NO OPTIONS FOR GETTING OFF BAR WITH DIE1");
                 ////CustomCanvas.tellPlayers("No options with Die 1 ("+die1.getValue()+")");
             }
             else
             {
                 //there are optiosn for getting off generation in here for the cpu player
-                _("DIE1:");
+                log("DIE1:");
                 getOffTheBarOptions();
             }
 
@@ -333,12 +333,12 @@ public class Board
                 //however if they cant get off the bar at all then we set both dies to used since they #d be stuck on the bar otherwise
                 //so we keep a flag of it til bottom
                 cantGetOfBarWithDie2=true;
-                _("NO OPTIONS FOR GETTING OFF BAR WITH DIE2");
+                log("NO OPTIONS FOR GETTING OFF BAR WITH DIE2");
                ///// CustomCanvas.tellPlayers("No options with Die 2 ("+die2.getValue()+")");
             }
             else
             {
-                _("DIE2:");
+                log("DIE2:");
                 //there are optiosn for getting off generation in here for the cpu player
                 getOffTheBarOptions();
             }
@@ -352,7 +352,7 @@ public class Board
 
         if (cantGetOfBarWithDie1 && cantGetOfBarWithDie2)//die1HasBeenUsed && die2HasBeenUsed)
         {
-            _("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!1");
+            log("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!1");
             die1HasBeenUsed=true;
             die2HasBeenUsed=true;
             CustomCanvas.turnOver();
@@ -364,11 +364,11 @@ public class Board
     {
          //there are options for getting off the bar
         Enumeration e = spikesAllowedToMoveToFromBar.elements();
-        _("OFF THE BAR OPTIONS:");
+        log("OFF THE BAR OPTIONS:");
         while(e.hasMoreElements())
         {
             Spike spike = (Spike) e.nextElement();
-            _("SPIKE:"+spike.getSpikeNumber()+" using ROLL OF "+spike.get_stored_die().getValue());
+            log("SPIKE:" + spike.getSpikeNumber() + " using ROLL OF " + spike.get_stored_die().getValue());
         }
         //grab the first spike for later:
         Spike destinationSpike = (Spike) spikesAllowedToMoveToFromBar.firstElement();
@@ -377,24 +377,24 @@ public class Board
         Vector theBarPieces=null;
         if (whoseTurnIsIt==Player.WHITE)
         {
-            _("FOR WHITE:");
+            log("FOR WHITE:");
             theBarPieces=CustomCanvas.theBarWHITE;
         }
         else
         {
-            _("FOR BLACK:");
+            log("FOR BLACK:");
             theBarPieces=CustomCanvas.theBarBLACK;
         }
         Enumeration weepingDonkey = theBarPieces.elements();
         while(weepingDonkey.hasMoreElements())
         {
-            _("White pieces on bar potential pick ups:");
+            log("White pieces on bar potential pick ups:");
             Piece piece = (Piece)weepingDonkey.nextElement();
-            _("piece:"+piece.getColour());
+            log("piece:" + piece.getColour());
         }
         if (CustomCanvas.pieceOnMouse)
         {
-            _("Destination PLACE ON AVAIL SPIKE:"+destinationSpike.getSpikeNumber());
+            log("Destination PLACE ON AVAIL SPIKE:" + destinationSpike.getSpikeNumber());
             if (destinationSpike.getType()==Spike.STALECTITE)
             {
                // _("STALECTITE dest");
@@ -416,7 +416,7 @@ public class Board
         }
         else
         {
-            _("DESTINATION FOR BOT, PIECE ON BAR......");
+            log("DESTINATION FOR BOT, PIECE ON BAR......");
             //pick first piece on bar
             Piece p = (Piece) theBarPieces.firstElement();
             setBotDestination(p.collision_x+Piece.PIECE_DIAMETER/2,p.collision_y+Piece.PIECE_DIAMETER/2,"DESTINATION FOR BOT, PIECE ON BAR......");
@@ -586,7 +586,7 @@ thereAreOptions=false;
         boolean debugmessages=false;
         if (debugmessages)
         {
-            _("keepPotentialSpikesPulsing");
+            log("keepPotentialSpikesPulsing");
         }
         debugstr="";
         if (copy_of_reachableFromDie1!=null)
@@ -620,7 +620,7 @@ thereAreOptions=false;
         }
         if (debugmessages)
         {
-            _("debugstr:"+debugstr);
+            log("debugstr:" + debugstr);
         }
     }
 
@@ -643,7 +643,7 @@ thereAreOptions=false;
     public static Spike copy_of_reachableFromBothDice;
     private void clearCopiedPulsatingSpikes()
     {
-        _("clearCopiedPulsatingSpikes");
+        log("clearCopiedPulsatingSpikes");
         copy_of_reachableFromDie1=null;
         copy_of_reachableFromDie2=null;
         copy_of_reachableFromBothDice=null;
@@ -811,7 +811,7 @@ thereAreOptions=false;
                 else
                 if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK)
                 {
-                    _("yes "+potentialSpikeIndex+" is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
+                    log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer=true;
                     die1StillAnOption=true;
                      copy_of_reachableFromDie1=null;//EXPERIMENT-YES THIS WORKS // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
@@ -835,7 +835,7 @@ thereAreOptions=false;
                      Spike reachableFromDie1 = (Spike) spikes.elementAt(potentialSpikeIndex);
                      if (debugmessages)
                      {
-                        _("yes "+potentialSpikeIndex+" is a valid option DIE1");
+                        log("yes " + potentialSpikeIndex + " is a valid option DIE1");
                      }
                      //graphically indicate the spike that is a valid move using die1s value:
                      pulsatePotentialSpike(reachableFromDie1,DIE1);
@@ -845,7 +845,7 @@ thereAreOptions=false;
                      copy_of_reachableFromDie1=reachableFromDie1;
                      if (debugmessages)
                      {
-                        _("copy_of_reachableFromDie1 set up.");
+                        log("copy_of_reachableFromDie1 set up.");
                      }
                      die1StillAnOption=true;
                 }
@@ -889,7 +889,7 @@ thereAreOptions=false;
             {
                 if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==Player.WHITE)
                 {
-                     _("yes "+potentialSpikeIndex+" is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
+                     log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     pulsateWhiteContainer=true;
                     die2StillAnOption=true;
                     copy_of_reachableFromDie2=null;//EXPERIMENT- YES IT WORKS
@@ -897,7 +897,7 @@ thereAreOptions=false;
                 else
                 if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK)
                 {
-                     _("yes "+potentialSpikeIndex+" is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
+                     log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer=true;
                     die2StillAnOption=true;
                     copy_of_reachableFromDie2=null;//EXPERIMENT-YES IT WORKS
@@ -920,7 +920,7 @@ thereAreOptions=false;
                      Spike reachableFromDie2 = (Spike) spikes.elementAt(potentialSpikeIndex);
                      if (debugmessages)
                      {
-                        _("yes "+potentialSpikeIndex+" is a valid option DIE2");
+                        log("yes " + potentialSpikeIndex + " is a valid option DIE2");
                      }
                      //graphically indicate the spike that is a valid move using die1s value:
                      pulsatePotentialSpike(reachableFromDie2,DIE2);
@@ -930,7 +930,7 @@ thereAreOptions=false;
                      copy_of_reachableFromDie2=reachableFromDie2;
                      if (debugmessages)
                      {
-                        _("copy_of_reachableFromDie2 set up.");
+                        log("copy_of_reachableFromDie2 set up.");
                      }
                      die2StillAnOption=true;
                 }
@@ -981,7 +981,7 @@ thereAreOptions=false;
             {
                 if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==Player.WHITE)
                 {
-                    _("yes "+potentialSpikeIndex+" is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
+                    log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     pulsateWhiteContainer=true;
                     bothDiceStillAnOption=true;
                     copy_of_reachableFromBothDice=null;//EXPERIMENTAL yes this works
@@ -989,7 +989,7 @@ thereAreOptions=false;
                 else
                 if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK)
                 {
-                    _("yes "+potentialSpikeIndex+" is a valid option DIE1+DIE2 TO GET ONTO PIECE BLACK CONTAINER");
+                    log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer=true;
                     bothDiceStillAnOption=true;
                     copy_of_reachableFromBothDice=null;//EXPERIMENTAL yes this works
@@ -1012,7 +1012,7 @@ thereAreOptions=false;
                      Spike reachableFromBothDice = (Spike) spikes.elementAt(potentialSpikeIndex);
                      if (debugmessages)
                      {
-                        _("yes "+potentialSpikeIndex+" is a valid option BOTH DICE");
+                        log("yes " + potentialSpikeIndex + " is a valid option BOTH DICE");
                      }
                      //graphically indicate the spike that is a valid move using die1s value:
                      pulsatePotentialSpike(reachableFromBothDice,DIE1AND2);
@@ -1022,7 +1022,7 @@ thereAreOptions=false;
                      copy_of_reachableFromBothDice=reachableFromBothDice;
                      if (debugmessages)
                      {
-                        _("copy_of_reachableFromBothDice set up.");
+                        log("copy_of_reachableFromBothDice set up.");
                      }
                      bothDiceStillAnOption=true;
 
@@ -1550,17 +1550,17 @@ thereAreOptions=false;
         switch(mode)
         {
             case BOARD_NEW_GAME:
-                _("mode: BOARD_NEW_GAME");
+                log("mode: BOARD_NEW_GAME");
                  initialiseBoardForNewGame();
                 break;
             case DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME:
-                _("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
+                log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
                 // now we simply move all of the black pieces from where they are and add them into their home area
                 //randomly.
                 movePiecesToHome(Player.WHITE);
                 break;
             case DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME:
-                _("mode: DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME");
+                log("mode: DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME");
                 // now we simply move all of the white pieces from where they are and add them into their home area
                 //randomly.
                 movePiecesToHome(Player.BLACK);
@@ -1591,14 +1591,14 @@ thereAreOptions=false;
             homeAreaStartSpike  = WHITE_HOME_START_SPIKE;//white home area is top right, 0,1,2,3,4,5
             homeAreaEndSpike    = WHITE_HOME_END_SPIKE;
             father=whitePlayer;
-            _("movePiecesToHome  white");
+            log("movePiecesToHome  white");
         } else
         if (player==Player.BLACK)
         {
             homeAreaStartSpike  = BLACK_HOME_START_SPIKE;//black home area is bot right, 18,19,20,21,22,23
             homeAreaEndSpike    = BLACK_HOME_END_SPIKE;
             father=blackPlayer;
-            _("movePiecesToHome  black");
+            log("movePiecesToHome  black");
         } else
         {
             HAL._E("piecesInHomeSide received an invalid player to check.");
@@ -1632,10 +1632,10 @@ thereAreOptions=false;
     //puts the pieces where they need to be to initialise a new game of backgammon
     public void initialiseBoardForNewGame()
     {
-        _("initialiseBoardForNewGame");
+        log("initialiseBoardForNewGame");
         for (int i=0; i<24; i++)
         {
-            _("#### Dealing with Spike number "+i);
+            log("#### Dealing with Spike number " + i);
             Spike tempSpike=null;
             try
             {
@@ -1666,7 +1666,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add white piece to spike "+i);
+                        log("Add white piece to spike " + i);
                     }
                 break;
                 case 5: //SPIKE SIX
@@ -1676,7 +1676,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add black piece to spike "+i);
+                        log("Add black piece to spike " + i);
                     }
                 break;
                 case 7: //SPIKE EIGHT
@@ -1686,7 +1686,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add black piece to spike "+i);
+                        log("Add black piece to spike " + i);
                     }
                 break;
                 case 11: //SPIKE EIGHT
@@ -1696,7 +1696,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add white piece to spike "+i);
+                        log("Add white piece to spike " + i);
                     }
                 break;
                 case 12: //SPIKE THIRTEEN
@@ -1706,7 +1706,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add black piece to spike "+i);
+                        log("Add black piece to spike " + i);
                     }
                 break;
                 case 16: //SPIKE SEVENTINE
@@ -1716,7 +1716,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add white piece to spike "+i);
+                        log("Add white piece to spike " + i);
                     }
                 break;
                 case 18: //SPIKE SEVENTINE
@@ -1726,7 +1726,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add white piece to spike "+i);
+                        log("Add white piece to spike " + i);
                     }
                 break;
                 case 23: //SPIKE TWENTY FOUR
@@ -1736,7 +1736,7 @@ thereAreOptions=false;
                     {
                         Piece addMe = new Piece(getPlayer(playeri));
                         tempSpike.addPiece(addMe);
-                        _("Add black piece to spike "+i);
+                        log("Add black piece to spike " + i);
                     }
                 break;
             }
@@ -1784,9 +1784,9 @@ thereAreOptions=false;
         return true;
     }
 
-    private static void _(String s)
+    private static void log(String s)
     {
-        HAL._("Board{}:"+s);
+        HAL.log("Board{}:" + s);
     }
 
     private String playerStr()
@@ -1963,7 +1963,7 @@ thereAreOptions=false;
                  //_("Yes Spike "+potentialSpike+" is a valid option.");
                 if (currentSpike==reachableFromDie)
                 {
-                    _("RETURNING MYSELF.");
+                    log("RETURNING MYSELF.");
                 }
                  return reachableFromDie;
             }
@@ -1993,7 +1993,7 @@ public void calculatePotentialMoves(boolean FORCE)
                  //if SPtheMoveToMake isnt null they have already chosen the spikes to pick up from and drop off at
                  if (FORCE || (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse) && !thereAreOptions )//&& SPtheMoveToMake==null))//&& !CustomCanvas.showRollButton)// && !die1HasBeenUsed  && !die2HasBeenUsed)
                  {
-                 _("_______________________________________________RECALCULATE MOVES "+FORCE+" die1:"+die1HasBeenUsed+" die2:"+die2HasBeenUsed);
+                 log("_______________________________________________RECALCULATE MOVES " + FORCE + " die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
                      
 
                     theyWantToPickUpAPiece();//<- fills up spikePairs
@@ -2010,7 +2010,7 @@ public void calculatePotentialMoves(boolean FORCE)
                     // if this is true by the time we get to "no options!" we know we need to let them take a special move and allow the
                     //die roll to wotkeven tho its to big
 
-                    _("spikePairs size:"+spikePairs.size());
+                    log("spikePairs size:" + spikePairs.size());
 
                     if (thereAreOptions)
                     {
@@ -2028,7 +2028,7 @@ public void calculatePotentialMoves(boolean FORCE)
                                     sp.pickMyPiece.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)
                                         )
                                 {
-                                    _("super special spike found ");
+                                    log("super special spike found ");
                                     /*this is when the die roll is too big to be exact but theyre putting pieces on container
                                      and it should be allowed.*/
                                 }
@@ -2058,7 +2058,7 @@ public void calculatePotentialMoves(boolean FORCE)
                         if (SPtheMoveToMake.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR))//ie its a fake spike, since its a piece container option
                         {
                             //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
-                            _("SPECIAL CASE randomly chose to go to spike:"+SPtheMoveToMake.pickMyPiece.spikeName+" and drop off at CONTAINER");
+                            log("SPECIAL CASE randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at CONTAINER");
                             CustomCanvas.tellRobot(true, "->"+SPtheMoveToMake.pickMyPiece.spikeName+"->Container");
                             Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                             Piece firstPiece=((Piece)takeMyPiece.pieces.firstElement());
@@ -2081,7 +2081,7 @@ public void calculatePotentialMoves(boolean FORCE)
                         {
 
                             //NORMAL CONDITION
-                             _("-randomly chose to go to spike:"+SPtheMoveToMake.pickMyPiece.spikeName+" and drop off at spike:"+SPtheMoveToMake.dropPiecesOnMe.spikeName);
+                             log("-randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at spike:" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
                             CustomCanvas.tellRobot(true, "->"+SPtheMoveToMake.pickMyPiece.spikeName+"->"+SPtheMoveToMake.dropPiecesOnMe.spikeName);
                             Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                             Piece firstPiece=((Piece)takeMyPiece.pieces.firstElement());
@@ -2089,7 +2089,7 @@ public void calculatePotentialMoves(boolean FORCE)
                             int goToY=firstPiece.collision_y+firstPiece.PIECE_DIAMETER/2;
 
                             setBotDestination(goToX,goToY,"RANDOMLY CHOOSE A PIECE");
-                            _("***************PIECE IM LOOKING FOR IS AT: "+goToX+","+goToY);
+                            log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
                         }
 
                        
@@ -2098,7 +2098,7 @@ public void calculatePotentialMoves(boolean FORCE)
                     {
                        /////////////// SPtheMoveToMake=null;
                         //////////thereAreOptions=false; //<-EXERIMENTED REMOVIN THITS JAN 26 131
-                        _("NO OPTIONS!");
+                        log("NO OPTIONS!");
 
                         // OK NO POTENTIAL MOVES TO BE MADE HERE, NOW WHAT?
                         if (!die1HasBeenUsed)//if this is die 1 were dealing with
@@ -2109,13 +2109,13 @@ public void calculatePotentialMoves(boolean FORCE)
                             if (whoseTurnIsIt==Player.WHITE && checkAbleToGetIntoPieceContainerWHITE)
                             {
                                 
-                                _("WHITE LOWERING THEVALUE OF DIE 1");
+                                log("WHITE LOWERING THEVALUE OF DIE 1");
                                 die1.setValue(die1.getValue()-1);
                             } else
                             if (whoseTurnIsIt==Player.BLACK && checkAbleToGetIntoPieceContainerBLACK)
                             {
 
-                                _("BLACK LOWERING THEVALUE OF DIE 1");
+                                log("BLACK LOWERING THEVALUE OF DIE 1");
                                 die1.setValue(die1.getValue()-1);
                             }
 
@@ -2124,7 +2124,7 @@ public void calculatePotentialMoves(boolean FORCE)
                                 //ORDINARY CASE
                                 //use this die up so it can move onto next one
                                 die1HasBeenUsed=true;
-                                _("DISABLED DIE 1x");
+                                log("DISABLED DIE 1x");
 
                                 CustomCanvas.tellPlayers("No option with Die 1 ("+die1.getValue()+")");
                                 CustomCanvas.sfxNoMove.playSound();
@@ -2142,13 +2142,13 @@ public void calculatePotentialMoves(boolean FORCE)
                             if (whoseTurnIsIt==Player.WHITE && checkAbleToGetIntoPieceContainerWHITE)
                             {
 
-                                _("WHITE LOWERING THEVALUE OF DIE 2");
+                                log("WHITE LOWERING THEVALUE OF DIE 2");
                                 die2.setValue(die2.getValue()-1);
                             } else
                             if (whoseTurnIsIt==Player.BLACK && checkAbleToGetIntoPieceContainerBLACK)
                             {
 
-                                _("BLACK LOWERING THEVALUE OF DIE 2");
+                                log("BLACK LOWERING THEVALUE OF DIE 2");
                                 die2.setValue(die2.getValue()-1);
                             }
 
@@ -2156,7 +2156,7 @@ public void calculatePotentialMoves(boolean FORCE)
                             {
                                 //use this die up so it can move onto next go
                                 die2HasBeenUsed=true;
-                                _("DISABLED DIE 2x");
+                                log("DISABLED DIE 2x");
                                 CustomCanvas.tellPlayers("No options available with Die 2 ("+die2.getValue()+")");
                                 CustomCanvas.sfxNoMove.playSound();
                                 //waitASec();
@@ -2167,7 +2167,7 @@ public void calculatePotentialMoves(boolean FORCE)
                                     //even cancel a double go if theres no options for die2
                                     CustomCanvas.someoneRolledADouble=false;
                                     CustomCanvas.doubleRollCounter=3;
-                                    _("NO OPTIONS SO CANCELLED DOUBLE TURN!");
+                                    log("NO OPTIONS SO CANCELLED DOUBLE TURN!");
 
                                 }
                             }
@@ -2213,7 +2213,7 @@ public void calculatePotentialMoves(boolean FORCE)
 
                  /////////EXPERMIENTAL BUT SOMETIMES IT DOESNT KNOW THE TURN IS OVER
                     //SO DICE DONT REAPPEAR
-                    _("TURN OVER A.");
+                    log("TURN OVER A.");
                      CustomCanvas.turnOver();
                 }
 
@@ -2223,7 +2223,7 @@ private void waitASec()
 {
      ///////////////
 
-                            _("--------------------------------------WAITING.");
+                            log("--------------------------------------WAITING.");
                             try
                             {
                                 Thread.sleep(10000);
@@ -2232,7 +2232,7 @@ private void waitASec()
                             {
                             }
                             wait=false;
-                            _("-----------------------------------------DONE WAITING");
+                            log("-----------------------------------------DONE WAITING");
 
                         ///////////////
 }
@@ -2252,12 +2252,12 @@ private void theyWantToPickUpAPiece()
             //choose which die to use here
             if (!die1HasBeenUsed)
             {
-                _("using DIE1 value ");
+                log("using DIE1 value ");
                 diceRoll=die1.getValue();
             }
             else if (!die2HasBeenUsed)
             {
-                _("using DIE2 value");
+                log("using DIE2 value");
                 diceRoll=die2.getValue();
             }
 
@@ -2270,14 +2270,14 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
                 clockwise=true;
                 checkAbleToGetIntoPieceContainerWHITE=allWhitePiecesAreHome;
                  checkAbleToGetIntoPieceContainer=checkAbleToGetIntoPieceContainerWHITE;
-                 _("x checkAbleToGetIntoPieceContainerWHITE:"+checkAbleToGetIntoPieceContainerWHITE);
+                 log("x checkAbleToGetIntoPieceContainerWHITE:" + checkAbleToGetIntoPieceContainerWHITE);
             }
             else if (whoseTurnIsIt==Player.BLACK)
             {
                 clockwise=false;
                 checkAbleToGetIntoPieceContainerBLACK=allBlackPiecesAreHome;
                 checkAbleToGetIntoPieceContainer=checkAbleToGetIntoPieceContainerBLACK;
-                _("x checkAbleToGetIntoPieceContainerBLACK:"+checkAbleToGetIntoPieceContainerBLACK);
+                log("x checkAbleToGetIntoPieceContainerBLACK:" + checkAbleToGetIntoPieceContainerBLACK);
             }
             else
             {
@@ -2348,7 +2348,7 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
 
                             if (potentialSpike>=FIRST_SPIKE-1 && potentialSpike<=LAST_SPIKE+1)//keep it on the board.BUT REMEMBER PIECE CONTAINERS
                             {
-                                _("checkAbleToGetIntoPieceContainer is true - potentialSpike:"+potentialSpike);
+                                log("checkAbleToGetIntoPieceContainer is true - potentialSpike:" + potentialSpike);
                                 // so we now know that the piece container is an option and we have a valid roll
                                 // to get us there.
                                 // buti n this case we cant grab a spiek to navigate to, and the piecesSafelyHome is just a vector
@@ -2357,10 +2357,10 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
 
                                 if (potentialSpike==LAST_SPIKE+1 || potentialSpike==FIRST_SPIKE-1)//so we know for sure its destined for piece container
                                 {
-                                    _("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is "+potentialSpike);
+                                    log("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is " + potentialSpike);
                                     // pass in -99 to make spike a very special one which is basically a piece container (see Spike constructor)
                                     canWeMoveAPieceToThisSpike = new Spike(Spike.NOT_A_REAL_SPIKE_MINUS_99); //(Spike) spikes.elementAt(potentialSpike);
-                                    _("yes "+canWeMoveAPieceToThisSpike.spikeName+" IS A PIECE CONTAINER we can move to");
+                                    log("yes " + canWeMoveAPieceToThisSpike.spikeName + " IS A PIECE CONTAINER we can move to");
                                           spikePairs.add(new SpikePair(spike,canWeMoveAPieceToThisSpike));
 
                                 }
@@ -2415,10 +2415,10 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
 
             } else
             {
-                _(" warnign dice roll was under 0 - this indicates no options for this player");
+                log(" warnign dice roll was under 0 - this indicates no options for this player");
             }
 //            return null;
-_("finished theyWantToPickUpAPiece");
+log("finished theyWantToPickUpAPiece");
 }
 
 private void calculateIfThisDieRollIsToBigButAlsoValidForGettingOntoPieceContainer()
@@ -2493,7 +2493,7 @@ public static void setBotDestination(int x, int y, String desc)
         return;//just so the message is not constantly printing
     }
     ROBOT_DESTINATION_MESSAGE="NEW BOT DEST: "+x+","+y+":"+desc;
-    _(ROBOT_DESTINATION_MESSAGE);
+    log(ROBOT_DESTINATION_MESSAGE);
     Bot.destX=x;
     Bot.destY=y;
 }
@@ -2504,12 +2504,12 @@ private void theyWantToPlaceAPiece()
     {
         //stops tem going on with normal case stuff will bar piece is put down
         //works briliantly!
-        _("dont do anythign til we palce this");
+        log("dont do anythign til we palce this");
         return;
     }
     if (SPtheMoveToMake==null)
     {
-        _("DOUBLE RECALC.>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log("DOUBLE RECALC.>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         thereAreOptions=false;
 
         
@@ -2658,7 +2658,7 @@ private void listSpikes(Vector potentialSpikes)
 //returns a vector of pieces that can be picked up and use valid
 private void calculatePotentialValidSpikesToPlacePiece()
 {
-	_("calculatePotentialValidSpikesToPlacePiece");
+	log("calculatePotentialValidSpikesToPlacePiece");
 }
 
 

@@ -2,9 +2,7 @@ package lowlevel;
 
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Shape;
-import java.util.Stack;
 
 public class CustomFont
 {
@@ -62,7 +60,7 @@ public class CustomFont
             width = image.getWidth(CustomCanvas.this_) / amountOfLetters_;
            // Gooey.PrintTHIS("Strip width is " + image.getWidth() + " so each of the letters is " + width + " wide and height is " + height);
             charWidth = width - widthBetweenPixelsCompensator;
-            HAL._("charWidth:"+charWidth);
+            HAL.log("charWidth:" + charWidth);
             baseline = calculateBaseline();
         }
         catch(Throwable t)

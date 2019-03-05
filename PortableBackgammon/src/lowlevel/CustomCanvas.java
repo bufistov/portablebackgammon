@@ -1463,7 +1463,7 @@ public static final int DEBUGRIGHT=2;
         
      } else
      {
-         HAL._("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
+         HAL.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
      }
 
  }
@@ -2206,7 +2206,7 @@ g.setClip(s);
  // wrapper around system out to console
  private static void _(String s)
  {
-    HAL._("CustomCanvas{}:"+s);
+    HAL.log("CustomCanvas{}:" + s);
  }
 GameNetworkClient client;
  public static final int LEFT_MOUSE_BUTTON=0;
@@ -3558,7 +3558,7 @@ public static boolean I_AM_SERVER;
          int GAP=3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
          try
          {
-             hal._("loading fonts:");
+             hal.log("loading fonts:");
              fontwhite = CustomFont.getFont( hal.loadImage(path+"whitefont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
              if (fontwhite==null)
              {
@@ -3781,7 +3781,7 @@ public static void tellRobot(boolean b,String s)
 /*Vector textLinesForWrappingTMP;
     int lastColour;
     boolean allowScrollingDOWN,allowScrollingUP;
-    String SPECIAL_END_SYMBOL="”””””";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
+    String SPECIAL_END_SYMBOL="ï¿½ï¿½ï¿½ï¿½ï¿½";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
     int scrollBarPos;
     int incrementSizeForScrollBarIndicator;
     public static final int WRAP_WIDTH_HACK_VAL=20; //15  //ensures that text doesnt go off edge
