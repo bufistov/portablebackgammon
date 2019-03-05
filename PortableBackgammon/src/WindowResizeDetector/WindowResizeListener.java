@@ -5,12 +5,8 @@
 
 package WindowResizeDetector;
 
-/**
- *
- * @author Gaz
- */
 import java.util.EventListener;
 
 public interface WindowResizeListener extends EventListener {
-void windowResized(WindowResizeEvent e);
+  void windowResized(WindowResizeEvent e);
 }
