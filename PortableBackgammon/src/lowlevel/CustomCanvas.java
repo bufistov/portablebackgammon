@@ -23,8 +23,8 @@ import javax.swing.JFrame;
  */
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener//, WindowResizeListener
 {
-    public static final String VERSION="v0.4.5";
-    public static final boolean RELEASE_BUILD=false;//set to true for release
+    public static final String VERSION="v0.0.1";
+    public static final boolean RELEASE_BUILD=false;
     public static boolean SOUND_ON=true;
     public static boolean showCollisions=false; // debug
     boolean PAINT_STATE=false;                  //debug
@@ -102,7 +102,7 @@ ignorePaintsCounter=0;
     */
     CustomCanvas(JFrame jFrame_)
     {
-        _("CustomCanvas made.");
+        log("CustomCanvas made.");
         bot.start();
        
         // j2se specifics
@@ -124,7 +124,7 @@ jFrame.setResizable(false);
         loadImages();
 
         //load sounds
-        _("Loading Sounds");
+        log("Loading Sounds");
        // java.io.File currentDir = new java.io.File("");
         //System.out.println("path determined "+currentDir.getAbsolutePath());
   
@@ -140,7 +140,7 @@ jFrame.setResizable(false);
         sfxKilled=new Sound("/killed.wav");
         sfxdouble=new Sound("/double.wav");
         sfxResign=new Sound("/resign.wav");
-        _("Sounds loaded.");
+        log("Sounds loaded.");
         requestFocus();  // get focus for keys
         setIgnoreRepaint(true);//this is the key to it not flickering on my desktop
        // s.testSound();
@@ -661,12 +661,12 @@ public static final int DEBUGRIGHT=2;
              if (direction==DEBUGLEFT)
              {
                  Bot.TIME_DELAY_BETWEEN_CLICKS-=10;
-                 _("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
+                 log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
              }
              if (direction==DEBUGRIGHT)
              {
                  Bot.TIME_DELAY_BETWEEN_CLICKS+=10;
-                 _("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
+                 log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
              }
              break;
          //DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS
@@ -674,12 +674,12 @@ public static final int DEBUGRIGHT=2;
              if (direction==DEBUGLEFT)
              {
                  Bot.ROBOT_DELAY_AFTER_CLICKS-=10;
-                 _("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
+                 log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
              }
              if (direction==DEBUGRIGHT)
              {
                  Bot.ROBOT_DELAY_AFTER_CLICKS+=10;
-                 _("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
+                 log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
              }
              break;
              //DEBUG_OPTION_paintRobotMessages
@@ -687,12 +687,12 @@ public static final int DEBUGRIGHT=2;
              if (direction==DEBUGLEFT)
              {
                  paintRobotMessages=!paintRobotMessages;
-                 _("paintRobotMessages:"+paintRobotMessages);
+                 log("paintRobotMessages:"+paintRobotMessages);
              }
              if (direction==DEBUGRIGHT)
              {
                  paintRobotMessages=!paintRobotMessages;
-                 _("paintRobotMessages:"+paintRobotMessages);
+                 log("paintRobotMessages:"+paintRobotMessages);
              }
              break;
              //TIME_DELAY_BETWEEN_CLICKS
@@ -700,12 +700,12 @@ public static final int DEBUGRIGHT=2;
              if (direction==DEBUGLEFT)
              {
                  Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
-                 _("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
+                 log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
              }
              if (direction==DEBUGRIGHT)
              {
                  Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
-                 _("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
+                 log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
              }
              break;
          default:
@@ -734,7 +734,7 @@ public static final int DEBUGRIGHT=2;
  //loads all images needed
  private void loadImages()
  {
-     _("Attempting to loadImages()");
+     log("Attempting to loadImages()");
      if (splashScreenLogo==null)
      {
          splashScreenLogo      = hal.loadImage("/midokura-logo.png");
@@ -745,7 +745,7 @@ public static final int DEBUGRIGHT=2;
      }
      else
      {
-         _("Images already pre-cached...");
+         log("Images already pre-cached...");
      }
  }
 
@@ -771,7 +771,7 @@ public static final int DEBUGRIGHT=2;
      }
      if (splashCounter++ > SPLASH_COUNTER)
      {
-        _("Splash done.");
+        log("Splash done.");
         state=OPTIONS_SCREEN_LOCAL_OR_NETWORK;
         
      }
@@ -1078,7 +1078,7 @@ public static final int DEBUGRIGHT=2;
          {
              if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll)
              {
-                 _("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
+                 log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
              }
              else
              {
@@ -1307,7 +1307,7 @@ public static final int DEBUGRIGHT=2;
      {
         if (y>=buttonyA && y<=buttonyA+buttonhA)
         {
-             _("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
+             log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
              buttonPressed=true;
              typeOfOpponent=CPU;//REMOVE ME???? TODOOOO
 
@@ -1315,18 +1315,18 @@ public static final int DEBUGRIGHT=2;
              //{
                  Board.HUMAN_VS_COMPUTER=true;
                  Bot.dead=false;//give him life
-                 _("CPU OPPONENT PRIMED.");
+                 log("CPU OPPONENT PRIMED.");
             // }
 
              state=GAME_IN_PROGRESS;
 
              if (typeOfPlay==LOCAL_PLAY)
              {
-                _("Selected LOCAL play against CPU");
+                log("Selected LOCAL play against CPU");
              }
              else
              {
-                 _("Selected NETWORK play against CPU");
+                 log("Selected NETWORK play against CPU");
                  
              }
         }
@@ -1342,21 +1342,21 @@ public static final int DEBUGRIGHT=2;
      {
         if (y>=buttonyB && y<=buttonyB+buttonhB)
         {
-             _("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
+             log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
              buttonPressed=true;
              typeOfOpponent=HUMAN;
              state=GAME_IN_PROGRESS;
 
               Board.HUMAN_VS_COMPUTER=false;
-              _("THE WEAKLING WOULD RATHER FACE A HUMAN.");
+              log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
 
              if (typeOfPlay==LOCAL_PLAY)
              {
-                _("Selected LOCAL play against HUMAN");
+                log("Selected LOCAL play against HUMAN");
              }
              else
              {
-                 _("Selected NETWORK play against HUMAN");
+                 log("Selected NETWORK play against HUMAN");
              }
         }
      }
@@ -1371,7 +1371,7 @@ public static final int DEBUGRIGHT=2;
      {
         if (y>=buttonyB && y<=buttonyB+buttonhB)
         {
-             _("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
+             log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
              typeOfPlay=NETWORK_PLAY;
              buttonPressed=true;
 
@@ -1393,7 +1393,7 @@ public static final int DEBUGRIGHT=2;
      {
         if (y>=buttonyA && y<=buttonyA+buttonhA)
         {
-             _("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
+             log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
              typeOfPlay=LOCAL_PLAY;
              buttonPressed=true;
 
@@ -1411,7 +1411,7 @@ public static final int DEBUGRIGHT=2;
      {
         if (y>=rollButtonY && y<=rollButtonY+rollButtonH)
         {
-            _("Roll Dice button clicked.");
+            log("Roll Dice button clicked.");
             Board.die1HasBeenUsed=false;
             Board.die2HasBeenUsed=false;
             showDice=true;//show the die now theyve clicked roll.
@@ -1423,7 +1423,7 @@ public static final int DEBUGRIGHT=2;
             //takes the first go.
             if (numberOfFirstRollsDone<=1)
             {
-                _("OPENING ROLL (numberOfFirstRollsDone:"+numberOfFirstRollsDone+")");
+                log("OPENING ROLL (numberOfFirstRollsDone:"+numberOfFirstRollsDone+")");
                 //ie the one each you get to see how starts.
                 dealWithOpeningRolls();
                   //kick start the bot
@@ -1433,7 +1433,7 @@ public static final int DEBUGRIGHT=2;
             //////////////////////////////
             //ORDINARY ROLLS/////////////
             {
-                _("ORDINARY ROLL");
+                log("ORDINARY ROLL");
                 dealWithOrdinaryRolls();
             }
 
@@ -1447,17 +1447,17 @@ public static final int DEBUGRIGHT=2;
  //deals with an ordinary roll, that is sets the 2 die values to new random ones
  private void dealWithOrdinaryRolls()
  {
-     _("----------- dealWithOrdinaryRolls -----------");
+     log("----------- dealWithOrdinaryRolls -----------");
      if (Board.whoseTurnIsIt==Player.WHITE)
      {
-         _("white will roll both die now.");
+         log("white will roll both die now.");
          // note we pass in null in here which tells it to roll both die for us directly
          playerRolls(Player.WHITE, null,false);
          
      } else
      if (Board.whoseTurnIsIt==Player.BLACK)
      {
-         _("black will roll both die now.");
+         log("black will roll both die now.");
          // note we pass in null in here which tells it to roll both die for us directly
          playerRolls(Player.BLACK,null,false);
         
@@ -1473,9 +1473,9 @@ public static final int DEBUGRIGHT=2;
  //as their opening move.
  private void dealWithOpeningRolls()
  {
-     _("----------- dealWithOpeningRolls -----------");
+     log("----------- dealWithOpeningRolls -----------");
      numberOfFirstRollsDone++;
-    _("first roll. "+numberOfFirstRollsDone);
+    log("first roll. "+numberOfFirstRollsDone);
 
     // WHITE rolls first to see who starts
     if (numberOfFirstRollsDone==1)
@@ -1497,7 +1497,7 @@ public static final int DEBUGRIGHT=2;
         } else
         if (blacksFirstRollVal==whitesFirstRollVal)
         {
-            _("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
+            log("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
             tellPlayers("Both players rolled the same! Re-roll.");
             numberOfFirstRollsDone=0;
             blacksFirstRollVal=-1;
@@ -1515,14 +1515,14 @@ public static final int DEBUGRIGHT=2;
  {
      if (player==Player.BLACK)
      {
-        _("BLACK won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
+        log("BLACK won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
         tellPlayers("Black won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
         board.whoseTurnIsIt=Player.BLACK;
         //theyve rolled now time to move their pieces
      } else
      if (player==Player.WHITE)
      {
-        _("WHITE won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
+        log("WHITE won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
         tellPlayers("White won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
         board.whoseTurnIsIt=Player.WHITE;
         //theyve rolled now time to move their pieces
@@ -1538,7 +1538,7 @@ public static final int DEBUGRIGHT=2;
      
    
 
-     _("hiding show roll button");
+     log("hiding show roll button");
     }
  }
 
@@ -1586,7 +1586,7 @@ public static final int DEBUGRIGHT=2;
              }
              
 
-             _("White rolled:"+val);
+             log("White rolled:"+val);
              whitesFirstRollVal=val;
 
              tellPlayers("White's opening roll "+whitesFirstRollVal);
@@ -1606,12 +1606,12 @@ public static final int DEBUGRIGHT=2;
                  val  = board.die1.getValue();
                  HAL._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
              }*/
-             _("####################################White rolled:"+val+", "+val2);
+             log("####################################White rolled:"+val+", "+val2);
              tellPlayers("White rolled:"+val+"-"+val2);
              
              if (val==val2)
              {
-                 _("White Double!");
+                 log("White Double!");
                  tellPlayers("White rolled:"+val+"-"+val2+" (Double)");
                  someoneRolledADouble=true;
                  doubleRollCounter=0;
@@ -1627,7 +1627,7 @@ public static final int DEBUGRIGHT=2;
              int val = die.roll();
             D1lastDieRoll_toSendOverNetwork=val;
              GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-             _("Black rolled:"+val);
+             log("Black rolled:"+val);
              blacksFirstRollVal=val;
              tellPlayers("Black's opening roll "+blacksFirstRollVal);
          }
@@ -1646,12 +1646,12 @@ public static final int DEBUGRIGHT=2;
                  val  = board.die1.getValue();
                  HAL._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
              }*/
-             _("#####################################################Black rolled:"+val+", "+val2);
+             log("#####################################################Black rolled:"+val+", "+val2);
              tellPlayers("Black rolled:"+val+"-"+val2);
              
              if (val==val2)
              {
-                 _("Black Double!");
+                 log("Black Double!");
                  tellPlayers("Black rolled:"+val+"-"+val2+" (Double)");
                  someoneRolledADouble=true;
                  doubleRollCounter=0;
@@ -1687,7 +1687,7 @@ public static final int DEBUGRIGHT=2;
  //once cleared they are recreated as needed.
  private static void clearPotentialSpikes()
  {
-     _("clearPotentialSpikes");
+     log("clearPotentialSpikes");
      //Clear all the copy spikes so the valid options vanish
      Board.copy_of_reachableFromDie1=null;
      Board.copy_of_reachableFromDie2=null;
@@ -1700,7 +1700,7 @@ public static final int DEBUGRIGHT=2;
  //to ensure things behave correctly.
  public static void resetVarsTurn()
  {
-     _("resetVarsTurn");
+     log("resetVarsTurn");
 
      //so it doesnt think dice have been used anymore
      Board.die1HasBeenUsed=false;
@@ -1901,9 +1901,9 @@ public static final int DEBUGRIGHT=2;
  {
      if (serverIP==null)
      {
-         _("GRABBING SERVER IP");
+         log("GRABBING SERVER IP");
          serverIP=readStringFromWeb("http://www.alphasoftware.org/backgammon/serverip.txt");
-          _(" SERVER IP:"+serverIP);
+          log(" SERVER IP:"+serverIP);
      }
 
      printme="Enter your name:";
@@ -2204,7 +2204,7 @@ g.setClip(s);
  }
 
  // wrapper around system out to console
- private static void _(String s)
+ private static void log(String s)
  {
     HAL.log("CustomCanvas{}:" + s);
  }
@@ -2241,11 +2241,11 @@ GameNetworkClient client;
                  e.getY()>=pos.y && e.getY()<=pos.y+pos.height
                      )
              {
-                 _("Clicked on:"+pos.name);
+                 log("Clicked on:"+pos.name);
                  showChallengeWindow=true;
                  personToChallenge=pos.name;
                  String theirIP=personToChallenge.substring( personToChallenge.indexOf("@")+1,personToChallenge.length() );
-                 _("IP TO CONNECT TO:"+theirIP);
+                 log("IP TO CONNECT TO:"+theirIP);
 
 //                 connectToSocket(theirIP);
                  client = new GameNetworkClient();
@@ -2263,7 +2263,7 @@ GameNetworkClient client;
     }
     else
     {
-         _("mouseClicked "+e.getX()+","+e.getY());
+         log("mouseClicked "+e.getX()+","+e.getY());
    //      GameNetworkClient.SENDCLICK=true;//tells it to send a click over network
          int buttonPressed=-1;
          if (e.getButton()==e.BUTTON1)
@@ -2304,7 +2304,7 @@ GameNetworkClient client;
     }
     if (buttonPressed==RIGHT_MOUSE_BUTTON)//e.getButton()==e.BUTTON3)
     {
-        _("RIGHT BUTTON PRESSED");
+        log("RIGHT BUTTON PRESSED");
         unstickPieceFromMouse();
         if (board!=null)
         {
@@ -2328,7 +2328,7 @@ GameNetworkClient client;
 
              if (showRollButton)
              {
-                 _("respond to no clicks as the roll button is up");
+                 log("respond to no clicks as the roll button is up");
                  
                  //only thign that will respond is the about window
                  //brings up the about window.
@@ -2379,7 +2379,7 @@ GameNetworkClient client;
                 //if both dice used move to next turn
                     if (Board.die1HasBeenUsed && Board.die2HasBeenUsed)
                     {
-                        _("GO TO NEW TURN AA");
+                        log("GO TO NEW TURN AA");
                         turnOver();
 
                     }
@@ -2428,18 +2428,18 @@ Bot.dead=true;
 
  public static void turnOver()
  {
-     _("---- THIS TURN IS OVER ----");
+     log("---- THIS TURN IS OVER ----");
                         if (Board.whoseTurnIsIt==Player.WHITE)
                         {
                             Board.whoseTurnIsIt=Player.BLACK;
-                            _("BLACKS TURN");
+                            log("BLACKS TURN");
                             tellPlayers("Black's turn to roll.");
 
                         }
                         else
                         {
                             Board.whoseTurnIsIt=Player.WHITE;
-                            _("WHITES TURN");
+                            log("WHITES TURN");
                             tellPlayers("White's turn to roll.");
 
                         }
@@ -2462,7 +2462,7 @@ Bot.dead=true;
 
 if (board==null)
 {
-    _("board null");
+    log("board null");
     return;
 }
 
@@ -2483,7 +2483,7 @@ pieceStuckToMouse=null;/////////////////////<-will this stop it stickign ot poin
      {
          if (y>=prefy && y<=prefy+prefh)
          {
-             _("Prefs button clicked.");
+             log("Prefs button clicked.");
              INFO=!INFO;
              if (INFO)
              {
@@ -2511,7 +2511,7 @@ private void checkIfDoubleClickedOn(int x,int y)
     {
         if (y>myY && y<(myY+myHeight))
         {
-            _("DOUBLE CLICKED ON!");
+            log("DOUBLE CLICKED ON!");
             sfxdouble.playSound();
             if (Board.whoseTurnIsIt==Player.WHITE)
             {
@@ -2534,7 +2534,7 @@ private void checkIfResignClickedOn(int x,int y)
     {
         if (y>myY && y<(myY+myHeight))
         {
-            _("RESIGN CLICKED ON!");
+            log("RESIGN CLICKED ON!");
             sfxResign.playSound();
             if (Board.whoseTurnIsIt==Player.WHITE)
             {
@@ -2586,12 +2586,12 @@ public static boolean blackResigned;
     {
         if (y>myY && y<(myY+myHeight))
         {
-            _(""+clickedOnText);
+            log(""+clickedOnText);
             //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
             //then we simply let it go into the piece container.
             if (Board.pulsateWhiteContainer && pieceOnMouse && Board.whoseTurnIsIt==Player.WHITE)
             {
-                _("WHITE put in container");
+                log("WHITE put in container");
                 //remove from spike
                 //add to container vector
                 int correctDie=Board.whichDieGetsUsToPieceContainer;
@@ -2603,7 +2603,7 @@ public static boolean blackResigned;
             //then we simply let it go into the piece container.
             if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt==Player.BLACK)
             {
-                _("BLACK put in container");
+                log("BLACK put in container");
                 //remove from spike
                 //add to container vector
                 int correctDie=Board.whichDieGetsUsToPieceContainer;
@@ -2623,7 +2623,7 @@ public static boolean blackResigned;
     // see if the user clicked on that spike
     if (board==null)
     {
-        _("game not ready. (splash still up)");
+        log("game not ready. (splash still up)");
         return;
     }
 
@@ -2634,7 +2634,7 @@ public static boolean blackResigned;
         Spike spike = (Spike) spikes_e.nextElement();
         if (spike.userClickedOnThis(x,y))
         {
-             _("Spike was clicked on ("+spike.getSpikeNumber()+")");
+             log("Spike was clicked on ("+spike.getSpikeNumber()+")");
 
              /* REMOVING A PIECE FROM ONE SPIKE AND ADDING IT TO ANOTHER.
               * When the player has a piece stuck to their mouse pointer
@@ -2656,25 +2656,25 @@ public static boolean blackResigned;
              // find out if this is a valid spiek to go to from bar
              if (barPieceStuckOnMouse)
              {
-                 _("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()"+Board.spikesAllowedToMoveToFromBar.size());
+                 log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()"+Board.spikesAllowedToMoveToFromBar.size());
                  Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
                  while (e.hasMoreElements())
                  {
 
                      Spike sp = (Spike) e.nextElement();
-                     _("checkign spike:"+sp.getSpikeNumber());
+                     log("checkign spike:"+sp.getSpikeNumber());
                      if (spike.getSpikeNumber()==sp.getSpikeNumber())
                      {
-                         _("YES WE CAN DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
+                         log("YES WE CAN DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
                          //remove piece from bar
                          if (Board.whoseTurnIsIt==Player.WHITE)
                          {
-                             _("WHITE PIECE REMOVED FROM BAR");
+                             log("WHITE PIECE REMOVED FROM BAR");
                              theBarWHITE.remove(pieceStuckToMouse);
                              //IF this spike contains an enemy piece Kill it
                              if (sp.getAmountOfPieces(Player.BLACK)==1)
                              {
-                                 _("WHITE KILLED A BLACK WHILE GETTING OFF BAR");
+                                 log("WHITE KILLED A BLACK WHILE GETTING OFF BAR");
                                  Piece piece = (Piece)sp.pieces.firstElement();
                                  theBarBLACK.add(piece);///add this piece to the bar
                                  sp.removePiece(piece); //and remove from spike
@@ -2684,7 +2684,7 @@ public static boolean blackResigned;
                          }
                          if (Board.whoseTurnIsIt==Player.BLACK)
                          {
-                             _("BLACK PIECE REMOVED FROM BAR");
+                             log("BLACK PIECE REMOVED FROM BAR");
                              theBarBLACK.remove(pieceStuckToMouse);
 
                               //IF this spike contains an enemy piece Kill it
@@ -2692,19 +2692,19 @@ public static boolean blackResigned;
                              {
                                   Piece piece = (Piece)sp.pieces.firstElement();
                                  theBarWHITE.add(piece);///add this piece to the bar
-                                 _("BLACK KILLED A WHITE WHILE GETTING OFF BAR");
+                                 log("BLACK KILLED A WHITE WHILE GETTING OFF BAR");
                                  sp.removePiece((Piece)sp.pieces.firstElement());
                                  sfxKilled.playSound();
                              }
                          }
-                         _("PLACED ON SPIKE");
+                         log("PLACED ON SPIKE");
 
 
 
                          //add it to the spike clicked on
                          sp.addPiece(pieceStuckToMouse);
                          //and make sure nothing is stuck to mouse by finalising move like this
-                         _("UNSTUCK");
+                         log("UNSTUCK");
                          unstickPieceFromMouse();
                          // USE UP THE CORRECT DIE
                          Die theDieThatGotUsHere = sp.get_stored_die();
@@ -2713,30 +2713,30 @@ public static boolean blackResigned;
                          //UNLESS someone rolled a double
                         if (someoneRolledADouble && doubleRollCounter<=3)
                         {
-                            _("Player is still enjoying his double round so dont move on. y");
+                            log("Player is still enjoying his double round so dont move on. y");
                            board.calculatePotentialNumberOfMoves=true;//so they get calc'd at start of each go.
-                           _("DONT USE UP DICE SINCE ITS A DOUBLE XXX");
+                           log("DONT USE UP DICE SINCE ITS A DOUBLE XXX");
                         }
                         else
                         {
                              if (theDieThatGotUsHere.getValue()==Board.die1.getValue())
                              {
-                                 _("DIE1 USED GETTING OFF BAR "+Board.die1.getValue());
+                                 log("DIE1 USED GETTING OFF BAR "+Board.die1.getValue());
                                  Board.die1HasBeenUsed=true;
 
                              } else
                              {
-                                 _("DIE2 USED GETTING OFF BAR "+Board.die2.getValue());
+                                 log("DIE2 USED GETTING OFF BAR "+Board.die2.getValue());
                                  Board.die2HasBeenUsed=true;
 
                              }
-                             _("CORRECT DIE USED UP.");
+                             log("CORRECT DIE USED UP.");
                         }
                          //done getting off bar
 
                          if (someoneRolledADouble)
                          {
-                             _("doubleRollCounter incremented!");
+                             log("doubleRollCounter incremented!");
                             doubleRollCounter++;//increment this here to keep a track fi thi was a dbl
                          }
 
@@ -2752,7 +2752,7 @@ public static boolean blackResigned;
              //DIE1 MOVE
              if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie1!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie1.getSpikeNumber())
              {
-                 _("clicked on valid potential spike (die1)");
+                 log("clicked on valid potential spike (die1)");
 
                  placePieceRemoveOldOneAndSetDieToUsed(1,false);
                  
@@ -2779,7 +2779,7 @@ public static boolean blackResigned;
              //DIE2 MOVE
              if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie2!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie2.getSpikeNumber())
              {
-                 _("clicked on valid potential spike (die2)");
+                 log("clicked on valid potential spike (die2)");
 
                  placePieceRemoveOldOneAndSetDieToUsed(2,false);
 
@@ -2802,7 +2802,7 @@ public static boolean blackResigned;
              //DIE1 + DIE2 MOVE
              if (pieceStuckToMouse!=null && board.copy_of_reachableFromBothDice!=null && spike.getSpikeNumber()==board.copy_of_reachableFromBothDice.getSpikeNumber())
              {
-                 _("clicked on valid potential spike (die1+die2)");
+                 log("clicked on valid potential spike (die1+die2)");
 
                  placePieceRemoveOldOneAndSetDieToUsed(3,false);
 
@@ -2829,7 +2829,7 @@ public static boolean blackResigned;
  //situations its simply removing from one spike and adding to another
  private void placePieceRemoveOldOneAndSetDieToUsed(int dieToSetUnused, boolean pieceWillGoToContainer)
  {
-     _("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:"+dieToSetUnused);// board.copy_of_reachableFromDie1:"+board.copy_of_reachableFromDie1+" board.copy_of_reachableFromDie1.pieces.size():"+board.copy_of_reachableFromDie1.pieces.size());
+     log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:"+dieToSetUnused);// board.copy_of_reachableFromDie1:"+board.copy_of_reachableFromDie1+" board.copy_of_reachableFromDie1.pieces.size():"+board.copy_of_reachableFromDie1.pieces.size());
      if (pieceStuckToMouse==null)
      {
          HAL._E("pieceStuckToMouse was null somehow");
@@ -2847,13 +2847,13 @@ public static boolean blackResigned;
             if (Board.whoseTurnIsIt==Player.WHITE)
             {
                 whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                 _("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                 log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
             }else
             if (Board.whoseTurnIsIt==Player.BLACK)
             {
                 blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                 _("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                 log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
             } else {HAL._E("whoseTurnIsIt is invalid here.");}
         }
@@ -2864,7 +2864,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.BLACK)>0)
              {
                 
-                    _("WHITE KILLED A BLACK");
+                    log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie1.pieces.firstElement();
                     board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
@@ -2875,7 +2875,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.WHITE)>0)
              {
                
-                    _("BLACK KILLED A WHITE");
+                    log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie1.pieces.firstElement();
                     board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
@@ -2895,7 +2895,7 @@ public static boolean blackResigned;
          //so player cant use die one again
          //(and it wont come up as a potential valid option)
          Board.die1HasBeenUsed=true;
-         _("die1HasBeenUsed A.");
+         log("die1HasBeenUsed A.");
      }
      else
      if (dieToSetUnused==2)
@@ -2905,13 +2905,13 @@ public static boolean blackResigned;
             if (Board.whoseTurnIsIt==Player.WHITE)
             {
                 whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                 _("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                 log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
             }else
             if (Board.whoseTurnIsIt==Player.BLACK)
             {
                 blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                 _("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                 log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
             } else {HAL._E("whoseTurnIsIt is invalid here.");}
         }
@@ -2921,7 +2921,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromDie2.getAmountOfPieces(Player.BLACK)>0)
              {
 
-                    _("WHITE KILLED A BLACK");
+                    log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie2.addPiece(pieceStuckToMouse);
@@ -2932,7 +2932,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie2.getAmountOfPieces(Player.WHITE)>0)
              {
 
-                    _("BLACK KILLED A WHITE");
+                    log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie2.addPiece(pieceStuckToMouse);
@@ -2950,7 +2950,7 @@ public static boolean blackResigned;
          //so player cant use die one again
          //(and it wont come up as a potential valid option)
          Board.die2HasBeenUsed=true;
-         _("die2HasBeenUsed AA.");
+         log("die2HasBeenUsed AA.");
      }
      else
      if (dieToSetUnused==3)
@@ -2960,13 +2960,13 @@ public static boolean blackResigned;
                 if (Board.whoseTurnIsIt==Player.WHITE)
                 {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                     _("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                     log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                      sfxPutPieceInContainer.playSound();
                 }else
                 if (Board.whoseTurnIsIt==Player.BLACK)
                 {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                     _("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
+                     log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                      sfxPutPieceInContainer.playSound();
                 } else {HAL._E("whoseTurnIsIt is invalid here.");}
             }
@@ -2976,7 +2976,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.BLACK)>0)
              {
 
-                    _("WHITE KILLED A BLACK");
+                    log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromBothDice.addPiece(pieceStuckToMouse);
@@ -2987,7 +2987,7 @@ public static boolean blackResigned;
              if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.WHITE)>0)
              {
 
-                    _("BLACK KILLED A WHITE");
+                    log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromBothDice.addPiece(pieceStuckToMouse);
@@ -3007,8 +3007,8 @@ public static boolean blackResigned;
           Board.die1HasBeenUsed=true;
           Board.die2HasBeenUsed=true;
 
-           _("die1HasBeenUsed B.");
-            _("die2HasBeenUsed B.");
+           log("die1HasBeenUsed B.");
+            log("die2HasBeenUsed B.");
 
      }
      else
@@ -3026,15 +3026,15 @@ public static boolean blackResigned;
          {
              case 1:
                  doubleRollCounter++;
-                 _("someoneRolledADouble DIE 1 doubleRollCounter:"+doubleRollCounter);
+                 log("someoneRolledADouble DIE 1 doubleRollCounter:"+doubleRollCounter);
                  if (doubleRollCounter<=1)
                  {
-                     _("dont hide die yet as it was a double");
+                     log("dont hide die yet as it was a double");
                     Board.die1HasBeenUsed=false;// so it doesnt vanish
                  }
                  if (doubleRollCounter>=4)
                  {
-                     _("double round done.1");
+                     log("double round done.1");
                      //ADDED TO FIX DOUBLES ISSUE 243PM JAN 21
                     Board.die1HasBeenUsed=true;//so they dont vanish
                     Board.die2HasBeenUsed=true;
@@ -3043,15 +3043,15 @@ public static boolean blackResigned;
                  break;
              case 2:
                  doubleRollCounter++;
-                 _("someoneRolledADouble DIE2 doubleRollCounter:"+doubleRollCounter);
+                 log("someoneRolledADouble DIE2 doubleRollCounter:"+doubleRollCounter);
                  if (doubleRollCounter<=3)
                  {
-                     _("dont hide die yet as it was a double");
+                     log("dont hide die yet as it was a double");
                      Board.die2HasBeenUsed=false;//so it doesnt vanish
                  }
                  if (doubleRollCounter>=4)
                  {
-                     _("double round done.2");
+                     log("double round done.2");
                      //ADDED TO FIX DOUBLES ISSUE 243PM JAN 21
                     Board.die1HasBeenUsed=true;//so they dont vanish
                     Board.die2HasBeenUsed=true;
@@ -3060,15 +3060,15 @@ public static boolean blackResigned;
                  break;
              case 3:
                  doubleRollCounter++;doubleRollCounter++;//2 dice used in a roll like this
-                 _("someoneRolledADouble BOTH DIE doubleRollCounter:"+doubleRollCounter);
-                 _("dont hide die yet as it was a double");
+                 log("someoneRolledADouble BOTH DIE doubleRollCounter:"+doubleRollCounter);
+                 log("dont hide die yet as it was a double");
                   Board.die1HasBeenUsed=false;//so they dont vanish
                 Board.die2HasBeenUsed=false;
                 if (doubleRollCounter>=4)
                  {
-                     _("double round done.3");
+                     log("double round done.3");
                      Board.die1HasBeenUsed=true;//so they do vanish
-                     _("die1HasBeenUsed C.");
+                     log("die1HasBeenUsed C.");
                     Board.die2HasBeenUsed=true;
                     someoneRolledADouble=false;
                 }
@@ -3097,7 +3097,7 @@ public static boolean barPieceStuckOnMouse;
          //special case, if the player already has a piece stuck on the mouse dont let another
          //one go on, this causes an error in the game, best way is to simply leap out of
          //this method here if this is true
-         _("pieceOnMouse special case ignore this piece click");
+         log("pieceOnMouse special case ignore this piece click");
          return;
      }
      
@@ -3119,7 +3119,7 @@ public static boolean barPieceStuckOnMouse;
              Piece p = (Piece) e.nextElement();
              if (p.userClickedOnThis(x, y))
              {
-                 _("PIECE ON THE BAR CLICKED ON.");
+                 log("PIECE ON THE BAR CLICKED ON.");
                  p.stickToMouse();
                  pieceOnMouse=true;
                  barPieceStuckOnMouse=true;
@@ -3147,7 +3147,7 @@ public static boolean barPieceStuckOnMouse;
                 //this was a bug so hopefully fixed.
                 if (board.allowPieceToStickToMouse && piece.getColour()==Board.whoseTurnIsIt && !pieceOnMouse) //And it has potential moves (i.e. not pointless to pick up)
                 {
-                    _("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
+                    log("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
                     //if this piece has options then we allow it to stick to
                     //mouse, ie we allow player to pick it up..
                     piece.stickToMouse();
@@ -3155,7 +3155,7 @@ public static boolean barPieceStuckOnMouse;
                     pieceStuckToMouse=piece;
                     originalSpikeForPieceSelected=spike;//keep a copy of this piece's original Spike (for removing the piece later if need be)
                 }
-                _("Piece was clicked on ("+piece+") board.allowPieceToStickToMouse:"+board.allowPieceToStickToMouse+" board.whoseTurnIsIt:"+board.whoseTurnIsIt);
+                log("Piece was clicked on ("+piece+") board.allowPieceToStickToMouse:"+board.allowPieceToStickToMouse+" board.whoseTurnIsIt:"+board.whoseTurnIsIt);
             }
         }
     }
@@ -3186,7 +3186,7 @@ public static boolean barPieceStuckOnMouse;
 
  public void mouseDragged(MouseEvent e)
  {
-        _("mousedragged");
+        log("mousedragged");
  }
 public static boolean I_AM_CLIENT;
 public static boolean I_AM_SERVER;
@@ -3233,7 +3233,7 @@ public static boolean I_AM_SERVER;
  //Respond to keypresses.
  public void keyPressed(KeyEvent e)
  {
-    _("keyPressed");
+    log("keyPressed");
 
     //TEXT ENTRY IN LOBBY
     if (state==NETWORKING_LOBBY)
@@ -3290,7 +3290,7 @@ public static boolean I_AM_SERVER;
          setIgnoreRepaint(ignoreRepaints);
          jFrame.setResizable(!ignoreRepaints);
          tellPlayers("F1 Pressed, ignoreRepaints is now "+ignoreRepaints);
-         _("F1 Pressed, ignoreRepaints is now "+ignoreRepaints);
+         log("F1 Pressed, ignoreRepaints is now "+ignoreRepaints);
     }
 
     if (e.getKeyChar()=='q' || e.getKeyChar()=='Q')//QUIT
@@ -3305,9 +3305,9 @@ public static boolean I_AM_SERVER;
         Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
         Board.HUMAN_VS_COMPUTER=!Board.HUMAN_VS_COMPUTER;
         Bot.dead=!Bot.FULL_AUTO_PLAY;
-        _("Bot.dead:"+Bot.dead);
+        log("Bot.dead:"+Bot.dead);
         paintRobotMessages=Bot.FULL_AUTO_PLAY;
-        _("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
+        log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
         if (Bot.FULL_AUTO_PLAY)
         {
             tellRobot(true,"Bot turned on.");
@@ -3322,7 +3322,7 @@ public static boolean I_AM_SERVER;
         //PAUSE
         PAUSED=!PAUSED;
         Bot.dead=PAUSED;
-        _("PAUSED:"+PAUSED);
+        log("PAUSED:"+PAUSED);
 
 
     }
@@ -3334,7 +3334,7 @@ public static boolean I_AM_SERVER;
         //PAUSE
         SOUND_ON=!SOUND_ON;
 
-        _("SOUND_ON:"+SOUND_ON);
+        log("SOUND_ON:"+SOUND_ON);
 
 
     }
@@ -3353,7 +3353,7 @@ public static boolean I_AM_SERVER;
 
 
         Bot.JUMP_DIRECT_TO_DEST=!Bot.JUMP_DIRECT_TO_DEST;
-        _("Bot.JUMP_DIRECT_TO_DEST:"+Bot.JUMP_DIRECT_TO_DEST);
+        log("Bot.JUMP_DIRECT_TO_DEST:"+Bot.JUMP_DIRECT_TO_DEST);
        //// _("play windows test sound");
         ////sfxmouseClick.testSound();
 
@@ -3407,7 +3407,7 @@ public static boolean I_AM_SERVER;
     {
         if(e.getKeyCode()==KeyEvent.VK_UP)
         {
-           _("UP");
+           log("UP");
             debugMenuPos--;
            if (debugMenuPos<0)
                debugMenuPos=0;
@@ -3415,7 +3415,7 @@ public static boolean I_AM_SERVER;
         }
         if(e.getKeyCode()==KeyEvent.VK_DOWN)
         {
-           _("DOWN");
+           log("DOWN");
            debugMenuPos++;
            if (debugMenuPos>LAST_DEBUG_OPTION)
                debugMenuPos=LAST_DEBUG_OPTION;
@@ -3423,12 +3423,12 @@ public static boolean I_AM_SERVER;
         }
         if(e.getKeyCode()==KeyEvent.VK_LEFT)
         {
-           _("LEFT");
+           log("LEFT");
            debugOptionChanged(DEBUGLEFT);
         }
         if(e.getKeyCode()==KeyEvent.VK_RIGHT)
         {
-           _("RIGHT");
+           log("RIGHT");
            debugOptionChanged(DEBUGRIGHT);
         }
 
@@ -3464,7 +3464,7 @@ public static boolean I_AM_SERVER;
      
 
      theme=theme_;
-     _("theme:"+theme);
+     log("theme:"+theme);
      if (theme>MAX_THEMES)
      {
          theme=DEFAULT;
@@ -3472,23 +3472,24 @@ public static boolean I_AM_SERVER;
 
      switch(theme)
      {
-         case DEFAULT:  _("THEME SET TO DEFAULT");themeName="default";
+         case DEFAULT:  log("THEME SET TO DEFAULT");themeName="default";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=defaultms;   break;
-         case METALIC:  _("THEME SET TO METALIC");themeName="metalic";
+         case METALIC:  log("THEME SET TO METALIC");themeName="metalic";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=metalic;     break;
-         case CLASSIC:  _("THEME SET TO CLASSIC");themeName="classic";
+         case CLASSIC:  log("THEME SET TO CLASSIC");themeName="classic";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=classic;     break;
-         case FUNNYMAN: _("THEME SET TO FUNNYMAN");themeName="funnyman";
+         case FUNNYMAN: log("THEME SET TO FUNNYMAN");themeName="funnyman";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=funnyman;   break;
-         case BUMBLEBEE:_("THEME SET TO BUMBLEBEE");themeName="bumblebee";
+         case BUMBLEBEE:
+             log("THEME SET TO BUMBLEBEE");themeName="bumblebee";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=bumblebee; break;
@@ -3524,7 +3525,7 @@ public static boolean I_AM_SERVER;
      Spike.makeColourObjects(true);
      Piece.makeColourObjects(true);
      Die.makeColourObjects(true);
-     _("Theme is loaded now and working.");
+     log("Theme is loaded now and working.");
  }
 
  // make colour objects
@@ -3577,7 +3578,7 @@ public static boolean I_AM_SERVER;
       }
      else
      {
-         _("Fonts already pre-cached...");
+         log("Fonts already pre-cached...");
      }
  }
 
@@ -3910,7 +3911,8 @@ public static void tellRobot(boolean b,String s)
     {
         if (wrapMe==null)
         {
-            /*REMOVED4RELEASE*/_("drawMeWrapped received a null string");
+            /*REMOVED4RELEASE*/
+            log("drawMeWrapped received a null string");
         }
        // /*REMOVED4RELEASE*/_("drawMeWrapped :: "+wrapMe+" newLineChar:"+newLineChar);
         // TEXTS GET WRAPPED HERE.
@@ -3976,7 +3978,8 @@ public static void tellRobot(boolean b,String s)
                 if (printme.indexOf(SPECIAL_END_SYMBOL)!=-1)
                 {
                     allowScrollingDOWN=false;
-                    /*REMOVED4RELEASE*/_("DONT ALLOW ASCROLL SINCE SPECIAL END SYMBOL DETECTED allowScrollingDOWN:"+allowScrollingDOWN);
+                    /*REMOVED4RELEASE*/
+                    log("DONT ALLOW ASCROLL SINCE SPECIAL END SYMBOL DETECTED allowScrollingDOWN:"+allowScrollingDOWN);
                     //ok now remove the special end sybol so it doesnt print
                     printme=printme.substring(0,printme.indexOf(SPECIAL_END_SYMBOL));
                 }

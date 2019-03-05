@@ -7,11 +7,12 @@ import java.awt.Shape;
 public class CustomFont
 {
 
-    public static CustomFont getFont(Image i, int inStyle, int inSize, boolean landscape, int compensator_, int amountOfLetters_, int widthBetweenPixelsCompensator_, int gap_, 
-            boolean offsetCorrectionRequired_)
-    {
+    public static CustomFont getFont(Image i, int inStyle, int inSize, boolean landscape, int compensator_,
+                                     int amountOfLetters_, int widthBetweenPixelsCompensator_, int gap_,
+                                     boolean offsetCorrectionRequired_) {
         System.out.println("font created.");
-        return new CustomFont(i, inSize, inStyle, landscape, compensator_, amountOfLetters_, widthBetweenPixelsCompensator_, gap_, offsetCorrectionRequired_);
+        return new CustomFont(i, inSize, inStyle, landscape, compensator_, amountOfLetters_,
+            widthBetweenPixelsCompensator_, gap_, offsetCorrectionRequired_);
     }
 
     public int getCharWidth()
@@ -24,7 +25,8 @@ public class CustomFont
         return charHeight;
     }
 
-    private CustomFont(Image inImage, int inStyle, int inSize, boolean landscape, int compensator_, int amountOfLetters_, int widthBetweenPixelsCompensator_, 
+    private CustomFont(Image inImage, int inStyle, int inSize, boolean landscape, int compensator_,
+                       int amountOfLetters_, int widthBetweenPixelsCompensator_,
             int gap_, boolean offsetCorrectionRequired_)
     {
         isLandscape = false;
@@ -155,7 +157,7 @@ public class CustomFont
     public void drawChar(Graphics g1, char c, int i, int j, int k)
     {
     }
-Shape s;
+    Shape s;
     public void drawGDChars(Graphics g, byte data[], int offset, int x, int y, int anchor)
     {
 		int length=data[offset];
