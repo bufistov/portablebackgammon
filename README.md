@@ -6,6 +6,9 @@
 INTRODUCTION
 ------------------------------------------------------------------------------------------------
 
+To run application:
+
+$./gradlew run
 
 Video: https://youtu.be/Azts7E8-UK4
 
