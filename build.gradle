@@ -28,9 +28,10 @@ project.ext {
             guice: "4.2.0",
             jetty: "9.4.11.v20180605",
             jsr305: "3.0.2",
-            junit: "4.12",
+            junit: "5.4.0",
             logback: "1.2.3",
             mockito: "2.18.3",
+            owner: "1.0.10",
             reflections: "0.9.11",
             spotbugs: "3.1.5",
     ]
@@ -53,8 +54,11 @@ project.ext {
             jsr305: "com.google.code.findbugs:jsr305:${versions.jsr305}",
             junit: "junit:junit:${versions.junit}",
             mockito: "org.mockito:mockito-core:${versions.mockito}",
+            owner: "org.aeonbits.owner:owner:${versions.owner}",
             reflections: "org.reflections:reflections:${versions.reflections}",
             spotbugs: "com.github.spotbugs:spotbugs:${versions.spotbugs}",
+            testing: ["org.junit.jupiter:junit-jupiter:${versions.junit}",
+                      "org.mockito:mockito-core:${versions.mockito}"],
     ]
 }
 
@@ -63,10 +67,13 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '5.4.0'
+    compile libraries.owner
+
+    testCompile libraries.testing
 }
 
 test {
+    useJUnitPlatform()
     testLogging {
         events "started", "passed", "skipped", "failed"
         if (project.hasProperty('consoleTestOutput')) {
