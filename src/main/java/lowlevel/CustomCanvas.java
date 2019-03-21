@@ -1,9 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package lowlevel;
-import WindowResizeDetector.WindowResizeEvent;
+
 import java.awt.*;
 import java.awt.event.*;
 import gamelogic.*;
@@ -17,12 +13,8 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JFrame;
-/**
- *
- * @author Gaz
- */
-public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener//, WindowResizeListener
-{
+
+public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
     public static final String VERSION="v0.0.1";
     public static final boolean RELEASE_BUILD=false;
     public static boolean SOUND_ON=true;
@@ -32,8 +24,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         
     // possible states:
     public static final int SPLASH_SCREEN=0;
-    public static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK=1;// local or network?
-    public static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN=2;//play human or cpu?
+    public static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK=1; // local or network?
+    public static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN=2; //play human or cpu?
     public static final int OPTIONS_SCREEN_NETWORK_USERNAME_OF_OPPONENT=3;
     public static final int GAME_IN_PROGRESS=4;
     public static final int NETWORKING_ENTER_NAME=5;
@@ -62,15 +54,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //this simply means the panel will represent one x-th of the available screen,
     // ergo if PANEL_SIZE_FRACTION is 5, it uses 1/5 of the space avail and the game
     // uses the other 4/5
-    public static int ULTIMATE_WIDTH  =-1;// this is the width of the entire canvas (ie not just board itself but also panel etc)
-    public static int ULTIMATE_HEIGHT =-1;//
+    public static int ULTIMATE_WIDTH  =-1; // this is the width of the entire canvas (ie not just board itself but also panel etc)
+    public static int ULTIMATE_HEIGHT =-1; //
 
     boolean INFO=false;    // 'about box' toggle
     Utils utils = new Utils();   // Hardware Abstraction Layer
     public static int state;             // current state
     String stateString;
     int PANEL_WIDTH=0;
-   // Graphics g;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
 
     /////j2se specific vars
@@ -81,27 +72,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     GraphicsConfiguration graphicConf  = graphDevice.getDefaultConfiguration();
     Graphics2D g;
     BufferStrategy bufferStrategy;
-    /////////////////
-
-    public void windowResized(WindowResizeEvent e) {
-System.out.println("WINDOW RESIZED! "+e);
-
-/*horrible hack to fix graphics, basically its flash liek mad unless i set ignorerepaint, that makes it fine but then it ignores
- * OS calls to repaint the window so stays white when resized, the window event listwener now detects OS calls to window changed size
- * allowing us to unset ignore repaint for a few ticks and then set it again so it should look ok after that agt the new size.
- */
-ignorePaintsCounter=0;
-
-
-//setIgnoreRepaint(true);
-}
-    public static int ignorePaintsCounter=0;
 
     /* This class is used basically for calling the right paint methods
      * based on state, these paint due to this class being a subclass of canvas.
     */
-    CustomCanvas(JFrame jFrame_)
-    {
+    CustomCanvas(JFrame jFrame_) {
         log("CustomCanvas made.");
         bot.start();
        
@@ -112,10 +87,9 @@ ignorePaintsCounter=0;
         addKeyListener( this );
         //set icon in corner
         jFrame.setIconImage(utils.loadImage("/icon.gif"));
-        /////
 
-jFrame.setResizable(false);
-       // WindowResizeMonitor.register(jFrame, this);
+        jFrame.setResizable(false);
+        // WindowResizeMonitor.register(jFrame, this);
 
         setTheme(theme);
         makeColourObjects(false);
@@ -123,13 +97,7 @@ jFrame.setResizable(false);
         loadCustomFonts();
         loadImages();
 
-        //load sounds
         log("Loading Sounds");
-       // java.io.File currentDir = new java.io.File("");
-        //System.out.println("path determined "+currentDir.getAbsolutePath());
-  
-          
-
         sfxmouseClick = new Sound("/mouseclick.wav");
         sfxDiceRoll   = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -142,209 +110,66 @@ jFrame.setResizable(false);
         sfxResign=new Sound("/resign.wav");
         log("Sounds loaded.");
         requestFocus();  // get focus for keys
-        setIgnoreRepaint(true);//this is the key to it not flickering on my desktop
-       // s.testSound();
-       // s.playSound();
- 
-        
- }
-public static boolean NETWORK_GAME_IN_PROCESS;
-public static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled,sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
-public static Sound sfxdouble, sfxResign;
-// paint depending on state
- public void paint(Graphics g_)
- {
-    // create the buffering strategy which will allow AWT
-// to manage our accelerated graphics
-//jFrame.createBufferStrategy(2);
-//bufferStrategy = jFrame.getBufferStrategy();
-  // Graphics2D g_ =null;
- //  g_= (Graphics2D)bufferStrategy.getDrawGraphics();
-////
-
-////
-      // g = (Graphics2D) bufferStrategy.getDrawGraphics();
-
-
-        
-
-    handleMouse();
-
-
-    doubleBuffering(1); // pass 1 in to start dbl buffering
-    if (ANTI_ALIAS)
-    {
-        doAntiAliasing();
+        setIgnoreRepaint(true);// this is the key to it not flickering on my desktop
     }
 
-    //we refresh these on each paint loop so it always scales no matter what
-    //WIDTH and HEIGHT are used to pass into board so everything scales
-    //nice. the panel to the side represents 1/xth of the avail space.
-    ULTIMATE_WIDTH=getWidth();//whole canvas
-    ULTIMATE_HEIGHT=getHeight();
-    // whole game canvas:
-    WIDTH  = (getWidth()/PANEL_SIZE_FRACTION)*(PANEL_SIZE_FRACTION-1);
-    PANEL_WIDTH=(getWidth()/PANEL_SIZE_FRACTION)-Board.BORDER;
-    HEIGHT = getHeight();
+    public static boolean NETWORK_GAME_IN_PROCESS;
+    public static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled,
+        sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
+    public static Sound sfxdouble, sfxResign;
 
-//checkOffscreenImage();
-  //  Graphics g = mImage.getGraphics();
-
-    
-    
-
-
-
-
-
-
-    //all painting:
-    if (ANTI_ALIAS)
-    {
-        paintSwitch(g);//paint with the anti alias Graphics object
-    }
-    else
-    {
-        //(gNoAntiAliasing);//paint with normal Graphics object
-    }
-   
-
-
- 
-        //g.dispose();
-	//bufferStrategy.show();
-
-    if (drawPointer)
-    {
-        ////if (numberOfFirstRollsDone>1)//ie game started
-        {
-
-            if (NETWORK_GAME_IN_PROCESS)
-            {
-                //System.out.println("NETWORK_GAME_IN_PROCESS "+pointerX+" , "+pointerY);
-                  utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-                       Board.mouseHoverX=pointerX;//e.getX();
-                          Board.mouseHoverY=pointerY;//e.getY();
-            }
-            else
-            {
-
-                if (Bot.FULL_AUTO_PLAY)
-                {
-                    utils.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
-                    Board.mouseHoverX=Bot.x;//e.getX();
-                    Board.mouseHoverY=Bot.y;//e.getY();
-                }
-                else
-                {
-                    if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE)
-                    {
-                         Main.hideMousePointer(false);
-
-                         //REMOVED TO TEST NETWORKING
-                         /*
-                       utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-                       Board.mouseHoverX=pointerX;//e.getX();
-                          Board.mouseHoverY=pointerY;//e.getY();*/
-                    }else
-                    if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK)
-                    {
-                       /// _("bot.dead set to false");
+    public void paint(Graphics g_) {
+        handleMouse();
+        doubleBuffering(1); // pass 1 in to start dbl buffering
+        if (ANTI_ALIAS) {
+            doAntiAliasing();
+        }
+        //we refresh these on each paint loop so it always scales no matter what
+        //WIDTH and HEIGHT are used to pass into board so everything scales
+        //nice. the panel to the side represents 1/xth of the avail space.
+        ULTIMATE_WIDTH = getWidth();//whole canvas
+        ULTIMATE_HEIGHT = getHeight();
+        // whole game canvas:
+        WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
+        PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
+        HEIGHT = getHeight();
+        if (ANTI_ALIAS) {
+            paintSwitch(g);//paint with the anti alias Graphics object
+        }
+        if (drawPointer) {
+            if (NETWORK_GAME_IN_PROCESS) {
+                utils.drawImage(g, pointer, pointerX, pointerY + 6, this_);//this 6 lines it up
+                Board.mouseHoverX = pointerX;//e.getX();
+                Board.mouseHoverY = pointerY;//e.getY();
+            } else {
+                if (Bot.FULL_AUTO_PLAY) {
+                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this_);//this 6 lines it up
+                    Board.mouseHoverX = Bot.x;//e.getX();
+                    Board.mouseHoverY = Bot.y;//e.getY();
+                } else {
+                    if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE) {
+                        Main.hideMousePointer(false);
+                    } else if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK) {
+                        /// _("bot.dead set to false");
                         Main.hideMousePointer(true);
-                        Bot.dead=false;
-                        utils.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
-                        Board.mouseHoverX=Bot.x;//e.getX();
-                        Board.mouseHoverY=Bot.y;//e.getY();
-                    }else
-                    {
-                         Main.hideMousePointer(false);
-                         /* utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-                          Board.mouseHoverX=pointerX;//e.getX();
-                          Board.mouseHoverY=pointerY;//e.getY();*/
+                        Bot.dead = false;
+                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this_);//this 6 lines it up
+                        Board.mouseHoverX = Bot.x;//e.getX();
+                        Board.mouseHoverY = Bot.y;//e.getY();
+                    } else {
+                        Main.hideMousePointer(false);
                     }
                 }
             }
-            
         }
-
-        /*if ((Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE))//Bot.dead)
-        {
-            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-        }
-        else
-        {
-              utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
-        }*/
-        /*if (Bot.FULL_AUTO_PLAY)
-        {
-            utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
-            desinationsFromWhichSource="Bot X";
-        } else
-        if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE)
-        {
-            //draw human pointer
-            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-            desinationsFromWhichSource="Human X";
-        } else
-        if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK)
-        {
-            utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
-            desinationsFromWhichSource="Bot X1";
-        } else
-        {
-            //draw human pointer
-            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
-            desinationsFromWhichSource="Human X1";
-        }*/
-        
-
+        doubleBuffering(2); // pass 2 in to start dbl buffering
     }
-
-
-  
- doubleBuffering(2); // pass 2 in to start dbl buffering
-   
-    
- }
 
  /*
   * The pointer is a wrapper over the real pointer, this is because at times we want the computer to control the mouse
   */
- private void handleMouse()
- {
-    /* if (!Bot.TAKES_OVER_MOUSE)//only true when we use the Robot class. (ie testing never release)
-     {
-         if (!Bot.FULL_AUTO_PLAY)
-         {
-                if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE)
-                {
-                    // IE: its a human vs computer game
-                    Board.mouseHoverX=pointerX;//e.getX();
-                    Board.mouseHoverY=pointerY;//e.getY();
-                    //desinationsFromWhichSource="Human A";
-                } else
-                {
-                    
-                    Board.mouseHoverX=Bot.x;//pointerX;//e.getX();
-                    Board.mouseHoverY=Bot.y;//pointerY;//e.getY();
-                    //desinationsFromWhichSource="Human B";
-                }
-
-         }
-         else if (!Bot.dead)
-         {
-                    Board.mouseHoverX=Bot.x;//e.getX();
-                    Board.mouseHoverY=Bot.y;//e.getY();
-                    desinationsFromWhichSource="Bot A";
-                    Bot.currentMouseX=Board.mouseHoverX;
-                    Bot.currentMouseY=Board.mouseHoverY;
-                    pointerX=Bot.x;
-                    pointerX=Bot.y;
-         }
-     }*/
+ private void handleMouse() {
  }
-
-public static String desinationsFromWhichSource;//for debug window
  // implements double buffering, phase is 1 or 2, 1 is called before
  // painting and 2 is called after. Any other phase is erroneous
  private void doubleBuffering(int phase)
@@ -370,77 +195,56 @@ public static String desinationsFromWhichSource;//for debug window
         Utils._E("doubleBuffering() phase was invalid "+phase);
     }
  }
-  private Image mImage;
-private void checkOffscreenImage() {
-    Dimension d = getSize();
-    if (mImage == null || mImage.getWidth(null) != d.width
-        || mImage.getHeight(null) != d.height) {
-      mImage = createImage(d.width, d.height);
-    }
-  }
- //this will simply suggest anti aliasing and set up g2 as the graphics object to use
- private void doAntiAliasing()
- {
-      //g2 = (Graphics2D)g;
+
+ // This will simply suggest anti aliasing and set up g2 as the graphics object to use
+ private void doAntiAliasing() {
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
  }
 
- // calls a different paint method based on the current state
- private void paintSwitch(Graphics g)
- {
-     /*if (CustomCanvas.numberOfFirstRollsDone>1)//ie if game started.
-    {
-     //hide roll button while they move their pieces.
-     showRollButton=false;
-    // _("hiding show roll button");
-    }*/
-
-
-    ///////the state machine////////
-    switch(state)
-    {
-        case SPLASH_SCREEN:///////////////////////////////////////
-            stateString="SPLASH_SCREEN";
-            paint_SPLASH_SCREEN(g);
-            break;
-        case OPTIONS_SCREEN_LOCAL_OR_NETWORK://///////////////////
-            stateString="OPTIONS_SCREEN_LOCAL_OR_NETWORK";
-            paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g," Local Play ","Network Play","Please select");
-            // make buttons glow if hovered over//
-            glowButton(Board.mouseHoverX,Board.mouseHoverY);
-            break;
-        case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN://///////////
-            /*note since 2 states require the same thing, (a question with 2
-             options) We simply re-use this state's paint method and pass in the
-             right strings to make it work*/
-            stateString="OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN";
-            // ie option 1, option 2, question
-            paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(g,"Computer"," Human  ","Play against");
-            // make buttons glow if hovered over//
-            glowButton(Board.mouseHoverX,Board.mouseHoverY);
-            break;
-        case GAME_IN_PROGRESS:///////////////////////////////////
-            stateString="POST_SPLASH_SCREEN";
-            paint_POST_SPLASH_SCREEN(g);
-            break;
-        case NETWORKING_ENTER_NAME:///////////////////////////////
-            stateString="NETWORKING_ENTER_NAME";
-            paint_NETWORKING_ENTER_NAME(g);
-            break;
-        case NETWORKING_LOBBY:
-            stateString="NETWORKING_LOBBY";
-            paint_NETWORKING_LOBBY(g);
-            break;
-        default://///////////////////////////////////////////////
-            Utils._E("Warning state in paint unrecognised!");
-            break;
+    // Calls a different paint method based on the current state
+    private void paintSwitch(Graphics g) {
+        ///////the state machine////////
+        switch(state)
+        {
+            case SPLASH_SCREEN:///////////////////////////////////////
+                stateString="SPLASH_SCREEN";
+                paint_SPLASH_SCREEN(g);
+                break;
+            case OPTIONS_SCREEN_LOCAL_OR_NETWORK://///////////////////
+                stateString="OPTIONS_SCREEN_LOCAL_OR_NETWORK";
+                paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g," Local Play ","Network Play","Please select");
+                // make buttons glow if hovered over//
+                glowButton(Board.mouseHoverX,Board.mouseHoverY);
+                break;
+            case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN://///////////
+                /*note since 2 states require the same thing, (a question with 2
+                 options) We simply re-use this state's paint method and pass in the
+                 right strings to make it work*/
+                stateString="OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN";
+                // ie option 1, option 2, question
+                paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(g,"Computer"," Human  ","Play against");
+                // make buttons glow if hovered over//
+                glowButton(Board.mouseHoverX,Board.mouseHoverY);
+                break;
+            case GAME_IN_PROGRESS:///////////////////////////////////
+                stateString="POST_SPLASH_SCREEN";
+                paint_POST_SPLASH_SCREEN(g);
+                break;
+            case NETWORKING_ENTER_NAME:///////////////////////////////
+                stateString="NETWORKING_ENTER_NAME";
+                paint_NETWORKING_ENTER_NAME(g);
+                break;
+            case NETWORKING_LOBBY:
+                stateString="NETWORKING_LOBBY";
+                paint_NETWORKING_LOBBY(g);
+                break;
+            default://///////////////////////////////////////////////
+                Utils._E("Warning state in paint unrecognised!");
+                break;
+        }
+        ////////////////////////////////
+        drawExtras(g); //draw extra hud stuff
     }
-    ////////////////////////////////
-    drawExtras(g); //draw extra hud stuff
-
-
-    //paint_NETWORKING_LOBBY(g);
- }
 
  //draws any of the extras: 
  //debug info, about box, messages to players etc
@@ -512,44 +316,43 @@ private void checkOffscreenImage() {
         paintDebugBox(g);
     }
  }
- public static long FIFTY_SECONDS=50000L;
-         public static long TEN_SECONDS=10000L;
-static long robotMessageTimePassedLong;
-static long playerMessageTimePassedLong;
-static long robotMessageSetTimeLong;
- public static int TRANSPARENCY_LEVEL=100;
- //paints the about box
- private void paintAboutBox(Graphics g)
- {
-    infoCounter++;
-    if (infoCounter>SPLASH_COUNTER)
-    {
-        infoCounter=0;
-        INFO=false;
+    public static long FIFTY_SECONDS=50000L;
+    public static long TEN_SECONDS=10000L;
+    static long robotMessageTimePassedLong;
+    static long playerMessageTimePassedLong;
+    static long robotMessageSetTimeLong;
+    public static int TRANSPARENCY_LEVEL=100;
+
+    //paints the about box
+    private void paintAboutBox(Graphics g) {
+        infoCounter++;
+        if (infoCounter>SPLASH_COUNTER) {
+            infoCounter=0;
+            INFO=false;
+        }
+
+        utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+        utils.setColor(g, Color.white);
+        utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+
+        int xabout=WIDTH/2;
+        int yabout=(HEIGHT/4)+TINY_GAP;
+
+        //paint the about box
+        printme="Forumosa Backgammon ("+VERSION+")";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme="- www.forumosa.com -";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme="Keys:    ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme="q = quit ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme="t = theme";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        printme="Developed by www.garethmurfin.co.uk";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
     }
-
-    utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-    utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-    utils.setColor(g, Color.white);
-    utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-
-    int xabout=WIDTH/2;
-    int yabout=(HEIGHT/4)+TINY_GAP;
-
-    //paint the about box
-    printme="Forumosa Backgammon ("+VERSION+")";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme="- www.forumosa.com -";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme="Keys:    ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme="q = quit ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme="t = theme";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-    printme="Developed by www.garethmurfin.co.uk";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
- }
 
  //paints the about box
  private void paintDebugBox(Graphics g)
@@ -605,10 +408,6 @@ static long robotMessageSetTimeLong;
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
-
-
-
-
     y+=10;
     printme="Q = QUIT";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="P = PAUSE (bot dead? "+Bot.dead+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
@@ -641,9 +440,6 @@ static long robotMessageSetTimeLong;
     }
     printme="BAR:W("+theBarWHITE.size()+"),B("+theBarBLACK.size()+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="DIE Used?:("+Board.die1HasBeenUsed+"),("+Board.die2HasBeenUsed+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-
-
-    
  }
 
  int debugMenuPos=0;
@@ -719,8 +515,7 @@ public static final int DEBUGRIGHT=2;
  }
 
  //paints the state - for debugging.
- private void paintState(Graphics g)
- {
+ private void paintState(Graphics g) {
      fontblack.drawString(g,stateString,20,20,0);
  }
 
@@ -736,19 +531,16 @@ public static final int DEBUGRIGHT=2;
  public static int pointerY;
 
  //loads all images needed
- private void loadImages()
- {
+ private void loadImages() {
      log("Attempting to loadImages()");
-     if (splashScreenLogo==null)
-     {
+     if (splashScreenLogo == null) {
          splashScreenLogo      = utils.loadImage("/midokura-logo.png");
          splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
          pointer               = utils.loadImage("/pointer.png");
          op                    = utils.loadImage("/op.png");
          admin                 =  utils.loadImage("/admin.png");
      }
-     else
-     {
+     else {
          log("Images already pre-cached...");
      }
  }
@@ -789,12 +581,10 @@ public static final int DEBUGRIGHT=2;
  int prefx=ULTIMATE_WIDTH-(Board.BORDER+prefw+TINY_GAP/2);
  int prefy=Board.BORDER;
 
- Color greyColour=new Color(0x2f343a);//for prefs icon
  Board board;
  public static int TINY_GAP=5;//when we need a tiny gap
- private void paint_POST_SPLASH_SCREEN(Graphics g)
- {
-      utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT);//paint entire background
+ private void paint_POST_SPLASH_SCREEN(Graphics g) {
+      utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT); // paint entire background
       if (board==null)
       {
           board = new Board();
@@ -905,23 +695,17 @@ public static final int DEBUGRIGHT=2;
  //draws the little holder where the pieces go
  private void drawPieceContainer(Graphics g, int xpos, int topOfPieceContainer,
             int containerWidth, int containerSubSize, int heightOf3LinesOfText,
-            int player
-         )
- {
+            int player) {
 
      int piecesOnContainer=0;
-     if (player==Player.WHITE)
-     {
+     if (player==Player.WHITE) {
         piecesOnContainer=whitePiecesSafelyInContainer.size();
-     }else
-     if (player==Player.BLACK)
-     {
+     } else if (player==Player.BLACK) {
          piecesOnContainer=blackPiecesSafelyInContainer.size();
      }
      int myX=WIDTH+((PANEL_WIDTH/4)-(containerWidth/2));
      int myY=topOfPieceContainer;
-     for (int i=0; i<15; i++)
-     {
+     for (int i=0; i<15; i++) {
          
          //simply draws the containers green if players have all their pieces in the home section 
          //and therefore the piece containers are 'live' and ready for action
@@ -938,8 +722,7 @@ public static final int DEBUGRIGHT=2;
          utils.drawRect(g, myX, myY, containerWidth , containerSubSize );
      }
      //update collision data
-     if (player==Player.WHITE)
-     {
+     if (player==Player.WHITE) {
          whiteContainerX=myX;
          whiteContainerY=myY-(containerSubSize*14);
          whiteContainerWidth=containerWidth;
@@ -949,25 +732,18 @@ public static final int DEBUGRIGHT=2;
              utils.setColor(g,Color.RED);
              utils.drawRect(g, whiteContainerX, whiteContainerY,whiteContainerWidth,whiteContainerHeight );
          }
-     }
-     else
-     if (player==Player.BLACK)
-     {
+     } else if (player==Player.BLACK) {
          blackContainerX=myX;
          blackContainerY=myY-(containerSubSize*14);
          blackContainerWidth=containerWidth;
          blackContainerHeight=containerSubSize*15;
-         if (showCollisions)
-         {
+         if (showCollisions) {
              utils.setColor(g,Color.RED);
              utils.drawRect(g, blackContainerX, blackContainerY,blackContainerWidth,blackContainerHeight );
          }
-     }
-     else
-     {
+     } else {
          Utils._E("drawPieceContainer has been given incorrect player number!");
      }
-     
  }
 
  String printme;//reused for many text that is printed
@@ -1037,47 +813,15 @@ public static final int DEBUGRIGHT=2;
      ///////// roll button (on board itself (could be either side)
      printme=""+Die.rollString;//either says roll or 'roll to see who goes first' ..
      widthOfPrintMe=(fontwhite.stringWidth(printme));
-     //we place the roll button on the appropriate side of the board
-     //depending on whose turn it is
-
-     /*if (leftSide)
-     {
-        xposTmp=(WIDTH/4)-widthOfPrintMe/2;
-     }
-     else
-     {
-        xposTmp=((WIDTH/4)*3)-widthOfPrintMe/2;
-     }*/
 
      //only show roll button when required
-     if (CustomCanvas.showRollButton)
-     {
+     if (CustomCanvas.showRollButton) {
          //draw in centre:
          xposTmp=((WIDTH/2))-widthOfPrintMe/2;
 
          utils.setColor(g, roll_button_colour);
          utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
 
-
-
-//numberOfFirstRollsDone here in this condition allows the bot to take its opening roll even though it doesnt know
-         //whoseTurnitIs yet, FULL_AUTO_PLAY allows bot to fully control game, and
-         //Board.whoseTurnIsIt==Player.WHITE means the bot doesnt react when its your go if youre a human (human is always white right now)
-         /*if (!Bot.FULL_AUTO_PLAY )
-         {
-             if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE && numberOfFirstRollsDone==0)
-             {
-                 desinationsFromWhichSource="Human B";
-             }
-             else if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK && numberOfFirstRollsDone==0 )
-             {
-                 Bot.destX=(xposTmp-10)+(widthOfPrintMe+20)/2;
-                 Bot.destY=ypos+(fontwhite.getHeight())/2;
-                 desinationsFromWhichSource="Bot B";
-             }
-             
-         }*/
-         //_("numberOfFirstRollsDone:"+numberOfFirstRollsDone);
          if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.FULL_AUTO_PLAY  || numberOfFirstRollsDone==1 )
          {
              if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll)
@@ -1089,11 +833,6 @@ public static final int DEBUGRIGHT=2;
                 Board.setBotDestination((xposTmp-10)+(widthOfPrintMe+20)/2,ypos+(fontwhite.getHeight())/2,"PRESS ROLL BUTTON");
              }
          }
-
-          //.destX=(xposTmp-10)+(widthOfPrintMe+20)/2;
-          //       Bot.destY=ypos+(fontwhite.getHeight())/2;
-
-     
          
          /////for collisions
          rollButtonX=xposTmp-10;
@@ -1101,20 +840,13 @@ public static final int DEBUGRIGHT=2;
          rollButtonW=widthOfPrintMe+20;
          rollButtonH=(fontwhite.getHeight());
          //////////
-         if (CustomCanvas.showCollisions)
-        {
-
+         if (CustomCanvas.showCollisions) {
             utils.setColor(g,Color.RED);
             utils.drawRect(g,rollButtonX, rollButtonY,rollButtonW, rollButtonH);
         }
-
          fontblack.drawString(g, printme, xposTmp , ypos+1, 0);ypos+=fontwhite.getHeight();
-     ////
 
-
-     }
-     else
-     {
+     } else {
          //still knock y down so other buttons draw inline.
          ypos+=fontwhite.getHeight();
      }
@@ -1133,18 +865,14 @@ public static final int DEBUGRIGHT=2;
       resignWidth=widthOfPrintMe+20;
       resignHeight=(fontwhite.getHeight());
 
-     ////
-      
-      if (showCollisions)
-      {
+      if (showCollisions) {
           utils.setColor(g, Color.red);
           utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
       }
  }
 
  //returns the current pip count doe the player passed in.
- private int calculatePips(int player)
- {
+ private int calculatePips(int player) {
      int pips=0;
     
      /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
@@ -1157,8 +885,6 @@ public static final int DEBUGRIGHT=2;
       * total is 167
       */
      Enumeration e = board.spikes.elements();
-
-     int spikeCounter=0;
      if (player==Player.WHITE)
      {
          //works for white logic is simple
@@ -1170,9 +896,7 @@ public static final int DEBUGRIGHT=2;
                  pips+=(i+1)*spike.getAmountOfPieces(player);
              }
          }
-     }
-     else
-     {
+     } else {
          //logic for black takes some thinking about!
          int j=0;
         for (int i=23; i>=0;i--)
@@ -1185,31 +909,6 @@ public static final int DEBUGRIGHT=2;
              j++;
          }
      }
-
-     
-
-    /* while (e.hasMoreElements())
-     {
-        Spike spike = (Spike) e.nextElement();
-        int amountOfPieces = spike.getAmountOfPieces(player);
-        if (amountOfPieces>0)
-        {
-            int distanceThisSpikeIsFromEnd=spikeCounter;
-             if (player==Player.WHITE)
-             {
-                 distanceThisSpikeIsFromEnd=24-spikeCounter;
-             }else
-             if (player==Player.BLACK)
-             {
-                 distanceThisSpikeIsFromEnd=24-spikeCounter;
-             }
-
-            pips+=(amountOfPieces*distanceThisSpikeIsFromEnd);
-            _(Board.playerStr(player)+":"+ amountOfPieces+" on spike "+spikeCounter+" ("+distanceThisSpikeIsFromEnd+" steps from end) * "+amountOfPieces+" ="+(amountOfPieces*distanceThisSpikeIsFromEnd));
-            
-        }
-        spikeCounter++;
-     }*/
      return pips;
  }
 
@@ -1219,8 +918,7 @@ public static final int DEBUGRIGHT=2;
 
  // simply sets glow to true if the mouse is over the button
  // glow is a boolean used to make the button glow when pointer is over it.
- private void glowButton(int x, int y)
- {
+ private void glowButton(int x, int y) {
      if (x>=buttonxA && x<=buttonxA+buttonwA)
      {
         if (y>=buttonyA && y<=buttonyA+buttonhA)
@@ -1254,8 +952,7 @@ public static final int DEBUGRIGHT=2;
  boolean buttonPressed;
  // this deals with touching the 'virtual' buttons
  // a mouse event is passed in to grab the x,y values from
- private boolean touchedButton(int x,int y)
- {
+ private boolean touchedButton(int x,int y) {
      buttonPressed=false;
      switch(state)
      {
@@ -1275,42 +972,22 @@ public static final int DEBUGRIGHT=2;
          case GAME_IN_PROGRESS:
              //CHECK IF ROLL DICE BUTTON WAS PRESSED AND DEAL WITH IT////////
              //tellRobot(true,"dddd");
-             if (showRollButton)
-             {
-               /*  if (showRollButton)
-                {
-                    tellRobot(true,"Click on roll dice button");
-                }*/
+             if (showRollButton) {
                 checkAndDealWithRollDiceButton(x,y);
-
-                
-             } else
-             {
+             } else {
                  //ROBOT LOOK FOR RELEVANT SPIKES..
-                 
-
              }
-             
              //Other in game buttons go here, like double up, resign etc.
              break;
-             ///////////////////////////////////////////////////
-     }
-
-     if (!buttonPressed)
-     {
-         //_("No button pressed, x  >= "+buttonxA+" x <= "+(buttonxA+buttonwA));
      }
      return buttonPressed;
  }
 
  //works out if the bottom button is pressed (in this state the 'computer player' button)
  //and deals with it
- private void checkAndDealWithTopButtonPressed_computerPlayer(int x,int y)
- {
-     if (x>=buttonxA && x<=buttonxA+buttonwA)
-     {
-        if (y>=buttonyA && y<=buttonyA+buttonhA)
-        {
+ private void checkAndDealWithTopButtonPressed_computerPlayer(int x,int y) {
+     if (x>=buttonxA && x<=buttonxA+buttonwA) {
+        if (y>=buttonyA && y<=buttonyA+buttonhA) {
              log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
              buttonPressed=true;
              typeOfOpponent=CPU;//REMOVE ME???? TODOOOO
@@ -1324,14 +1001,10 @@ public static final int DEBUGRIGHT=2;
 
              state=GAME_IN_PROGRESS;
 
-             if (typeOfPlay==LOCAL_PLAY)
-             {
+             if (typeOfPlay==LOCAL_PLAY) {
                 log("Selected LOCAL play against CPU");
-             }
-             else
-             {
+             } else {
                  log("Selected NETWORK play against CPU");
-                 
              }
         }
      }
@@ -1354,12 +1027,9 @@ public static final int DEBUGRIGHT=2;
               Board.HUMAN_VS_COMPUTER=false;
               log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
 
-             if (typeOfPlay==LOCAL_PLAY)
-             {
+             if (typeOfPlay==LOCAL_PLAY) {
                 log("Selected LOCAL play against HUMAN");
-             }
-             else
-             {
+             } else {
                  log("Selected NETWORK play against HUMAN");
              }
         }
@@ -1368,8 +1038,7 @@ public static final int DEBUGRIGHT=2;
 
  //works out if the bottom button is pressed (in this state the 'network play' button)
  //and deals with it
- private void checkAndDealWithBotButtonPressed_networkplay(int x,int y)
- {
+ private void checkAndDealWithBotButtonPressed_networkplay(int x,int y) {
      //check if bottom button is pressed (NETWORK)
      if (x>=buttonxB && x<=buttonxB+buttonwB)
      {
@@ -1380,11 +1049,6 @@ public static final int DEBUGRIGHT=2;
              buttonPressed=true;
 
              state=NETWORKING_ENTER_NAME;
-             ///state=OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
-             ///Utils._E("NETWORK PLAY IS NOT YET IMPLEMENTED!");
-             ///robotmove=true;
-             ///System.exit(0);
-             
         }
      }
  }
@@ -1865,14 +1529,12 @@ public static final int DEBUGRIGHT=2;
  public static boolean robotmove=true;
  static String robotMoveDesc="Bot loaded.";
 
- private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question)
- {
+ private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
      //reuse an existing method, they both simply have 2 buttons on them
      paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,buttonAstr,buttonBstr,question);
  }
 
- public String readStringFromWeb(String url)
-    {
+ public String readStringFromWeb(String url) {
         String full="";
         String inputLine="";
         try
@@ -3782,132 +3444,9 @@ public static void tellRobot(boolean b,String s)
     robotmove=b;
 }
 
-////WRAPPING ROUTINE
-/*Vector textLinesForWrappingTMP;
-    int lastColour;
-    boolean allowScrollingDOWN,allowScrollingUP;
-    String SPECIAL_END_SYMBOL="�����";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
-    int scrollBarPos;
-    int incrementSizeForScrollBarIndicator;
-    public static final int WRAP_WIDTH_HACK_VAL=20; //15  //ensures that text doesnt go off edge
-    // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
-    // properly.
-    public int drawMeWrapped(Graphics g,int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft,int width)
-    {
-        //_("drawMeWrapped :: "+wrapMe);
-        // TEXTS GET WRAPPED HERE.
-        //////these texts need to be wrapped as they could be long
-        textLinesForWrappingTMP=new Vector();                  //hack
-        textLinesForWrappingTMP = separateText(wrapMe,(width)-WRAP_WIDTH_HACK_VAL,newLineChar,font);
-        int stringHeight = y+font.getHeight();//y+paraYoffset;
-        int yValueForOutline=y;//+paraYoffset;
-
-        //_("paraYoffset:"+paraYoffset);
-        int linesDrawn=0;
-
-        int Xtmp=0;
-        if (backdrop)//draw box behind text
-        {
-            g.fillRect(0,yValueForOutline-3,WIDTH,(font.getHeight()*textLinesForWrappingTMP.size())+2);
-        }
-
-        allowScrollingUP=true;
-
-
-
-
-        for (int i = 0; i < textLinesForWrappingTMP.size(); i++) {
-            if (stringHeight >= 20 && stringHeight < HEIGHT-30) // -30 here since we have top and bottom border, and want the very last line to show (was clipped)
-            {
-                //check if user is allowed to scroll up.
-                if (i==0)
-                {
-                    // we are displaying the first line of the text, this indicates that we dont need to let user scroll up
-                    allowScrollingUP=false;
-                }
-
-                printme=(String)textLinesForWrappingTMP.elementAt(i);
-                if (justifyleft)
-                {
-                    Xtmp=10;//(WIDTH/2)-(font.stringWidth(printme)/2);
-                }
-                else
-                {
-                    Xtmp=(WIDTH/2)-(font.stringWidth(printme)/2);
-                }
-
-                //MAKE A PARAGRAPH IF DTECT <P> IN THE TEXT
-                if (printme.indexOf("<P>")!=-1)
-                {
-                    //stringHeight+=10;_("<P>");
-                    String bitbeforePara=printme.substring(0,printme.indexOf("<P>"));
-                    String bitafterPara=printme.substring(printme.indexOf("<P>")+3,printme.length());
-                    font.drawString( g, bitbeforePara,Xtmp,stringHeight, 0 );
-                    stringHeight+=font.getHeight()+5;
-                    printme=bitafterPara;
-                }
-                //shameless duplicating of code for lower case <p>
-                if (printme.indexOf("<p>")!=-1)
-                {
-                    //stringHeight+=10;_("<P>");
-                    String bitbeforePara=printme.substring(0,printme.indexOf("<p>"));
-                    String bitafterPara=printme.substring(printme.indexOf("<p>")+3,printme.length());
-                    font.drawString( g, bitbeforePara,Xtmp,stringHeight, 0 );
-                    stringHeight+=font.getHeight()+5;
-                    printme=bitafterPara;
-                }
-
-                font.drawString( g, printme,Xtmp,stringHeight, 0 );
-
-                if (printme.indexOf("\n")!=-1)
-                {
-                    _("new line detected");
-                }
-
-                ///////_(linesDrawn+"/ stringHeight:"+stringHeight+" print line -->"+printme);
-
-                linesDrawn++; // debug, to check we arent drawing lines off screen
-
-                //check if the end of the text is reached and control users ability to scroll with bools.
-                //so we dont let them keep scrolling
-                if (printme.indexOf("THE END")!=-1 || printme.indexOf(SPECIAL_END_SYMBOL)!=-1)
-                {
-                    allowScrollingDOWN=false;
-                }
-                else
-                {
-                    allowScrollingDOWN=true;
-                }
-            }
-            stringHeight+=(font.getHeight()-5);
-        }
-
-         if (textLinesForWrappingTMP.size()>0)
-            incrementSizeForScrollBarIndicator=HEIGHT/(textLinesForWrappingTMP.size());//
-
-        if (outline)// draw black outline
-        {
-            //lastColour=g.getColor(); // preserve the current colour set in graphics
-            //g.setColor(0,0,0);
-            //g.drawRect(-1,yValueForOutline-4,WIDTH+1,(font.getHeight()*textLinesForWrappingTMP.size())+2);
-            //g.setColor(lastColour);
-        }
-
-        y=stringHeight;
-
-        //draw scrollbar (
-        //this is now done outside this methdo since we want it to paint over the header/footers
-       
-
-        return y;
-    }*/
-
- Vector textLinesForWrappingTMP;
-    int lastColour;
-    boolean allowScrollingDOWN,allowScrollingUP;
+    Vector textLinesForWrappingTMP;
+    boolean allowScrollingDOWN;
     String SPECIAL_END_SYMBOL="::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
-    int scrollBarPos;
-    int incrementSizeForScrollBarIndicator;
     public static  int WRAP_WIDTH_HACK_VAL=0; //15  //ensures that text doesnt go off edge
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
@@ -4149,9 +3688,6 @@ public static void tellRobot(boolean b,String s)
 
 
         }
-		//System.out.println("LINES-->"+lines);
-//System.out.println("..lines:"+lines.capacity());
         return lines;
     }
-
 }
