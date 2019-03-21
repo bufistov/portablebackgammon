@@ -134,12 +134,6 @@ public class Die {
         MINI_DOT_DIAMETER=(Piece.PIECE_DIAMETER-6)/5;
         MINI_HALF_DOT_DIAMETER=DOT_DIAMETER/2;
 
-        //divide these all by x to make a mini dice.
-        /*DIE_WIDTH  = DIE_WIDTH/MINI_DIE_DIVIDE_BY;
-        DIE_HEIGHT = DIE_HEIGHT/MINI_DIE_DIVIDE_BY;
-        DOT_DIAMETER=DOT_DIAMETER/MINI_DIE_DIVIDE_BY;
-        HALF_DOT_DIAMETER=HALF_DOT_DIAMETER/MINI_DIE_DIVIDE_BY;*/
-
         //draw outline of the die
         drawOutline(g,x,y,MINI_DIE_WIDTH,MINI_DIE_HEIGHT,MINI_DOT_DIAMETER,MINI_HALF_DOT_DIAMETER);
 
