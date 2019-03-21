@@ -7,4 +7,6 @@ import org.aeonbits.owner.Config;
     "classpath:gamelogic/backgammon.properties" })
 public interface GameConfig extends Config {
     int boardSize();
+
+    int totalCheckers();
 }
