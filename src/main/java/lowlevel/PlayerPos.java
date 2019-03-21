@@ -1,14 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package lowlevel;
 
-/**
- *
- * @author Gaz
- */
 public class PlayerPos {
 
     int x, y;
@@ -23,5 +14,4 @@ public class PlayerPos {
         height=height_;
         name=name_;
     }
-
 }

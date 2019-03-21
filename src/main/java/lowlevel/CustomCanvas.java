@@ -110,7 +110,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         sfxResign=new Sound("/resign.wav");
         log("Sounds loaded.");
         requestFocus();  // get focus for keys
-        setIgnoreRepaint(true);// this is the key to it not flickering on my desktop
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+          setIgnoreRepaint(true);
+        }
     }
 
     public static boolean NETWORK_GAME_IN_PROCESS;
@@ -118,6 +120,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
     public static Sound sfxdouble, sfxResign;
 
+    @Override
     public void paint(Graphics g_) {
         handleMouse();
         doubleBuffering(1); // pass 1 in to start dbl buffering
