@@ -18,7 +18,7 @@ public class Die {
     public static int DOT_COLOUR=0x000000;
     public static Color die_colour, dot_colour;
 
-    HAL hal = new HAL();
+    Utils utils = new Utils();
     int value=-1; //1 to 6
     public Die()
     {
@@ -43,7 +43,7 @@ public class Die {
     public int roll()
     {   
         showOriginalValue=false;
-        value=HAL.getRand(1,6);
+        value=Utils.getRand(1,6);
         return value;
     }
 
@@ -82,7 +82,7 @@ public class Die {
     
     private void log(String s)
     {
-        HAL.log("Die{}:" + s);
+        Utils.log("Die{}:" + s);
     }
 
     public static int DIE_WIDTH=0;
@@ -143,29 +143,29 @@ public class Die {
 
     private void drawOutline(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER)
     {
-        //hal.resetTransparenctColour();//optimisation so it doesnt keep makign colour objects unless it has to
-        //hal.setColor(g, die_colour,CustomCanvas.TRANSPARENCY_LEVEL);
-        hal.setColor(g, die_colour);
-        hal.fillRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
-        hal.setColor(g, Color.black);
-        hal.drawRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
+        //utils.resetTransparenctColour();//optimisation so it doesnt keep makign colour objects unless it has to
+        //utils.setColor(g, die_colour,CustomCanvas.TRANSPARENCY_LEVEL);
+        utils.setColor(g, die_colour);
+        utils.fillRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
+        utils.setColor(g, Color.black);
+        utils.drawRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
         
         if (CustomCanvas.showCollisions)
         {
 
-            hal.setColor(g,Color.RED);
-            hal.drawRect(g,x, y,DIE_WIDTH, DIE_WIDTH);
+            utils.setColor(g,Color.RED);
+            utils.drawRect(g,x, y,DIE_WIDTH, DIE_WIDTH);
         }
 
     }
 
     private void drawDots(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER)
     {
-        hal.setColor(g, dot_colour);
+        utils.setColor(g, dot_colour);
         int dots=-99;
         if (showOriginalValue)
         {
-            hal.setColor(g, Color.RED);
+            utils.setColor(g, Color.RED);
             dots=originalValue; //rarely we hide the real value form player, see above for why
         }
         else
@@ -177,47 +177,47 @@ public class Die {
         {
             case 1:
                 //draw single dot in middle
-                hal.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 2:
                 //draw 2 dots in opposing corners
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 3:
                 //draw 3 dots diagnally
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 4:
                 //draw 4 dots 2 at top and 2 at bottom
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 5:
                 //draw 4 dots 2 at top and 2 at bottom
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 //and one in the middle
-                hal.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 6:
                 //draw 4 dots 2 at top and 2 at bottom
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 //and 2 in middle top and bottom
-                hal.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                hal.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             default:
-                /////HAL._E("Dave, I'm a bit confused: how can a dice have a value that isnt between 1 and 6??");
+                /////Utils._E("Dave, I'm a bit confused: how can a dice have a value that isnt between 1 and 6??");
                 break;
         }
     }

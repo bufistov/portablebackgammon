@@ -39,10 +39,10 @@ public String serverIP;
         customCanvas=customCanvas_;
         for(int i=0; i<16; i++)
         {
-                messageText.add("”");
+                messageText.add("ï¿½");
         }
         IP=grabIP();
-//IP=HAL.IP;
+//IP=Utils.IP;
 _("IP:"+IP);
         init();
         start();

@@ -29,7 +29,7 @@ public class Bot extends Thread {
         }
         catch(Exception e)
         {
-            HAL._E("ERROR making robot "+e.getMessage());
+            Utils._E("ERROR making robot "+e.getMessage());
         }
         _("Mouse coords:"+currentMouseX+", "+currentMouseY);
         
@@ -174,7 +174,7 @@ private void tick()
                         }
                         catch(Exception e)
                         {
-                            HAL._E("insomnia!");
+                            Utils._E("insomnia!");
                         }
                         //clickedTime = System.currentTimeMillis();
                         canvas.mouseClickedX(destX, destY, CustomCanvas.LEFT_MOUSE_BUTTON);
@@ -185,7 +185,7 @@ private void tick()
                        }
                        catch(Exception e)
                        {
-                           HAL._E("insomnia!");
+                           Utils._E("insomnia!");
                        }*/
                        //  click=false;
                     }
@@ -212,7 +212,7 @@ private void tick()
             }
             catch(Exception e)
             {
-                HAL._E("insomnia!");
+                Utils._E("insomnia!");
             }
               // need a wait here so it doesnt move on until after the click.
                 if (x<destX)
@@ -294,7 +294,7 @@ int destinationCounter;
 
     private void _(String s)
     {
-        HAL.log("Bot{}:" + s);
+        Utils.log("Bot{}:" + s);
     }
 
    

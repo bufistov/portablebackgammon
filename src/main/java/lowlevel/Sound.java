@@ -134,6 +134,6 @@ public class Sound {
 
 
     private void log(String s) {
-        HAL.log("Sound{}:" + s);
+        Utils.log("Sound{}:" + s);
     }
 }

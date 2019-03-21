@@ -21,7 +21,7 @@ public class Spike
     // -- pieces within the spike
     public  Vector pieces=new Vector();
     int position; // 1 to 24
-    HAL hal = new HAL();
+    Utils utils = new Utils();
     // -- pre-calc'd and tmp variables
     public static int TRIANGLE_WIDTH=0;
     public static int TRIANGLE_HEIGHT=0;
@@ -77,7 +77,7 @@ public class Spike
         }
         else
         {
-            HAL._E("removePiece:spikeName is null");
+            Utils._E("removePiece:spikeName is null");
         }
         pieces.remove(p);
         return true;
@@ -118,8 +118,8 @@ public class Spike
         }
 
         //draw its number
-        //hal.setColor(g, Color.gray);
-        //hal.drawString(g, x3-(TRIANGLE_WIDTH/2),y1, spikeName);
+        //utils.setColor(g, Color.gray);
+        //utils.drawString(g, x3-(TRIANGLE_WIDTH/2),y1, spikeName);
 
     }
 
@@ -127,7 +127,7 @@ public class Spike
     {
         if (spikeName==null)
         {
-            HAL._E("getSpikeNumber() was called before spikeName was set up!");
+            Utils._E("getSpikeNumber() was called before spikeName was set up!");
         }
         
         int spikeNumber=-1;
@@ -138,11 +138,11 @@ public class Spike
         }
         catch(Exception e)
         {
-            HAL._E(" getSpikeNumber failed...");
+            Utils._E(" getSpikeNumber failed...");
         }
         if (spikeNumber<0)
         {
-            HAL._E(" getSpikeNumber returned less than ZERO...");
+            Utils._E(" getSpikeNumber returned less than ZERO...");
         }
         return spikeNumber;
     }
@@ -171,7 +171,7 @@ public class Spike
         }
         else
         {   //ERROR situation
-            HAL._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
+            Utils._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
         }
         ///////////////////////////////////////////////
 
@@ -218,7 +218,7 @@ public class Spike
             }
             else
             {   //ERROR situation
-                HAL._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
+                Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
             }
             if(getType()==STALECTITE)
             {   //overlap here just squares them up to the bottom/top of spike if there overlapping
@@ -229,8 +229,8 @@ public class Spike
                  p.paint(g,piecex,piecey-overlapOnPieces);
             }
            
-            //hal.setColor(g, Color.red);
-            //hal.drawString(g, piecex+Piece.PIECE_DIAMETER/2, piecey+Piece.PIECE_DIAMETER/2, ""+pieceCounter+" / "+spikeName);
+            //utils.setColor(g, Color.red);
+            //utils.drawString(g, piecex+Piece.PIECE_DIAMETER/2, piecey+Piece.PIECE_DIAMETER/2, ""+pieceCounter+" / "+spikeName);
             pieceCounter++;
         }
     }
@@ -260,14 +260,14 @@ public class Spike
             case Board.DIE1:     whichDie="DIE 1";  break;
             case Board.DIE2:     whichDie="DIE 2";  break;
             case Board.DIE1AND2: whichDie="DIE 1&2";  break;
-            default: HAL._E("Invalid die number passed into flash!");  break;
+            default: Utils._E("Invalid die number passed into flash!");  break;
         }*/
         switch(whichDice)
         {
             case Board.DIE1:     whichDiei=Board.DIE1;  break;
             case Board.DIE2:     whichDiei=Board.DIE2;  break;
             case Board.DIE1AND2: whichDiei=Board.DIE1AND2;  break;
-            default: HAL._E("Invalid die number passed into flash!");  break;
+            default: Utils._E("Invalid die number passed into flash!");  break;
         }
     }
     int whichDiei=-1;
@@ -290,19 +290,19 @@ public class Spike
         // the correct colour
         if (paintBlackColour(g))
         {
-            hal.setColor(g, black_spike_colour);
+            utils.setColor(g, black_spike_colour);
         }
         else
         {
-            hal.setColor(g, white_spike_colour);
+            utils.setColor(g, white_spike_colour);
         }
         if (flash)
         {
             //so it indicates when its a potential move for player
-            hal.setColor(g,flashColor);
+            utils.setColor(g,flashColor);
             flash=false;
         }
-        hal.fillTriangle(g, x1, y1, x2, y2, x3, y3);
+        utils.fillTriangle(g, x1, y1, x2, y2, x3, y3);
 
         //draw text here to tell player which die would do it
         //draw little dice.
@@ -313,13 +313,13 @@ public class Spike
         //
 
         //draw outline after otherwise it gets distored by the filled shape
-        hal.setColor(g, Color.BLACK);
-        hal.drawTriangle(g, x1, y1, x2, y2, x3, y3);
+        utils.setColor(g, Color.BLACK);
+        utils.drawTriangle(g, x1, y1, x2, y2, x3, y3);
 
         if (CustomCanvas.showCollisions)
         {
-            hal.setColor(g,Color.RED);
-            hal.drawRect(g,collision_x, collision_y,TRIANGLE_WIDTH, TRIANGLE_HEIGHT);
+            utils.setColor(g,Color.RED);
+            utils.drawRect(g,collision_x, collision_y,TRIANGLE_WIDTH, TRIANGLE_HEIGHT);
         }
     }
 
@@ -368,7 +368,7 @@ public class Spike
              }
              else
              {
-                 HAL._E("whichDiei type is unknown");
+                 Utils._E("whichDiei type is unknown");
              }
     }
 
@@ -407,7 +407,7 @@ public class Spike
         }
         if (type==-1)
         {
-            HAL._E(spikeName+": returned no type tite nor mite!");
+            Utils._E(spikeName+": returned no type tite nor mite!");
         }
         return type;
     }
@@ -577,7 +577,7 @@ public class Spike
     //wrapper around system outs
     private void _(String s)
     {
-        HAL.log("Spike{}:" + s);
+        Utils.log("Spike{}:" + s);
     }
 
     public static void makeColourObjects(boolean forceRecreation)

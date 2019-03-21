@@ -31,7 +31,7 @@ public class Piece {
 
     public Player father;
     int colour;
-    HAL hal = new HAL();
+    Utils utils = new Utils();
 
 
     public Piece(Player father_)
@@ -39,7 +39,7 @@ public class Piece {
         father=father_;
         if (father==null)
         {
-            HAL._E("Piece was made with a null father");
+            Utils._E("Piece was made with a null father");
         }
         String colstr="";
         if (father.getColour()==Player.WHITE)
@@ -53,7 +53,7 @@ public class Piece {
         else
         {
             colstr="**** NEITHER BLACK OR WHITE! (this isnt a michael jackson album)";
-            HAL._E(colstr);
+            Utils._E(colstr);
         }
         _("Piece made. father is "+colstr);
         colour=father.getColour();
@@ -82,7 +82,7 @@ public class Piece {
 
     private void _(String s)
     {
-        HAL.log("Piece{}:" + s);
+        Utils.log("Piece{}:" + s);
     }
 
     public void drawPieceOnMouse(Graphics g, int x, int y)
@@ -96,16 +96,16 @@ public class Piece {
         PIECE_DIAMETER=Spike.TRIANGLE_HEIGHT/7;
         if (colour==Player.WHITE)
         {
-            hal.setColor(g, white_piece_color);
+            utils.setColor(g, white_piece_color);
         }
         else if (colour==Player.BLACK)
         {
-            hal.setColor(g, black_piece_color);
+            utils.setColor(g, black_piece_color);
             
         }
         else
         {
-            HAL._E("Dave, Im a bit worried that this piece doesnt know what colour it is.");
+            Utils._E("Dave, Im a bit worried that this piece doesnt know what colour it is.");
         }
 
         if (stickToMouse)
@@ -114,19 +114,19 @@ public class Piece {
             y = Board.mouseHoverY;
         }
 //if (colour==Player.BLACK)
-//hal.setColor(g, 0,0,0,CustomCanvas.TRANSPARENCY_LEVEL);
-        hal.fillCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
+//utils.setColor(g, 0,0,0,CustomCanvas.TRANSPARENCY_LEVEL);
+        utils.fillCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
            
-        hal.setColor(g,Color.BLACK);
-        hal.drawCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
+        utils.setColor(g,Color.BLACK);
+        utils.drawCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
 
         collision_x=x;
         collision_y=y;
         if (CustomCanvas.showCollisions)
         {
 
-            hal.setColor(g,Color.RED);
-            hal.drawRect(g,collision_x, collision_y,PIECE_DIAMETER, PIECE_DIAMETER);
+            utils.setColor(g,Color.RED);
+            utils.drawRect(g,collision_x, collision_y,PIECE_DIAMETER, PIECE_DIAMETER);
         }
 
         //turned off inner circle for now, looks a bit weird
@@ -134,15 +134,15 @@ public class Piece {
         ////draw inner circle////
         if (colour==Player.WHITE)
         {
-            hal.setColor(g, white_piece_inner_color);
+            utils.setColor(g, white_piece_inner_color);
         }
         else if (colour==Player.BLACK)
         {
-            hal.setColor(g, black_piece_inner_color);
+            utils.setColor(g, black_piece_inner_color);
 
         }
         int piece_diameter_over_2 = PIECE_DIAMETER/2;
-        hal.drawCircle(g,x+piece_diameter_over_2/2, y+piece_diameter_over_2/2,piece_diameter_over_2, piece_diameter_over_2);
+        utils.drawCircle(g,x+piece_diameter_over_2/2, y+piece_diameter_over_2/2,piece_diameter_over_2, piece_diameter_over_2);
         */
         
        

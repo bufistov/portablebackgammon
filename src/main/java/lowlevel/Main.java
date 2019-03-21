@@ -103,6 +103,6 @@ public class Main
      }
 
      private static void log(String s) {
-         HAL.log("Main{}:" + s);
+         Utils.log("Main{}:" + s);
      }
 }

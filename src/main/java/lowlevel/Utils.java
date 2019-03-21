@@ -3,7 +3,7 @@ import java.awt.*;
 import java.util.*;
 import java.awt.image.*;
 
-public class HAL {
+public class Utils {
 
     private static final String ERROR_STRING = "****ERROR**** ";
     public static boolean CANVAS_LOGGING = false;
@@ -29,6 +29,7 @@ public class HAL {
 
     public Color getColor() {
         return colour;
+
     }
 
     public void drawRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {

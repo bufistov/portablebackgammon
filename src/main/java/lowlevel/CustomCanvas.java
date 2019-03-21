@@ -66,7 +66,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int ULTIMATE_HEIGHT =-1;//
 
     boolean INFO=false;    // 'about box' toggle
-    HAL hal = new HAL();   // Hardware Abstraction Layer
+    Utils utils = new Utils();   // Hardware Abstraction Layer
     public static int state;             // current state
     String stateString;
     int PANEL_WIDTH=0;
@@ -111,7 +111,7 @@ ignorePaintsCounter=0;
         addMouseMotionListener( this );
         addKeyListener( this );
         //set icon in corner
-        jFrame.setIconImage(hal.loadImage("/icon.gif"));
+        jFrame.setIconImage(utils.loadImage("/icon.gif"));
         /////
 
 jFrame.setResizable(false);
@@ -222,7 +222,7 @@ public static Sound sfxdouble, sfxResign;
             if (NETWORK_GAME_IN_PROCESS)
             {
                 //System.out.println("NETWORK_GAME_IN_PROCESS "+pointerX+" , "+pointerY);
-                  hal.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+                  utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
                        Board.mouseHoverX=pointerX;//e.getX();
                           Board.mouseHoverY=pointerY;//e.getY();
             }
@@ -231,7 +231,7 @@ public static Sound sfxdouble, sfxResign;
 
                 if (Bot.FULL_AUTO_PLAY)
                 {
-                    hal.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
+                    utils.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
                     Board.mouseHoverX=Bot.x;//e.getX();
                     Board.mouseHoverY=Bot.y;//e.getY();
                 }
@@ -243,7 +243,7 @@ public static Sound sfxdouble, sfxResign;
 
                          //REMOVED TO TEST NETWORKING
                          /*
-                       hal.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+                       utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
                        Board.mouseHoverX=pointerX;//e.getX();
                           Board.mouseHoverY=pointerY;//e.getY();*/
                     }else
@@ -252,13 +252,13 @@ public static Sound sfxdouble, sfxResign;
                        /// _("bot.dead set to false");
                         Main.hideMousePointer(true);
                         Bot.dead=false;
-                        hal.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
+                        utils.drawImage(g, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
                         Board.mouseHoverX=Bot.x;//e.getX();
                         Board.mouseHoverY=Bot.y;//e.getY();
                     }else
                     {
                          Main.hideMousePointer(false);
-                         /* hal.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+                         /* utils.drawImage(g, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
                           Board.mouseHoverX=pointerX;//e.getX();
                           Board.mouseHoverY=pointerY;//e.getY();*/
                     }
@@ -269,31 +269,31 @@ public static Sound sfxdouble, sfxResign;
 
         /*if ((Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE))//Bot.dead)
         {
-            hal.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
         }
         else
         {
-              hal.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
+              utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
         }*/
         /*if (Bot.FULL_AUTO_PLAY)
         {
-            hal.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
+            utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
             desinationsFromWhichSource="Bot X";
         } else
         if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE)
         {
             //draw human pointer
-            hal.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
             desinationsFromWhichSource="Human X";
         } else
         if ( Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK)
         {
-            hal.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
+            utils.drawImage(g_, pointer, Bot.x, Bot.y+6, this_);//this 6 lines it up
             desinationsFromWhichSource="Bot X1";
         } else
         {
             //draw human pointer
-            hal.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
+            utils.drawImage(g_, pointer, pointerX, pointerY+6, this_);//this 6 lines it up
             desinationsFromWhichSource="Human X1";
         }*/
         
@@ -367,7 +367,7 @@ public static String desinationsFromWhichSource;//for debug window
     
     } else
     {
-        HAL._E("doubleBuffering() phase was invalid "+phase);
+        Utils._E("doubleBuffering() phase was invalid "+phase);
     }
  }
   private Image mImage;
@@ -432,7 +432,7 @@ private void checkOffscreenImage() {
             paint_NETWORKING_LOBBY(g);
             break;
         default://///////////////////////////////////////////////
-            HAL._E("Warning state in paint unrecognised!");
+            Utils._E("Warning state in paint unrecognised!");
             break;
     }
     ////////////////////////////////
@@ -454,7 +454,7 @@ private void checkOffscreenImage() {
     {
         paintAboutBox(g);
     }
-    if (HAL.CANVAS_LOGGING) // again for debugging, paints sys outs on canvas
+    if (Utils.CANVAS_LOGGING) // again for debugging, paints sys outs on canvas
     {
         paintStringsToCanvas(g);
     }
@@ -528,10 +528,10 @@ static long robotMessageSetTimeLong;
         INFO=false;
     }
 
-    hal.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-    hal.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-    hal.setColor(g, Color.white);
-    hal.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+    utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+    utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+    utils.setColor(g, Color.white);
+    utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
 
     int xabout=WIDTH/2;
     int yabout=(HEIGHT/4)+TINY_GAP;
@@ -561,12 +561,12 @@ static long robotMessageSetTimeLong;
         INFO=false;
     }
 
-    hal.setColor(g, 0,0,0,125);
+    utils.setColor(g, 0,0,0,125);
     x=10;
     y=10;
-    hal.fillRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
-    hal.setColor(g, Color.yellow);
-    hal.drawRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
+    utils.fillRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
+    utils.setColor(g, Color.yellow);
+    utils.drawRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
 
     x+=5;
     
@@ -578,26 +578,30 @@ static long robotMessageSetTimeLong;
 
     printme="TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS;
     //Highlighter to indicate if its on this option
-    if (debugMenuPos==0) {hal.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
+    if (debugMenuPos==0) {
+        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
     //option itself, 
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
 
     printme="ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS;
     //Highlighter to indicate if its on this option
-    if (debugMenuPos==1) {hal.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
+    if (debugMenuPos==1) {
+        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
      printme="paintRobotMessages:"+paintRobotMessages;
     //Highlighter to indicate if its on this option
-    if (debugMenuPos==2) {hal.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
+    if (debugMenuPos==2) {
+        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
     printme="FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY;
     //Highlighter to indicate if its on this option
-    if (debugMenuPos==3) {hal.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
+    if (debugMenuPos==3) {
+        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
@@ -611,7 +615,7 @@ static long robotMessageSetTimeLong;
     printme="D = DEBUG CONSOLE ("+DEBUG_CONSOLE+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="T = THEME ("+themeName+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="C = COLLISIONS ("+showCollisions+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="L = CANVAS LOGGING ("+HAL.CANVAS_LOGGING+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+    printme="L = CANVAS LOGGING ("+Utils.CANVAS_LOGGING+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="S = SOUND ("+SOUND_ON+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="X = TEST SOUND";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="J = JUMP TO DESTINATION ("+Bot.JUMP_DIRECT_TO_DEST+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
@@ -709,7 +713,7 @@ public static final int DEBUGRIGHT=2;
              }
              break;
          default:
-             HAL._E("UNKNOWN DEBUG OPTION CHANGED:"+debugMenuPos);
+             Utils._E("UNKNOWN DEBUG OPTION CHANGED:"+debugMenuPos);
              break;
      }
  }
@@ -737,11 +741,11 @@ public static final int DEBUGRIGHT=2;
      log("Attempting to loadImages()");
      if (splashScreenLogo==null)
      {
-         splashScreenLogo      = hal.loadImage("/midokura-logo.png");
-         splashScreenLogoSmall = hal.loadImage("/midokura-logo-small.png");
-         pointer               = hal.loadImage("/pointer.png");
-         op                    = hal.loadImage("/op.png");
-         admin                 =  hal.loadImage("/admin.png");
+         splashScreenLogo      = utils.loadImage("/midokura-logo.png");
+         splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
+         pointer               = utils.loadImage("/pointer.png");
+         op                    = utils.loadImage("/op.png");
+         admin                 =  utils.loadImage("/admin.png");
      }
      else
      {
@@ -757,9 +761,9 @@ public static final int DEBUGRIGHT=2;
 
  private void paint_SPLASH_SCREEN(Graphics g) {
 
-     hal.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
-     hal.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
-     hal.setColor(g,Color.BLACK);
+     utils.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
+     utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
+     utils.setColor(g,Color.BLACK);
 
      if (showCollisions)
      {
@@ -790,18 +794,18 @@ public static final int DEBUGRIGHT=2;
  public static int TINY_GAP=5;//when we need a tiny gap
  private void paint_POST_SPLASH_SCREEN(Graphics g)
  {
-      hal.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT);//paint entire background
+      utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT);//paint entire background
       if (board==null)
       {
           board = new Board();
       }
-      hal.setColor(g,Color.WHITE);
+      utils.setColor(g,Color.WHITE);
 
       //paint board and its containing parts
       board.paint(g,WIDTH,HEIGHT);
       //paint the message panel to the right with players name etc
-      hal.setColor(g,panel_colour);
-      hal.fillRect(g,WIDTH,Board.BORDER,PANEL_WIDTH,HEIGHT-(Board.BORDER*2));
+      utils.setColor(g,panel_colour);
+      utils.fillRect(g,WIDTH,Board.BORDER,PANEL_WIDTH,HEIGHT-(Board.BORDER*2));
 
       //draw the preferences button
       prefw=20;
@@ -810,16 +814,16 @@ public static final int DEBUGRIGHT=2;
       prefy=Board.BORDER;
 
       //draw a circle with an 'i' inside.
-      hal.setColor(g, Color.blue);
-      hal.fillCircle(g, prefx, prefy, prefw, prefh);
-      hal.setColor(g, Color.white);
-      hal.drawCircle(g, prefx, prefy, prefw, prefh);
+      utils.setColor(g, Color.blue);
+      utils.fillCircle(g, prefx, prefy, prefw, prefh);
+      utils.setColor(g, Color.white);
+      utils.drawCircle(g, prefx, prefy, prefw, prefh);
       fontwhite.drawString(g, "i", prefx+4, prefy+2,0);
       //////////
       if (showCollisions)
       {
-          hal.setColor(g, Color.RED);
-          hal.drawRect(g, prefx, prefy, prefw, prefh);
+          utils.setColor(g, Color.RED);
+          utils.drawRect(g, prefx, prefy, prefw, prefh);
       }
 
       //draw panel text:
@@ -835,15 +839,15 @@ public static final int DEBUGRIGHT=2;
 
        if (Board.allBlackPiecesAreHome)
        {
-           hal.setColor(g, Color.GREEN);
+           utils.setColor(g, Color.GREEN);
            if (Board.pulsateBlackContainer)
            {
-               hal.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+               utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
            }
        }
        else
        {
-            hal.setColor(g, Color.WHITE);
+            utils.setColor(g, Color.WHITE);
        }
       //draw black players piece container
       drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
@@ -854,15 +858,15 @@ public static final int DEBUGRIGHT=2;
 
       if (Board.allWhitePiecesAreHome)
        {
-           hal.setColor(g, Color.GREEN);
+           utils.setColor(g, Color.GREEN);
            if (Board.pulsateWhiteContainer)
            {
-               hal.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+               utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
            }
        }
        else
        {
-            hal.setColor(g, Color.WHITE);
+            utils.setColor(g, Color.WHITE);
        }
       //draw white players piece container
       drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
@@ -925,13 +929,13 @@ public static final int DEBUGRIGHT=2;
          myY=myY+containerSubSize;
          if (i<piecesOnContainer)
          {
-             Color originalColor = hal.getColor();
-             hal.setColor(g,Color.ORANGE);
+             Color originalColor = utils.getColor();
+             utils.setColor(g,Color.ORANGE);
              
-             hal.fillRect(g, myX, myY, containerWidth , containerSubSize );
-             hal.setColor(g,originalColor);
+             utils.fillRect(g, myX, myY, containerWidth , containerSubSize );
+             utils.setColor(g,originalColor);
          }
-         hal.drawRect(g, myX, myY, containerWidth , containerSubSize );
+         utils.drawRect(g, myX, myY, containerWidth , containerSubSize );
      }
      //update collision data
      if (player==Player.WHITE)
@@ -942,8 +946,8 @@ public static final int DEBUGRIGHT=2;
          whiteContainerHeight=containerSubSize*15;
          if (showCollisions)
          {
-             hal.setColor(g,Color.RED);
-             hal.drawRect(g, whiteContainerX, whiteContainerY,whiteContainerWidth,whiteContainerHeight );
+             utils.setColor(g,Color.RED);
+             utils.drawRect(g, whiteContainerX, whiteContainerY,whiteContainerWidth,whiteContainerHeight );
          }
      }
      else
@@ -955,13 +959,13 @@ public static final int DEBUGRIGHT=2;
          blackContainerHeight=containerSubSize*15;
          if (showCollisions)
          {
-             hal.setColor(g,Color.RED);
-             hal.drawRect(g, blackContainerX, blackContainerY,blackContainerWidth,blackContainerHeight );
+             utils.setColor(g,Color.RED);
+             utils.drawRect(g, blackContainerX, blackContainerY,blackContainerWidth,blackContainerHeight );
          }
      }
      else
      {
-         HAL._E("drawPieceContainer has been given incorrect player number!");
+         Utils._E("drawPieceContainer has been given incorrect player number!");
      }
      
  }
@@ -1007,16 +1011,16 @@ public static final int DEBUGRIGHT=2;
      xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
      fontwhite.drawString(g, printme, xposTmp, ypos, 0);ypos+=fontwhite.getHeight();
 
-     hal.setColor(g, roll_button_colour);
+     utils.setColor(g, roll_button_colour);
       
      //---- draw buttons
      ///////// double button
      printme="Double";
      widthOfPrintMe=(fontwhite.stringWidth(printme));
      xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
-     hal.setColor(g, roll_button_colour);
+     utils.setColor(g, roll_button_colour);
      ypos+=10;
-     hal.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
+     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
      fontwhite.drawString(g, printme, xposTmp , ypos+1, 0);
      ////
      doubleX=xposTmp-10;
@@ -1025,8 +1029,8 @@ public static final int DEBUGRIGHT=2;
      doubleHeight=(fontwhite.getHeight()) ;
      if (showCollisions)
       {
-          hal.setColor(g, Color.red);
-          hal.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
+          utils.setColor(g, Color.red);
+          utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
       }
 
      //draw the 'Roll' button
@@ -1051,8 +1055,8 @@ public static final int DEBUGRIGHT=2;
          //draw in centre:
          xposTmp=((WIDTH/2))-widthOfPrintMe/2;
 
-         hal.setColor(g, roll_button_colour);
-         hal.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
+         utils.setColor(g, roll_button_colour);
+         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
 
 
 
@@ -1100,8 +1104,8 @@ public static final int DEBUGRIGHT=2;
          if (CustomCanvas.showCollisions)
         {
 
-            hal.setColor(g,Color.RED);
-            hal.drawRect(g,rollButtonX, rollButtonY,rollButtonW, rollButtonH);
+            utils.setColor(g,Color.RED);
+            utils.drawRect(g,rollButtonX, rollButtonY,rollButtonW, rollButtonH);
         }
 
          fontblack.drawString(g, printme, xposTmp , ypos+1, 0);ypos+=fontwhite.getHeight();
@@ -1119,9 +1123,9 @@ public static final int DEBUGRIGHT=2;
      printme="Resign";
      widthOfPrintMe=(fontwhite.stringWidth(printme));
      xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
-     hal.setColor(g, roll_button_colour);
+     utils.setColor(g, roll_button_colour);
      ypos+=10;
-     hal.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
+     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
      fontwhite.drawString(g, printme, xposTmp , ypos+1, 0);
 
      resignX=xposTmp-10;
@@ -1133,8 +1137,8 @@ public static final int DEBUGRIGHT=2;
       
       if (showCollisions)
       {
-          hal.setColor(g, Color.red);
-          hal.drawRect(g, resignX, resignY, resignWidth, resignHeight);
+          utils.setColor(g, Color.red);
+          utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
       }
  }
 
@@ -1377,7 +1381,7 @@ public static final int DEBUGRIGHT=2;
 
              state=NETWORKING_ENTER_NAME;
              ///state=OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
-             ///HAL._E("NETWORK PLAY IS NOT YET IMPLEMENTED!");
+             ///Utils._E("NETWORK PLAY IS NOT YET IMPLEMENTED!");
              ///robotmove=true;
              ///System.exit(0);
              
@@ -1463,7 +1467,7 @@ public static final int DEBUGRIGHT=2;
         
      } else
      {
-         HAL.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
+         Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
      }
 
  }
@@ -1529,7 +1533,7 @@ public static final int DEBUGRIGHT=2;
      }
      else
      {
-         HAL._E("playerWonRollOff received an invalid player colour "+player);
+         Utils._E("playerWonRollOff received an invalid player colour "+player);
      }
     if (CustomCanvas.numberOfFirstRollsDone>1)//ie if game started.
     {
@@ -1604,7 +1608,7 @@ public static final int DEBUGRIGHT=2;
              {
                  board.die1.setValue(val2);//now die one has same val as die2
                  val  = board.die1.getValue();
-                 HAL._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
+                 Utils._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
              }*/
              log("####################################White rolled:"+val+", "+val2);
              tellPlayers("White rolled:"+val+"-"+val2);
@@ -1644,7 +1648,7 @@ public static final int DEBUGRIGHT=2;
              {
                  board.die1.setValue(val2);//now die one has same val as die2
                  val  = board.die1.getValue();
-                 HAL._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
+                 Utils._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
              }*/
              log("#####################################################Black rolled:"+val+", "+val2);
              tellPlayers("Black rolled:"+val+"-"+val2);
@@ -1664,7 +1668,7 @@ public static final int DEBUGRIGHT=2;
      }
      else
      {
-         HAL._E("playerRolls() received an invalid player colour.");
+         Utils._E("playerRolls() received an invalid player colour.");
      }
      board.calculatePotentialNumberOfMoves=true;
  }
@@ -1763,17 +1767,17 @@ public static final int DEBUGRIGHT=2;
      {
          if (glowCounter<255)
          {
-            hal.setColor(g, new Color(glowCounter,0,0));
+            utils.setColor(g, new Color(glowCounter,0,0));
          }
          else
          {
-            hal.setColor(g, new Color(255,0,0));
+            utils.setColor(g, new Color(255,0,0));
          }
-         hal.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
+         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
          glowA=false;
      }
-     hal.setColor(g, Color.black);
-     hal.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
+     utils.setColor(g, Color.black);
+     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
 
      
      //if (robotmove)
@@ -1797,8 +1801,8 @@ public static final int DEBUGRIGHT=2;
      buttonhA=(fontblack.getHeight());
      if (showCollisions)
      {
-         hal.setColor(g, Color.red);
-         hal.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
+         utils.setColor(g, Color.red);
+         utils.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
      }
      /////
 
@@ -1818,7 +1822,7 @@ public static final int DEBUGRIGHT=2;
      printme=buttonBstr;//"Network Play";
      widthOfPrintMe=(fontblack.stringWidth(printme));
      xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     hal.setColor(g, Color.BLACK);
+     utils.setColor(g, Color.BLACK);
      ypos+=fontblack.getHeight()*2;
 
      /////
@@ -1827,18 +1831,18 @@ public static final int DEBUGRIGHT=2;
      {
          if (glowCounter<255)
          {
-            hal.setColor(g, new Color(0,0,glowCounter));
+            utils.setColor(g, new Color(0,0,glowCounter));
          }
          else
          {
-            hal.setColor(g, new Color(0,0,255));
+            utils.setColor(g, new Color(0,0,255));
          }
 
-         hal.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
+         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
          glowB=false;
      }
-     hal.setColor(g, Color.black);
-     hal.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
+     utils.setColor(g, Color.black);
+     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
      fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
      ////
 
@@ -1849,13 +1853,13 @@ public static final int DEBUGRIGHT=2;
      buttonhB=(fontblack.getHeight());
      if (showCollisions)
      {
-        hal.setColor(g, Color.red);
-        hal.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
+        utils.setColor(g, Color.red);
+        utils.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
      }
      /////
 
      //draw a little version of the logo in the bottom right
-     hal.drawImage(g, splashScreenLogoSmall, ULTIMATE_WIDTH-((splashScreenLogoSmall.getWidth(this_)/2)+20), ULTIMATE_HEIGHT-splashScreenLogoSmall.getHeight(this_), this_);
+     utils.drawImage(g, splashScreenLogoSmall, ULTIMATE_WIDTH-((splashScreenLogoSmall.getWidth(this_)/2)+20), ULTIMATE_HEIGHT-splashScreenLogoSmall.getHeight(this_), this_);
  }
 
  public static boolean robotmove=true;
@@ -1919,7 +1923,7 @@ public static final int DEBUGRIGHT=2;
      
      printme="Enter your name:";
      xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     hal.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
+     utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
      
      printme=NetworkChatClient.nick;
      widthOfPrintMe=(fontblack.stringWidth(printme));
@@ -1942,9 +1946,9 @@ public static final int DEBUGRIGHT=2;
  private void paint_NETWORKING_LOBBY(Graphics g)
  {
      TRANSPARENCY_LEVEL=255;
-   // hal.setColor(g,0);
-    hal.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-    hal.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
+   // utils.setColor(g,0);
+    utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+    utils.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
      int SMALLGAP=5;
 
 
@@ -1974,10 +1978,10 @@ public static final int DEBUGRIGHT=2;
 
      x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
      //info box top right (amount of users and ops)
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
      fontblack.drawString(g, ""+NetworkChatClient.userList.size()+" users", x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
      ////////////////////////////////////////////
      
@@ -1988,11 +1992,11 @@ public static final int DEBUGRIGHT=2;
      g.setClip(x-2, y+3, WIDTH_OF_MESSAGE_TEXT+5, HEIGHT_OF_MESSAGE_TEXT);
 
      //message text
-   //  hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+   //  utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
      
 
      int listY=y+SMALLGAP;
@@ -2029,9 +2033,9 @@ public static final int DEBUGRIGHT=2;
              if (flip)
              {
                  ydiff=y-ydiff;
-                 //hal.setColor(g,0xFFFFFF);
-                 hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-                 hal.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
+                 //utils.setColor(g,0xFFFFFF);
+                 utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+                 utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
                 y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
              }
@@ -2039,9 +2043,9 @@ public static final int DEBUGRIGHT=2;
              {
 
                  ydiff=y-ydiff;
-               //  hal.setColor(g,0xd5d5d5);
-                 hal.setColor(g, 100,100,100,TRANSPARENCY_LEVEL);
-                 hal.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
+               //  utils.setColor(g,0xd5d5d5);
+                 utils.setColor(g, 100,100,100,TRANSPARENCY_LEVEL);
+                 utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
                 y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
 
@@ -2050,8 +2054,8 @@ public static final int DEBUGRIGHT=2;
              
 
              /*ydiff=y-ydiff;
-             hal.setColor(g,0xff0000);
-             hal.fillRect(g, x+1, y+fontblack.getHeight(), WIDTH_OF_ENTERTEXT_BOX-1, ydiff);
+             utils.setColor(g,0xff0000);
+             utils.fillRect(g, x+1, y+fontblack.getHeight(), WIDTH_OF_ENTERTEXT_BOX-1, ydiff);
              y=yorig;
 
              y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);*/
@@ -2063,11 +2067,11 @@ g.setClip(s);
      x=SMALLGAP;
      y=SMALLGAP;
      // header for topic and live news/////////draw here so it covers over scrolled text from messages
-     //hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+     //utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
 
      fontblack.drawString(g, NetworkChatClient.topic, x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
 
@@ -2076,11 +2080,11 @@ g.setClip(s);
       y=2+SMALLGAP+fontblack.getHeight()*2;
       
      //user list
-     //hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+     //utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
 
      listY=y+SMALLGAP;
      e = NetworkChatClient.userList.elements();
@@ -2091,13 +2095,13 @@ g.setClip(s);
          int xval=0;
          if (user.equals("ChanServ"))
          {
-             hal.drawImage(g, op,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
+             utils.drawImage(g, op,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user,  xval, listY, 0); listY+=fontblack.getHeight();
          }
          else if (user.equals("Admin"))
          {
-             hal.drawImage(g, admin,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
+             utils.drawImage(g, admin,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user, xval , listY, 0); listY+=fontblack.getHeight();
          }
@@ -2116,38 +2120,38 @@ g.setClip(s);
      y+=HEIGHT_OF_USERLIST+SMALLGAP+2;
 
      //enter text box
-    // hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+    // utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
 
      if (chatText!=null)
      {
         //fontblack.drawString(g, chatText, x+5 , y+5, 0); listY+=fontblack.getHeight();
          drawMeWrapped(g,x,y,chatText,fontblack,"",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
 
-         //hal.fillRect(g,x,y-1,1,fontblack.getHeight());
+         //utils.fillRect(g,x,y-1,1,fontblack.getHeight());
      }
 
      ////2 buttons in bottom right
      x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
      //button 1
-     //hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+     //utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
      printme="Options";
      fontblack.drawString(g, printme, (x)+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
 
      y+=(HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP)/2;
      //button 2
-   //  hal.setColor(g, 0xFFFFFF);
-     hal.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     hal.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     hal.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     hal.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+   //  utils.setColor(g, 0xFFFFFF);
+     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
      printme="Leave";
      fontblack.drawString(g, printme, (x)+15+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
      /////////////////////////
@@ -2166,7 +2170,7 @@ g.setClip(s);
 
      printme="Enter your name:";
      xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     hal.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
+     utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
 
      printme=NetworkChatClient.nick;
      widthOfPrintMe=(fontblack.stringWidth(printme));
@@ -2176,10 +2180,10 @@ g.setClip(s);
 
      if (showChallengeWindow)
      {
-         hal.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        hal.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-        hal.setColor(g, Color.white);
-        hal.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+        utils.setColor(g, Color.white);
+        utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
 
         int xabout=WIDTH/2;
         int yabout=(HEIGHT/4)+TINY_GAP;
@@ -2195,7 +2199,7 @@ g.setClip(s);
  //paint helpers///////////////
  private void bg(Color col, Graphics g)
  {
-    hal.bg(g,col,WIDTH,HEIGHT);
+    utils.bg(g,col,WIDTH,HEIGHT);
  }
 
  // gets called each frame to repaint
@@ -2206,7 +2210,7 @@ g.setClip(s);
  // wrapper around system out to console
  private static void log(String s)
  {
-    HAL.log("CustomCanvas{}:" + s);
+    Utils.log("CustomCanvas{}:" + s);
  }
 GameNetworkClient client;
  public static final int LEFT_MOUSE_BUTTON=0;
@@ -2579,7 +2583,7 @@ public static boolean blackResigned;
      }
      else
      {
-         HAL._E("checkIfPieceContainerClickedOn knows not whom click upon it!");
+         Utils._E("checkIfPieceContainerClickedOn knows not whom click upon it!");
      }
 
     if (x>=myX && x<(myX+myWidth))
@@ -2774,7 +2778,7 @@ public static boolean blackResigned;
              //     return;
              // }
 
-             //if (board.copy_of_reachableFromDie2==null){HAL._E("board.copy_of_reachableFromDie2 was null");}
+             //if (board.copy_of_reachableFromDie2==null){Utils._E("board.copy_of_reachableFromDie2 was null");}
 
              //DIE2 MOVE
              if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie2!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie2.getSpikeNumber())
@@ -2832,7 +2836,7 @@ public static boolean blackResigned;
      log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:"+dieToSetUnused);// board.copy_of_reachableFromDie1:"+board.copy_of_reachableFromDie1+" board.copy_of_reachableFromDie1.pieces.size():"+board.copy_of_reachableFromDie1.pieces.size());
      if (pieceStuckToMouse==null)
      {
-         HAL._E("pieceStuckToMouse was null somehow");
+         Utils._E("pieceStuckToMouse was null somehow");
      }
         //remove piece from its current spike
          originalSpikeForPieceSelected.removePiece(pieceStuckToMouse);
@@ -2855,7 +2859,7 @@ public static boolean blackResigned;
                 blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                  log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
-            } else {HAL._E("whoseTurnIsIt is invalid here.");}
+            } else {Utils._E("whoseTurnIsIt is invalid here.");}
         }
         else
         {
@@ -2913,7 +2917,7 @@ public static boolean blackResigned;
                 blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                  log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
-            } else {HAL._E("whoseTurnIsIt is invalid here.");}
+            } else {Utils._E("whoseTurnIsIt is invalid here.");}
         }
         else
         {
@@ -2968,7 +2972,7 @@ public static boolean blackResigned;
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                      log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                      sfxPutPieceInContainer.playSound();
-                } else {HAL._E("whoseTurnIsIt is invalid here.");}
+                } else {Utils._E("whoseTurnIsIt is invalid here.");}
             }
             else
             {
@@ -3013,7 +3017,7 @@ public static boolean blackResigned;
      }
      else
      {
-         HAL._E("ERROR CANT TELL WHICH DICE TO SET AS UNUSED. dieToSetUnused:"+dieToSetUnused);
+         Utils._E("ERROR CANT TELL WHICH DICE TO SET AS UNUSED. dieToSetUnused:"+dieToSetUnused);
      }
      //and make sure nothing is stuck to mouse by finalising move like this
          unstickPieceFromMouse();
@@ -3074,7 +3078,7 @@ public static boolean blackResigned;
                 }
                  break;
              default:
-                 HAL._E("placePieceRemoveOldOneAndSetDieToUsed error in die number");
+                 Utils._E("placePieceRemoveOldOneAndSetDieToUsed error in die number");
                  break;
          }
 
@@ -3368,7 +3372,7 @@ public static boolean I_AM_SERVER;
     }
     if (!RELEASE_BUILD && e.getKeyChar()=='l' || e.getKeyChar()=='L')//DEBUG
     {
-        HAL.CANVAS_LOGGING=!HAL.CANVAS_LOGGING;
+        Utils.CANVAS_LOGGING=!Utils.CANVAS_LOGGING;
     }
 
     if (!RELEASE_BUILD && e.getKeyChar()=='d' || e.getKeyChar()=='D')//DEBUG
@@ -3493,7 +3497,7 @@ public static boolean I_AM_SERVER;
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=bumblebee; break;
-         default: HAL._E("theme is out of range!");
+         default: Utils._E("theme is out of range!");
      }
      firstThemeSet=false;
      //assigns each colour from the one specified
@@ -3514,7 +3518,7 @@ public static boolean I_AM_SERVER;
              case 10: Piece.BLACK_PIECE_INNER_COLOUR=themecolours[i]; break;
              case 11: Die.DIE_COLOUR                =themecolours[i]; break;
              case 12: Die.DOT_COLOUR                =themecolours[i]; break;
-             default: HAL._E("theme state error, should not exceed 12!");
+             default: Utils._E("theme state error, should not exceed 12!");
          }
      }
      //force recreation of colour objects
@@ -3559,21 +3563,21 @@ public static boolean I_AM_SERVER;
          int GAP=3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
          try
          {
-             hal.log("loading fonts:");
-             fontwhite = CustomFont.getFont( hal.loadImage(path+"whitefont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
+             utils.log("loading fonts:");
+             fontwhite = CustomFont.getFont( utils.loadImage(path+"whitefont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
              if (fontwhite==null)
              {
-                 HAL._E("-- fontwhite image is null");
+                 Utils._E("-- fontwhite image is null");
              }
-             fontblack = CustomFont.getFont( hal.loadImage(path+"blackfont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
+             fontblack = CustomFont.getFont( utils.loadImage(path+"blackfont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
              if (fontblack==null)
              {
-                 HAL._E("-- fontblack image is null");
+                 Utils._E("-- fontblack image is null");
              }
          }
          catch(Exception e)
          {
-             HAL._E("== error loading fonts "+e.getMessage());
+             Utils._E("== error loading fonts "+e.getMessage());
          }
       }
      else
@@ -3585,7 +3589,7 @@ public static boolean I_AM_SERVER;
  //for debugging, paints sytem.out to screen
  public void paintStringsToCanvas(Graphics g)
  {
-     Enumeration e = HAL.systemOuts.elements();
+     Enumeration e = Utils.systemOuts.elements();
      int x=3;
      int y=3;
      while (e.hasMoreElements())
@@ -3625,8 +3629,8 @@ static boolean showPlayerMessage=true;
  //paint the mssage to the players
  public void paintMessageToPlayers(Graphics g)
  {
-     //hal.setColor(g, Color.BLACK);
-     hal.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+     //utils.setColor(g, Color.BLACK);
+     utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
 
      
 
@@ -3638,9 +3642,9 @@ static boolean showPlayerMessage=true;
      messageHeight=fontwhite.getHeight();
      messagey=(HEIGHT/2)-messageHeight/2;
      
-          hal.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         hal.setColor(g, Color.WHITE);
-         hal.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+          utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+         utils.setColor(g, Color.WHITE);
+         utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
          //draw message in middle of screen
         fontwhite.drawString(g, message2Players, messagex+7, messagey+1, 0);
      }
@@ -3650,9 +3654,9 @@ static boolean showPlayerMessage=true;
      messagex=10;
      messagey=HEIGHT-(fontwhite.getHeight()+TINY_GAP);
      messageHeight=fontwhite.getHeight();
-          hal.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         hal.setColor(g, Color.WHITE);
-         hal.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+          utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+         utils.setColor(g, Color.WHITE);
+         utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
          //draw message in bottom left.
          fontwhite.drawString(g, message2Players, messagex+7, messagey+1, 0);
      }
@@ -3664,17 +3668,17 @@ static boolean showPlayerMessage=true;
  {
     
 
-     //hal.setColor(g, Color.BLACK);
-     hal.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+     //utils.setColor(g, Color.BLACK);
+     utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
      
      messageWidth=fontwhite.stringWidth(robotMoveDesc+"  ");
      messagex=WIDTH-(messageWidth+10);
      messagey=10;//(fontwhite.getHeight()+TINY_GAP);
      messageHeight=fontwhite.getHeight();
 
-     hal.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-     hal.setColor(g, Color.RED);
-     hal.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+     utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+     utils.setColor(g, Color.RED);
+     utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
      fontwhite.drawString(g, robotMoveDesc, messagex+7, messagey+1, 0);
  }
 

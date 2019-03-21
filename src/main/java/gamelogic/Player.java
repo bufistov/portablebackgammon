@@ -38,13 +38,13 @@ public class Player {
         else
         {
             
-            HAL._E("PRINT COLOUR NEITHER B OR W");
+            Utils._E("PRINT COLOUR NEITHER B OR W");
             return "ERROR NO COLOUR";
         }
     }
 
     private void _(String s)
     {
-        HAL.log("Player{}:" + s);
+        Utils.log("Player{}:" + s);
     }
 }

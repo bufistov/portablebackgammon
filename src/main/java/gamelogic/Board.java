@@ -24,7 +24,7 @@ public class Board
     public Vector spikes;
     Player whitePlayer, blackPlayer;
     public static Die die1, die2;
-    HAL hal = new HAL();
+    Utils utils = new Utils();
     // -- pre-calc'd and temp vals
     String printme="";
     public static int whoseTurnIsIt=Player.WHITE;//so when it says roll to see who goes
@@ -100,7 +100,7 @@ public class Board
     public void paint(Graphics g, int WIDTH, int HEIGHT)
     {
         methodNOW="";
-        hal.setColor(g,Color.BLACK);
+        utils.setColor(g,Color.BLACK);
 
         //Calc some stuff
         BORDER=WIDTH/64;
@@ -110,18 +110,18 @@ public class Board
 
         //draw the board:
         // outline:
-        hal.setColor(g, board_colour);
-        hal.fillRect(g,BORDER,BORDER,WIDTH-BORDER*2,HEIGHT-BORDER*2);
-        hal.setColor(g, Color.BLACK);
-        hal.drawRect(g,BORDER,BORDER,WIDTH-BORDER*2,HEIGHT-BORDER*2);
+        utils.setColor(g, board_colour);
+        utils.fillRect(g,BORDER,BORDER,WIDTH-BORDER*2,HEIGHT-BORDER*2);
+        utils.setColor(g, Color.BLACK);
+        utils.drawRect(g,BORDER,BORDER,WIDTH-BORDER*2,HEIGHT-BORDER*2);
         //draw piece containers
-        ////hal.drawRect(g,BORDER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
-        ////hal.drawRect(g,WIDTH-BORDER-PIECE_CONTAINER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
+        ////utils.drawRect(g,BORDER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
+        ////utils.drawRect(g,WIDTH-BORDER-PIECE_CONTAINER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
         //bar between 2 halves
-        hal.setColor(g,bar_colour);
-        hal.fillRect(g,(BORDER+WIDTH_MINUS_BORDERS/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
-        hal.setColor(g, Color.BLACK);
-        hal.drawRect(g,(BORDER+WIDTH_MINUS_BORDERS/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
+        utils.setColor(g,bar_colour);
+        utils.fillRect(g,(BORDER+WIDTH_MINUS_BORDERS/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
+        utils.setColor(g, Color.BLACK);
+        utils.drawRect(g,(BORDER+WIDTH_MINUS_BORDERS/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
 
         //spikes
         Enumeration e = spikes.elements();
@@ -596,7 +596,7 @@ thereAreOptions=false;
         }
         else
         {
-            //HAL._E("keepPotentialSpikesPulsing ... copy_of_reachableFromDie1 is null.");
+            //Utils._E("keepPotentialSpikesPulsing ... copy_of_reachableFromDie1 is null.");
         }
         //////
         if (copy_of_reachableFromDie2!=null)
@@ -606,7 +606,7 @@ thereAreOptions=false;
         }
         else
         {
-            /////HAL._E("copy_of_reachableFromDie2 is null.");
+            /////Utils._E("copy_of_reachableFromDie2 is null.");
         }
         /////
         if (copy_of_reachableFromBothDice!=null)
@@ -616,7 +616,7 @@ thereAreOptions=false;
         }
         else
         {
-            /////HAL._E("copy_of_reachableFromBothDice is null.");
+            /////Utils._E("copy_of_reachableFromBothDice is null.");
         }
         if (debugmessages)
         {
@@ -709,12 +709,12 @@ thereAreOptions=false;
         int piecesOnBoard=calculateAmountOfPiecesOnBoard(Player.WHITE);
         if ((piecesOnBoard + CustomCanvas.whitePiecesSafelyInContainer.size() + CustomCanvas.theBarWHITE.size())!=15)//
         {
-            HAL._E("PIECES NOT EQUAL TO 15 FOR WHITE its "+piecesOnBoard);
+            Utils._E("PIECES NOT EQUAL TO 15 FOR WHITE its "+piecesOnBoard);
         }
         piecesOnBoard=calculateAmountOfPiecesOnBoard(Player.BLACK);
         if ((piecesOnBoard + CustomCanvas.blackPiecesSafelyInContainer.size() + CustomCanvas.theBarBLACK.size())!=15)
         {
-            HAL._E("PIECES NOT EQUAL TO 15 FOR BLACK its "+piecesOnBoard);
+            Utils._E("PIECES NOT EQUAL TO 15 FOR BLACK its "+piecesOnBoard);
         }
         ////
     }
@@ -824,7 +824,7 @@ thereAreOptions=false;
                 //this is not an error since it might be a normal spike
                 /*else
                 {
-                    HAL._E("Error highlightPieceContainerAsOption is true but potentialSpikeIndex ("+potentialSpikeIndex+") is neither white or blacks piece container");
+                    Utils._E("Error highlightPieceContainerAsOption is true but potentialSpikeIndex ("+potentialSpikeIndex+") is neither white or blacks piece container");
                 }*/
 
             }
@@ -909,7 +909,7 @@ thereAreOptions=false;
                 }
                 /*else
                 {
-                    HAL._E("Error B highlightPieceContainerAsOption is true but potentialSpikeIndex is neither white or blacks piece container");
+                    Utils._E("Error B highlightPieceContainerAsOption is true but potentialSpikeIndex is neither white or blacks piece container");
                 }*/
 
             }
@@ -1001,7 +1001,7 @@ thereAreOptions=false;
                 }
                 /*else
                 {
-                    HAL._E("Error B highlightPieceContainerAsOption is true but potentialSpikeIndex is neither white or blacks piece container");
+                    Utils._E("Error B highlightPieceContainerAsOption is true but potentialSpikeIndex is neither white or blacks piece container");
                 }*/
 
             }
@@ -1089,7 +1089,7 @@ thereAreOptions=false;
            // _("piecesInHomeSide checking black");
         } else
         {
-            HAL._E("piecesInHomeSide received an invalid player to check.");
+            Utils._E("piecesInHomeSide received an invalid player to check.");
         }
 
         int numberOfPiecesOnBoard=0;
@@ -1174,7 +1174,7 @@ thereAreOptions=false;
         }
         else
         {
-            HAL._E("colour not defined in calculateAmountOfPiecesInHomeArea!");
+            Utils._E("colour not defined in calculateAmountOfPiecesInHomeArea!");
         }
 
         Enumeration e = spikes.elements();
@@ -1280,7 +1280,7 @@ thereAreOptions=false;
             }
             else
             {
-                HAL._E("whoseTurnIsIt is invalid");
+                Utils._E("whoseTurnIsIt is invalid");
             }
 
             //now check if we were to take one of those pieces, would we be able to place it?
@@ -1462,7 +1462,7 @@ thereAreOptions=false;
             }
             catch(Exception ex)
             {
-                HAL._E("Problem parsing the spikes name to an int.. "+ex);
+                Utils._E("Problem parsing the spikes name to an int.. "+ex);
             }
         }
         //_("Hovering over spike: "+hoveringOveri);
@@ -1494,7 +1494,7 @@ thereAreOptions=false;
             if (whoseTurnIsIt==Player.BLACK)
             {
                 enemyColour=Player.WHITE;
-            } else {HAL._E("whoseTurnIsIt invalid...");}
+            } else {Utils._E("whoseTurnIsIt invalid...");}
 
             if (piece.getColour()==enemyColour)
             {
@@ -1565,7 +1565,7 @@ thereAreOptions=false;
                 //randomly.
                 movePiecesToHome(Player.BLACK);
                 break;
-            default: HAL._E("Board.initialiseBoard received an invalid mode!");break;
+            default: Utils._E("Board.initialiseBoard received an invalid mode!");break;
         }
         
     }
@@ -1601,7 +1601,7 @@ thereAreOptions=false;
             log("movePiecesToHome  black");
         } else
         {
-            HAL._E("piecesInHomeSide received an invalid player to check.");
+            Utils._E("piecesInHomeSide received an invalid player to check.");
         }
 
         //Remove all pieces from spikes of player passed in:////
@@ -1623,7 +1623,7 @@ thereAreOptions=false;
         //add 15 pieces of correct colour to the home area, in random positions
         for (int i=0; i<15; i++)
         {
-            int random = HAL.getRand(homeAreaStartSpike, homeAreaEndSpike-1);
+            int random = Utils.getRand(homeAreaStartSpike, homeAreaEndSpike-1);
             Spike spike = (Spike) spikes.elementAt(random);
             spike.addPiece(new Piece(father));
         }
@@ -1643,17 +1643,17 @@ thereAreOptions=false;
             }
             catch(Exception e)
             {
-               HAL._E("grabbing a spike-problem doing spikes.elementAt("+i+"): "+e.getMessage());
+               Utils._E("grabbing a spike-problem doing spikes.elementAt("+i+"): "+e.getMessage());
             }
 
             int playeri=Player.BLACK;
             if (getWhitePlayer()==null)
             {
-               HAL._E("getWhitePlayer returned a null player");
+               Utils._E("getWhitePlayer returned a null player");
             }
             if (getBlackPlayer()==null)
             {
-                HAL._E("getBlackPlayer returned a null player");
+                Utils._E("getBlackPlayer returned a null player");
             }
             switch(i)
             {
@@ -1752,7 +1752,7 @@ thereAreOptions=false;
             case Player.BLACK:
                 return getBlackPlayer();
             default:
-                HAL._E("getPlayer did not receive a valid player colour "+col);
+                Utils._E("getPlayer did not receive a valid player colour "+col);
                 return null;
 
         }
@@ -1762,7 +1762,7 @@ thereAreOptions=false;
         
         if (whitePlayer==null)
         {
-            HAL._E("getWhitePlayer() is returning null.");
+            Utils._E("getWhitePlayer() is returning null.");
         }
         return whitePlayer;
     }
@@ -1771,7 +1771,7 @@ thereAreOptions=false;
     {
        
         if (blackPlayer == null) {
-            HAL._E("getBlackPlayer() is returning null.");
+            Utils._E("getBlackPlayer() is returning null.");
         }
         return blackPlayer;
     }
@@ -1786,7 +1786,7 @@ thereAreOptions=false;
 
     private static void log(String s)
     {
-        HAL.log("Board{}:" + s);
+        Utils.log("Board{}:" + s);
     }
 
     private String playerStr()
@@ -1798,7 +1798,7 @@ thereAreOptions=false;
             case Player.BLACK:
                 return "BLACK";
             default:
-                HAL._E("playerStr did not receive a valid  whoseTurnIsIt "+whoseTurnIsIt);
+                Utils._E("playerStr did not receive a valid  whoseTurnIsIt "+whoseTurnIsIt);
                 return null;
 
         }
@@ -1813,7 +1813,7 @@ thereAreOptions=false;
             case Player.BLACK:
                 return "BLACK";
             default:
-                HAL._E("playerStr did not receive a valid  i "+i);
+                Utils._E("playerStr did not receive a valid  i "+i);
                 return null;
 
         }
@@ -1828,7 +1828,7 @@ thereAreOptions=false;
             case Player.BLACK:
                 return "Black";
             default:
-                HAL._E("playerStr did not receive a valid  i "+i);
+                Utils._E("playerStr did not receive a valid  i "+i);
                 return null;
 
         }
@@ -2051,7 +2051,7 @@ public void calculatePotentialMoves(boolean FORCE)
                         }
                         ///FORCE LAST OOPTION SPtheMoveToMake=(SpikePair)spikePairs.elementAt(spikePairs.size()-1);
                         //PICK ONE AT RANDOM
-                        SPtheMoveToMake=(SpikePair)spikePairs.elementAt(HAL.getRand(0,spikePairs.size()-1));
+                        SPtheMoveToMake=(SpikePair)spikePairs.elementAt(Utils.getRand(0,spikePairs.size()-1));
 
 
 
@@ -2281,7 +2281,7 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
             }
             else
             {
-                HAL._E("whoseTurnIsIt is invalid");
+                Utils._E("whoseTurnIsIt is invalid");
             }
 
             if (diceRoll>0)
@@ -2293,7 +2293,7 @@ boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whos
                 // using that dice roll, when we find that spike we grab its first piece and use that dice roll
                 // to pick up the piece and move it to the spike
                 while(e.hasMoreElements())
-               // Spike spike = (Spike) spikes.elementAt(HAL.getRand(0,spikes.size()-1));
+               // Spike spike = (Spike) spikes.elementAt(Utils.getRand(0,spikes.size()-1));
                // if (spike!=null)
                 {
                     Spike spike = (Spike) e.nextElement();
@@ -2544,7 +2544,7 @@ private void theyWantToPlaceAPiece()
                 pieceContainerY=CustomCanvas.blackContainerY;
                 pieceContainerWidth=CustomCanvas.blackContainerWidth;
                 pieceContainerHeight=CustomCanvas.blackContainerHeight;
-            }else { HAL._E("errori n theywanttoplaceapiece, turn is invalid");}
+            }else { Utils._E("errori n theywanttoplaceapiece, turn is invalid");}
             ///_("Piece container DEST set");
             setBotDestination(pieceContainerX+pieceContainerWidth/2,pieceContainerY+pieceContainerHeight/2,"PIECE CONTAINER DESTINATION");
            // Bot.destX=pieceContainerX+pieceContainerWidth/2;
@@ -2574,7 +2574,7 @@ private void theyWantToPlaceAPiece()
     }
     else
     {
-        HAL._E("DROP ON ME IS NULL.");
+        Utils._E("DROP ON ME IS NULL.");
     }
     
 

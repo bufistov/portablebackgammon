@@ -48,7 +48,7 @@ public class CustomFont
 
         if (image==null)
         {
-            HAL._E("customfont image is null!");
+            Utils._E("customfont image is null!");
         }
         style = inStyle;
         size = inSize;
@@ -62,7 +62,7 @@ public class CustomFont
             width = image.getWidth(CustomCanvas.this_) / amountOfLetters_;
            // Gooey.PrintTHIS("Strip width is " + image.getWidth() + " so each of the letters is " + width + " wide and height is " + height);
             charWidth = width - widthBetweenPixelsCompensator;
-            HAL.log("charWidth:" + charWidth);
+            Utils.log("charWidth:" + charWidth);
             baseline = calculateBaseline();
         }
         catch(Throwable t)
