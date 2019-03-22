@@ -168,47 +168,39 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         doubleBuffering(2); // pass 2 in to start dbl buffering
     }
 
- /*
-  * The pointer is a wrapper over the real pointer, this is because at times we want the computer to control the mouse
-  */
- private void handleMouse() {
- }
- // implements double buffering, phase is 1 or 2, 1 is called before
- // painting and 2 is called after. Any other phase is erroneous
- private void doubleBuffering(int phase)
- {
-    if (phase==1)
-    {
-        //START DBL BUFFERING
-        this.createBufferStrategy(2); // must be after we are visible!
-        bufferStrategy = this.getBufferStrategy();
-        g = (Graphics2D)bufferStrategy.getDrawGraphics();
-        //g2=null;
-    } else
-    if (phase==2)
-    {
- 
-
-        //END DBL BUFFERING
-   // g.dispose();
-        bufferStrategy.show();
-    
-    } else
-    {
-        Utils._E("doubleBuffering() phase was invalid "+phase);
+    /*
+    * The pointer is a wrapper over the real pointer, this is because at times we want the computer to control the mouse
+    */
+    private void handleMouse() {
     }
- }
 
- // This will simply suggest anti aliasing and set up g2 as the graphics object to use
- private void doAntiAliasing() {
-      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
- }
+    // implements double buffering, phase is 1 or 2, 1 is called before
+    // painting and 2 is called after. Any other phase is erroneous
+    private void doubleBuffering(int phase)
+    {
+        if (phase==1)
+        {
+            //START DBL BUFFERING
+            this.createBufferStrategy(2); // must be after we are visible!
+            bufferStrategy = this.getBufferStrategy();
+            g = (Graphics2D)bufferStrategy.getDrawGraphics();
+        } else if (phase==2) {
+            bufferStrategy.show();
+
+        } else {
+            Utils._E("doubleBuffering() phase was invalid "+phase);
+        }
+    }
+
+    // This will simply suggest anti aliasing and set up g2 as the graphics object to use
+    private void doAntiAliasing() {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    }
 
     // Calls a different paint method based on the current state
     private void paintSwitch(Graphics g) {
         ///////the state machine////////
-        switch(state)
-        {
+        switch(state) {
             case SPLASH_SCREEN:///////////////////////////////////////
                 stateString="SPLASH_SCREEN";
                 paint_SPLASH_SCREEN(g);
@@ -249,76 +241,67 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         drawExtras(g); //draw extra hud stuff
     }
 
- //draws any of the extras: 
- //debug info, about box, messages to players etc
- private void drawExtras(Graphics g)
- {
-    if (PAINT_STATE) // purely for debugging, the state is painted in the corner
+    //draws any of the extras:
+    //debug info, about box, messages to players etc
+    private void drawExtras(Graphics g)
     {
-        paintState(g);
-    }
-    if (INFO) //draws the about box
-    {
-        paintAboutBox(g);
-    }
-    if (Utils.CANVAS_LOGGING) // again for debugging, paints sys outs on canvas
-    {
-        paintStringsToCanvas(g);
-    }
-    if(showPlayerMessage)//showMeFor++<SHOW_ME_LIMIT)  //paint messages to players
-    {
-       
-         //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
-          //could be a bit over the top for what im doign (todo optimise?)
-        playerMessageTimePassedLong=System.currentTimeMillis()-playerMessageSetTimeLong;
-         //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
-
-         /*if (playerMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
-         {
-             playerMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
-             playerMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
-         }*/
-        //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
-        if(playerMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
+        if (PAINT_STATE) // purely for debugging, the state is painted in the corner
         {
-            
-            paintMessageToPlayers(g);
+            paintState(g);
         }
-        else
+        if (INFO) //draws the about box
         {
-            if (state==GAME_IN_PROGRESS)
-                showPlayerMessage=false;
+            paintAboutBox(g);
         }
-
-        
-    }
-    if (Bot.dead==false)
-    {
-      if (paintRobotMessages)
-      {
-          //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
-          //could be a bit over the top for what im doign (todo optimise?)
-        robotMessageTimePassedLong=System.currentTimeMillis()-robotMessageSetTimeLong;
-        // _("robotMessageTimePassedLong:"+robotMessageTimePassedLong);
-
-         if (robotMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
-         {
-             robotMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
-             robotMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
-         }
-        if(/*showMeForROBOT++*/robotMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
+        if (Utils.CANVAS_LOGGING) // again for debugging, paints sys outs on canvas
         {
-            paintRobotMessage(g);
+            paintStringsToCanvas(g);
         }
-      }
-       
-        
+        if(showPlayerMessage)//showMeFor++<SHOW_ME_LIMIT)  //paint messages to players
+        {
+             //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
+              //could be a bit over the top for what im doign (todo optimise?)
+            playerMessageTimePassedLong=System.currentTimeMillis()-playerMessageSetTimeLong;
+             //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
+
+             /*if (playerMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
+             {
+                 playerMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
+                 playerMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
+             }*/
+            //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
+            if(playerMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
+            {
+                paintMessageToPlayers(g);
+            } else {
+                if (state==GAME_IN_PROGRESS)
+                    showPlayerMessage=false;
+            }
+        }
+        if (Bot.dead==false)
+        {
+            if (paintRobotMessages)
+            {
+                  //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
+                  //could be a bit over the top for what im doign (todo optimise?)
+                robotMessageTimePassedLong=System.currentTimeMillis()-robotMessageSetTimeLong;
+                // _("robotMessageTimePassedLong:"+robotMessageTimePassedLong);
+
+                 if (robotMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
+                 {
+                     robotMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
+                     robotMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
+                 }
+                if(/*showMeForROBOT++*/robotMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
+                {
+                    paintRobotMessage(g);
+                }
+            }
+        }
+        if (DEBUG_CONSOLE) {
+            paintDebugBox(g);
+        }
     }
-    if (DEBUG_CONSOLE)
-    {
-        paintDebugBox(g);
-    }
- }
     public static long FIFTY_SECONDS=50000L;
     public static long TEN_SECONDS=10000L;
     static long robotMessageTimePassedLong;
@@ -358,11 +341,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
  //paints the about box
- private void paintDebugBox(Graphics g)
- {
+ private void paintDebugBox(Graphics g) {
     infoCounter++;
-    if (infoCounter>SPLASH_COUNTER)
-    {
+    if (infoCounter>SPLASH_COUNTER) {
         infoCounter=0;
         INFO=false;
     }
@@ -375,9 +356,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     utils.drawRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
 
     x+=5;
-    
-    //int xabout=WIDTH/2;
-    //int yabout=(HEIGHT/4)+TINY_GAP;
     y+=TINY_GAP;
     //paint the about box
     printme="Backgammon ("+VERSION+") DEBUG CONSOLE";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
@@ -423,90 +401,76 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     printme="J = JUMP TO DESTINATION ("+Bot.JUMP_DIRECT_TO_DEST+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="F = FULL_AUTO_PLAY ("+Bot.FULL_AUTO_PLAY+")";fontwhite.drawString(g, printme,x,y,0);//y+=fontblack.getHeight();
 
-
     y+=5;
     printme=Board.ROBOT_DESTINATION_MESSAGE;
 
-    y=drawMeWrapped(g,x,y,printme,fontwhite,"",false,false,false,true,WIDTH/2,false);
+    y=drawMeWrapped(g,x,y,printme,fontwhite,false,false,true,WIDTH/2,false);
     if (robotMoveDesc.length()<20)//avoid printing textual things, just moves.
     {
         printme="Bot is thinking:"+robotMoveDesc;fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     }
-    if (Board.listBotsOptions && Board.botOptions.length()>4)//avoid printing textual things, just moves.
-    {
+    if (Board.listBotsOptions && Board.botOptions.length()>4) {//avoid printing textual things, just moves.
         printme="Alternatives:";fontwhite.drawString(g, printme,x,y,0);/////y+=fontblack.getHeight();
         //Graphics g,int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft)
         printme=Board.botOptions;
-        y=drawMeWrapped(g,x,y,printme,fontwhite,"",false,false,false,true,WIDTH/2,false);
-        //printme=Board.botOptions;fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-
+        y=drawMeWrapped(g,x,y,printme,fontwhite,false,false,true,WIDTH/2,false);
     }
     printme="BAR:W("+theBarWHITE.size()+"),B("+theBarBLACK.size()+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
     printme="DIE Used?:("+Board.die1HasBeenUsed+"),("+Board.die2HasBeenUsed+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
  }
 
- int debugMenuPos=0;
-public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
-public static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
-public static final int DEBUG_OPTION_paintRobotMessages=2;
-public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
-        public static final int LAST_DEBUG_OPTION=3;
+    int debugMenuPos=0;
+    public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
+    public static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
+    public static final int DEBUG_OPTION_paintRobotMessages=2;
+    public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
+    public static final int LAST_DEBUG_OPTION=3;
 
-public static final int DEBUGLEFT=1;
-public static final int DEBUGRIGHT=2;
+    public static final int DEBUGLEFT=1;
+    public static final int DEBUGRIGHT=2;
 
- private void debugOptionChanged(int direction)
- {
-     switch(debugMenuPos)
-     {
+ private void debugOptionChanged(int direction) {
+     switch(debugMenuPos) {
          //TIME_DELAY_BETWEEN_CLICKS
          case DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS:
-             if (direction==DEBUGLEFT)
-             {
+             if (direction==DEBUGLEFT) {
                  Bot.TIME_DELAY_BETWEEN_CLICKS-=10;
                  log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
              }
-             if (direction==DEBUGRIGHT)
-             {
+             if (direction==DEBUGRIGHT) {
                  Bot.TIME_DELAY_BETWEEN_CLICKS+=10;
                  log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
              }
              break;
          //DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS
          case DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS:
-             if (direction==DEBUGLEFT)
-             {
+             if (direction==DEBUGLEFT) {
                  Bot.ROBOT_DELAY_AFTER_CLICKS-=10;
                  log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
              }
-             if (direction==DEBUGRIGHT)
-             {
+             if (direction==DEBUGRIGHT) {
                  Bot.ROBOT_DELAY_AFTER_CLICKS+=10;
                  log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
              }
              break;
              //DEBUG_OPTION_paintRobotMessages
          case DEBUG_OPTION_paintRobotMessages:
-             if (direction==DEBUGLEFT)
-             {
+             if (direction==DEBUGLEFT) {
                  paintRobotMessages=!paintRobotMessages;
                  log("paintRobotMessages:"+paintRobotMessages);
              }
-             if (direction==DEBUGRIGHT)
-             {
+             if (direction==DEBUGRIGHT) {
                  paintRobotMessages=!paintRobotMessages;
                  log("paintRobotMessages:"+paintRobotMessages);
              }
              break;
              //TIME_DELAY_BETWEEN_CLICKS
          case DEBUG_OPTION_FULL_AUTO_PLAY:
-             if (direction==DEBUGLEFT)
-             {
+             if (direction==DEBUGLEFT) {
                  Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
                  log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
              }
-             if (direction==DEBUGRIGHT)
-             {
+             if (direction==DEBUGRIGHT) {
                  Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
                  log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
              }
@@ -517,39 +481,37 @@ public static final int DEBUGRIGHT=2;
      }
  }
 
- //paints the state - for debugging.
- private void paintState(Graphics g) {
-     fontblack.drawString(g,stateString,20,20,0);
- }
+    //paints the state - for debugging.
+    private void paintState(Graphics g) {
+        fontblack.drawString(g,stateString,20,20,0);
+    }
+    int infoCounter=0;
+    Image splashScreenLogo,splashScreenLogoSmall;
+    Image op,admin;
+    public static Image pointer;
+    public static int WIDTH;
+    public static int HEIGHT;
+    public static final boolean drawPointer=true;
 
- int infoCounter=0;
- Image splashScreenLogo,splashScreenLogoSmall;
- Image op,admin;
- public static Image pointer;
- public static int WIDTH;
- public static int HEIGHT;
- public static final boolean drawPointer=true;
+    public static int pointerX;
+    public static int pointerY;
 
- public static int pointerX;
- public static int pointerY;
-
- //loads all images needed
- private void loadImages() {
-     log("Attempting to loadImages()");
-     if (splashScreenLogo == null) {
-         splashScreenLogo      = utils.loadImage("/midokura-logo.png");
-         splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
-         pointer               = utils.loadImage("/pointer.png");
-         op                    = utils.loadImage("/op.png");
-         admin                 =  utils.loadImage("/admin.png");
-     }
-     else {
-         log("Images already pre-cached...");
-     }
- }
+    //loads all images needed
+    private void loadImages() {
+        log("Attempting to loadImages()");
+        if (splashScreenLogo == null) {
+            splashScreenLogo      = utils.loadImage("/midokura-logo.png");
+             splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
+             pointer               = utils.loadImage("/pointer.png");
+             op                    = utils.loadImage("/op.png");
+             admin                 =  utils.loadImage("/admin.png");
+        }
+        else {
+            log("Images already pre-cached...");
+        }
+    }
 
  ///////// ALL PAINT STATE METHODS //////////////////////
-
  int y;
  int x;
  int splashCounter;
@@ -560,22 +522,18 @@ public static final int DEBUGRIGHT=2;
      utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
      utils.setColor(g,Color.BLACK);
 
-     if (showCollisions)
-     {
+     if (showCollisions) {
          int ydebug=10;
          int xdebug=10;
          fontblack.drawString(g, DEBUG_HEADER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
          fontblack.drawString(g, VERSION,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
          fontblack.drawString(g, splashCounter+"/"+SPLASH_COUNTER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
      }
-     if (splashCounter++ > SPLASH_COUNTER)
-     {
+     if (splashCounter++ > SPLASH_COUNTER) {
         log("Splash done.");
         state=OPTIONS_SCREEN_LOCAL_OR_NETWORK;
         
      }
-
-     
  }
 
  //prefs button x,y width and height
@@ -588,8 +546,7 @@ public static final int DEBUGRIGHT=2;
  public static int TINY_GAP=5;//when we need a tiny gap
  private void paint_POST_SPLASH_SCREEN(Graphics g) {
       utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT); // paint entire background
-      if (board==null)
-      {
+      if (board==null) {
           board = new Board();
       }
       utils.setColor(g,Color.WHITE);
@@ -613,8 +570,7 @@ public static final int DEBUGRIGHT=2;
       utils.drawCircle(g, prefx, prefy, prefw, prefh);
       fontwhite.drawString(g, "i", prefx+4, prefy+2,0);
       //////////
-      if (showCollisions)
-      {
+      if (showCollisions) {
           utils.setColor(g, Color.RED);
           utils.drawRect(g, prefx, prefy, prefw, prefh);
       }
@@ -628,18 +584,12 @@ public static final int DEBUGRIGHT=2;
       int containerWidth=PANEL_WIDTH/3;
       int topOfPieceContainer=HEIGHT-((containerSubSize*15)+heightOf3LinesOfText);
 
-
-
-       if (Board.allBlackPiecesAreHome)
-       {
+       if (Board.allBlackPiecesAreHome) {
            utils.setColor(g, Color.GREEN);
-           if (Board.pulsateBlackContainer)
-           {
+           if (Board.pulsateBlackContainer) {
                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
            }
-       }
-       else
-       {
+       } else {
             utils.setColor(g, Color.WHITE);
        }
       //draw black players piece container
@@ -649,40 +599,31 @@ public static final int DEBUGRIGHT=2;
       heightOf3LinesOfText=(fontwhite.getHeight()*3)+Board.BORDER+TINY_GAP;
       topOfPieceContainer=heightOf3LinesOfText;
 
-      if (Board.allWhitePiecesAreHome)
-       {
+      if (Board.allWhitePiecesAreHome) {
            utils.setColor(g, Color.GREEN);
-           if (Board.pulsateWhiteContainer)
-           {
+           if (Board.pulsateWhiteContainer) {
                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
            }
-       }
-       else
-       {
+       } else {
             utils.setColor(g, Color.WHITE);
        }
       //draw white players piece container
       drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
               containerSubSize,heightOf3LinesOfText,Player.WHITE);
 
-
       int pieceOnBarY=(HEIGHT/2)-Piece.PIECE_DIAMETER;
       //Draw pieces on the bar//////////////
       Enumeration eW = theBarWHITE.elements();
-      while (eW.hasMoreElements())
-      {
+      while (eW.hasMoreElements()) {
           Piece p = (Piece)eW.nextElement();
           p.paint(g,(WIDTH/2)-Piece.PIECE_DIAMETER/2,pieceOnBarY-=Piece.PIECE_DIAMETER);
       }
       pieceOnBarY=(HEIGHT/2);
       Enumeration eB = theBarBLACK.elements();
-      while (eB.hasMoreElements())
-      {
+      while (eB.hasMoreElements()) {
           Piece p = (Piece)eB.nextElement();
           p.paint(g,(WIDTH/2)-Piece.PIECE_DIAMETER/2,pieceOnBarY+=Piece.PIECE_DIAMETER);
       }
-      ///////////////////////////////////
-
       drawHUDtext(xpos);
  }
  //for collisions.
@@ -714,8 +655,7 @@ public static final int DEBUGRIGHT=2;
          //and therefore the piece containers are 'live' and ready for action
         
          myY=myY+containerSubSize;
-         if (i<piecesOnContainer)
-         {
+         if (i<piecesOnContainer) {
              Color originalColor = utils.getColor();
              utils.setColor(g,Color.ORANGE);
              
@@ -730,8 +670,7 @@ public static final int DEBUGRIGHT=2;
          whiteContainerY=myY-(containerSubSize*14);
          whiteContainerWidth=containerWidth;
          whiteContainerHeight=containerSubSize*15;
-         if (showCollisions)
-         {
+         if (showCollisions) {
              utils.setColor(g,Color.RED);
              utils.drawRect(g, whiteContainerX, whiteContainerY,whiteContainerWidth,whiteContainerHeight );
          }
@@ -764,8 +703,7 @@ public static final int DEBUGRIGHT=2;
      int ypos=Board.BORDER+TINY_GAP;
      //draw black players score at top
      printme="White ("+board.getBlackPlayer().name+")";
-     if (board.whoseTurnIsIt==Player.WHITE)
-     {
+     if (board.whoseTurnIsIt==Player.WHITE) {
          printme+="*";
      }
      fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
@@ -775,8 +713,7 @@ public static final int DEBUGRIGHT=2;
      //draw white players score at bot
      ypos=HEIGHT-9-(Board.BORDER*2)-(fontwhite.getHeight()*2);
      printme="Brown ("+board.getWhitePlayer().name+")";
-     if (board.whoseTurnIsIt==Player.BLACK)
-     {
+     if (board.whoseTurnIsIt==Player.BLACK) {
          printme+="*";
      }
      fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
@@ -806,8 +743,7 @@ public static final int DEBUGRIGHT=2;
      doubleY=ypos;
      doubleWidth=widthOfPrintMe+20;
      doubleHeight=(fontwhite.getHeight()) ;
-     if (showCollisions)
-      {
+     if (showCollisions) {
           utils.setColor(g, Color.red);
           utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
       }
@@ -825,14 +761,11 @@ public static final int DEBUGRIGHT=2;
          utils.setColor(g, roll_button_colour);
          utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
 
-         if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.FULL_AUTO_PLAY  || numberOfFirstRollsDone==1 )
-         {
+         if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.FULL_AUTO_PLAY  || numberOfFirstRollsDone==1 ) {
              if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll)
              {
                  log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
-             }
-             else
-             {
+             } else {
                 Board.setBotDestination((xposTmp-10)+(widthOfPrintMe+20)/2,ypos+(fontwhite.getHeight())/2,"PRESS ROLL BUTTON");
              }
          }
@@ -1058,12 +991,10 @@ public static final int DEBUGRIGHT=2;
 
  //works out if the top button is pressed (in this state the 'local play' button)
  //and deals with it
- private void checkAndDealWithTopButtonPressed_localplay(int x,int y)
- {
+ private void checkAndDealWithTopButtonPressed_localplay(int x,int y) {
      if (x>=buttonxA && x<=buttonxA+buttonwA)
      {
-        if (y>=buttonyA && y<=buttonyA+buttonhA)
-        {
+        if (y>=buttonyA && y<=buttonyA+buttonhA) {
              log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
              typeOfPlay=LOCAL_PLAY;
              buttonPressed=true;
@@ -1078,10 +1009,8 @@ public static final int DEBUGRIGHT=2;
  //accordingly
  private void checkAndDealWithRollDiceButton(int x,int y)//MouseEvent e)
  {
-     if (x>=rollButtonX && x<=rollButtonX+rollButtonW)
-     {
-        if (y>=rollButtonY && y<=rollButtonY+rollButtonH)
-        {
+     if (x>=rollButtonX && x<=rollButtonX+rollButtonW) {
+        if (y>=rollButtonY && y<=rollButtonY+rollButtonH) {
             log("Roll Dice button clicked.");
             Board.die1HasBeenUsed=false;
             Board.die2HasBeenUsed=false;
@@ -1092,82 +1021,61 @@ public static final int DEBUGRIGHT=2;
             //we know its the very start of the game, each player
             //gets to roll one die - highest roll indicates who
             //takes the first go.
-            if (numberOfFirstRollsDone<=1)
-            {
+            if (numberOfFirstRollsDone<=1) {
                 log("OPENING ROLL (numberOfFirstRollsDone:"+numberOfFirstRollsDone+")");
                 //ie the one each you get to see how starts.
                 dealWithOpeningRolls();
                   //kick start the bot
-    
-
-            } else
+            } else {
             //////////////////////////////
             //ORDINARY ROLLS/////////////
-            {
                 log("ORDINARY ROLL");
                 dealWithOrdinaryRolls();
             }
-
             buttonPressed=true;//just to print out to us it was pressed.
         }
-        //////////////////p//////////////
      }
   }
-
  
  //deals with an ordinary roll, that is sets the 2 die values to new random ones
- private void dealWithOrdinaryRolls()
- {
+ private void dealWithOrdinaryRolls() {
      log("----------- dealWithOrdinaryRolls -----------");
-     if (Board.whoseTurnIsIt==Player.WHITE)
-     {
+     if (Board.whoseTurnIsIt==Player.WHITE) {
          log("white will roll both die now.");
          // note we pass in null in here which tells it to roll both die for us directly
          playerRolls(Player.WHITE, null,false);
          
-     } else
-     if (Board.whoseTurnIsIt==Player.BLACK)
-     {
+     } else if (Board.whoseTurnIsIt==Player.BLACK) {
          log("black will roll both die now.");
          // note we pass in null in here which tells it to roll both die for us directly
          playerRolls(Player.BLACK,null,false);
         
-     } else
-     {
+     } else {
          Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
      }
-
  }
 
  //deals with the implementation details of the opening rolls, that is each player
  //gets one roll to decide who goes first, then the winner takes both of these values
  //as their opening move.
- private void dealWithOpeningRolls()
- {
+ private void dealWithOpeningRolls() {
      log("----------- dealWithOpeningRolls -----------");
      numberOfFirstRollsDone++;
     log("first roll. "+numberOfFirstRollsDone);
 
     // WHITE rolls first to see who starts
-    if (numberOfFirstRollsDone==1)
-    {
+    if (numberOfFirstRollsDone==1) {
         playerRolls(Player.WHITE, board.die1,true);
     } else //THEN black rolls his try to see who goes first
-    if (numberOfFirstRollsDone==2)
-    {
+    if (numberOfFirstRollsDone==2) {
         playerRolls(Player.BLACK, board.die2,true);
 
         //check who was higher and therefore goes first
-        if (blacksFirstRollVal>whitesFirstRollVal)
-        {
+        if (blacksFirstRollVal>whitesFirstRollVal) {
             playerWonRollOff(Player.BLACK);
-        } else
-        if (whitesFirstRollVal>blacksFirstRollVal)
-        {
+        } else if (whitesFirstRollVal>blacksFirstRollVal) {
             playerWonRollOff(Player.WHITE);
-        } else
-        if (blacksFirstRollVal==whitesFirstRollVal)
-        {
+        } else if (blacksFirstRollVal==whitesFirstRollVal) {
             log("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
             tellPlayers("Both players rolled the same! Re-roll.");
             numberOfFirstRollsDone=0;
@@ -1182,50 +1090,37 @@ public static final int DEBUGRIGHT=2;
 
  //does some basic stuff regarding a player winning a roll off
  //and makes sure that board.whoseTurnIsIt is updated with the right value
- private void playerWonRollOff(int player)
- {
-     if (player==Player.BLACK)
-     {
+ private void playerWonRollOff(int player) {
+     if (player==Player.BLACK) {
         log("BLACK won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
         tellPlayers("Black won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
         board.whoseTurnIsIt=Player.BLACK;
         //theyve rolled now time to move their pieces
      } else
-     if (player==Player.WHITE)
-     {
+     if (player==Player.WHITE) {
         log("WHITE won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
         tellPlayers("White won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
         board.whoseTurnIsIt=Player.WHITE;
         //theyve rolled now time to move their pieces
-     }
-     else
-     {
+     } else {
          Utils._E("playerWonRollOff received an invalid player colour "+player);
      }
     if (CustomCanvas.numberOfFirstRollsDone>1)//ie if game started.
     {
      //hide roll button while they move their pieces.
      showRollButton=false;
-     
-   
-
      log("hiding show roll button");
     }
  }
 
  public static int D1lastDieRoll_toSendOverNetwork;
  public static int D2lastDieRoll_toSendOverNetwork;
-
- final String whiteStr="White";
- final String blackStr="Black";
- String tempStr;
  public static boolean someoneRolledADouble=false;
  public static int doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
                          //ie, we want them to have 4 rolls if thats the case and not 2
 
  //forces doubles on ordinary rolls, PURELY for checking the doubles implementation is bug free
  //this should never be true unless debugging.
- public static boolean DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS=false;
 
  // deals with a player rolling a dice, accepts an int representing either
  // BLACK or WHITE, die is the die which the player should roll.
@@ -1233,37 +1128,25 @@ public static final int DEBUGRIGHT=2;
  // note that:
  // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
  //accessing the dice objects directly, since we really want them to roll simulatenously so to speak
- private void playerRolls(int player, Die die,boolean openingRolls)
- {
-     if (player==Player.WHITE)
-     {
-         if (openingRolls)
-         {   // an opening roll.
+ private void playerRolls(int player, Die die,boolean openingRolls) {
+     if (player==Player.WHITE) {
+         if (openingRolls) {   // an opening roll.
              int val = die.roll();
-             
-             //if (doComms.updateDieRollRemotely)
+             System.out.println("updateDieRollRemotely");
+             if (I_AM_CLIENT)
              {
-                 System.out.println("updateDieRollRemotely");
-                 if (I_AM_CLIENT)
-                 {
-                     D1lastDieRoll_toSendOverNetwork=val;
-                     GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-                 }
-                 if (I_AM_SERVER)
-                 {
-                     val=Integer.parseInt(doComms.D1remoteDieRoll);
-                     die.setValue(val);
-                 }
+                 D1lastDieRoll_toSendOverNetwork=val;
+                 GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
              }
-             
-
+             if (I_AM_SERVER)
+             {
+                 val=Integer.parseInt(doComms.D1remoteDieRoll);
+                 die.setValue(val);
+             }
              log("White rolled:"+val);
              whitesFirstRollVal=val;
-
              tellPlayers("White's opening roll "+whitesFirstRollVal);
-         }
-         else
-         {
+         } else {
              //ordinary roll.
              int val  = board.die1.roll();
              D1lastDieRoll_toSendOverNetwork=val;
@@ -1271,17 +1154,10 @@ public static final int DEBUGRIGHT=2;
              int val2 = board.die2.roll();
              D2lastDieRoll_toSendOverNetwork=val2;
              GameNetworkClient.SENDCLICK_AND_DIEVALUE2=true;//tells it to send a click over network
-             /*if (DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS)
-             {
-                 board.die1.setValue(val2);//now die one has same val as die2
-                 val  = board.die1.getValue();
-                 Utils._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
-             }*/
              log("####################################White rolled:"+val+", "+val2);
              tellPlayers("White rolled:"+val+"-"+val2);
              
-             if (val==val2)
-             {
+             if (val==val2) {
                  log("White Double!");
                  tellPlayers("White rolled:"+val+"-"+val2+" (Double)");
                  someoneRolledADouble=true;
@@ -1290,20 +1166,15 @@ public static final int DEBUGRIGHT=2;
              }
              showRollButton=false;//dont show it now theyve just rolled.
          }
-     } else
-     if (player==Player.BLACK)
-     {
-         if (openingRolls)
-         {   //its an opening roll.
+     } else if (player==Player.BLACK) {
+         if (openingRolls) {   //its an opening roll.
              int val = die.roll();
             D1lastDieRoll_toSendOverNetwork=val;
              GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
              log("Black rolled:"+val);
              blacksFirstRollVal=val;
              tellPlayers("Black's opening roll "+blacksFirstRollVal);
-         }
-         else
-         {
+         } else {
              //ordinary roll.
              int val  = board.die1.roll();
              D1lastDieRoll_toSendOverNetwork=val;
@@ -1311,12 +1182,6 @@ public static final int DEBUGRIGHT=2;
              int val2 = board.die2.roll();
              D2lastDieRoll_toSendOverNetwork=val2;
              GameNetworkClient.SENDCLICK_AND_DIEVALUE2=true;//tells it to send a click over network
-             /*if (DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS)
-             {
-                 board.die1.setValue(val2);//now die one has same val as die2
-                 val  = board.die1.getValue();
-                 Utils._E("DEBUG warning, forcing doubles - you should not see this message in ordinary play");
-             }*/
              log("#####################################################Black rolled:"+val+", "+val2);
              tellPlayers("Black rolled:"+val+"-"+val2);
              
@@ -1328,13 +1193,9 @@ public static final int DEBUGRIGHT=2;
                  doubleRollCounter=0;
                  sfxDoubleRolled.playSound();
              }
-             
              showRollButton=false;//dont show it now theyve just rolled.
-             
          }
-     }
-     else
-     {
+     } else {
          Utils._E("playerRolls() received an invalid player colour.");
      }
      board.calculatePotentialNumberOfMoves=true;
@@ -1344,15 +1205,6 @@ public static final int DEBUGRIGHT=2;
  int whitesFirstRollVal=-1;//keep their initial roll to compare them 
  int blacksFirstRollVal=-1;
  public static boolean showRollButton=true;//false when not needed
-
- //things to clear to restart a game
- /*public void resetVarsGame()
- {
-     _("R-E-S-E-T--V-A-R-S!");
-    numberOfFirstRollsDone=0;
-    whitesFirstRollVal=-1;
-    blacksFirstRollVal=-1;
- }*/
 
  //clears the potential spikes used for highlighting possible moves,
  //once cleared they are recreated as needed.
@@ -1566,8 +1418,7 @@ public static final int DEBUGRIGHT=2;
     }
 
   public static String serverIP = null;
- private void paint_NETWORKING_ENTER_NAME(Graphics g)
- {
+  private void paint_NETWORKING_ENTER_NAME(Graphics g) {
      if (serverIP==null)
      {
          log("GRABBING SERVER IP");
@@ -1603,7 +1454,6 @@ public static final int DEBUGRIGHT=2;
 
  }
 
- int xScroll=0;
  boolean flip;
  int paraYoffset=0;
  int OUTLINE_FOR_CHAT_BOXES=0;
@@ -1615,8 +1465,6 @@ public static final int DEBUGRIGHT=2;
     utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
     utils.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
      int SMALLGAP=5;
-
-
 
      x=SMALLGAP;
      y=SMALLGAP+fontblack.getHeight()*2;
@@ -1630,13 +1478,6 @@ public static final int DEBUGRIGHT=2;
      int HEIGHT_OF_ENTERTEXT_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
 
      int HEIGHT_OF_TOPIC_AND_NEWS_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
-
-     
-     /*y+=fontblack.getHeight();
-     if (NetworkChatClient.news!=null)
-     {
-        fontblack.drawString(g, ""+NetworkChatClient.news, x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
-     }*/
      y=SMALLGAP;
      
      ///////////////////////////////////////////
@@ -1657,43 +1498,28 @@ public static final int DEBUGRIGHT=2;
      g.setClip(x-2, y+3, WIDTH_OF_MESSAGE_TEXT+5, HEIGHT_OF_MESSAGE_TEXT);
 
      //message text
-   //  utils.setColor(g, 0xFFFFFF);
      utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
      utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
      utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
      utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
-     
 
      int listY=y+SMALLGAP;
      int topofChatBox=listY;
 
      Enumeration e = null;
-     if (NetworkChatClient.messageText!=null)
-     {
+     if (NetworkChatClient.messageText!=null) {
          y=SMALLGAP+fontblack.getHeight()*2;
          y+=paraYoffset;//scrolls it
          e = NetworkChatClient.messageText.elements();
          flip=false;
-         while (e.hasMoreElements())
-         {
-             if (y>(ULTIMATE_HEIGHT-topofChatBox-HEIGHT_OF_ENTERTEXT_BOX)+fontblack.getHeight())
-             {
-                 //scroll
-                
-                //y=y-fontblack.getHeight();
+         while (e.hasMoreElements()) {
+             if (y>(ULTIMATE_HEIGHT-topofChatBox-HEIGHT_OF_ENTERTEXT_BOX)+fontblack.getHeight()) {
                  paraYoffset--;//smooth scrolling
-                 // System.out.println("scroll "+y);
              }
-           // y=y+paraYoffset;
              int ydiff=y;
              int yorig=y;
              String message = (String) e.nextElement();
-             //fontblack.drawString(g, message, x+SMALLGAP , listY, 0); listY+=fontblack.getHeight();
-
-             //System.out.println("print message: "+message);
-             y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
-
-            // y-=fontblack.getHeight();
+             y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
              flip=!flip;
              if (flip)
              {
@@ -1702,7 +1528,7 @@ public static final int DEBUGRIGHT=2;
                  utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
                  utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
-                y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
+                y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
              }
              else
              {
@@ -1712,22 +1538,12 @@ public static final int DEBUGRIGHT=2;
                  utils.setColor(g, 100,100,100,TRANSPARENCY_LEVEL);
                  utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
-                y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
+                y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
 
              }
-
-             
-
-             /*ydiff=y-ydiff;
-             utils.setColor(g,0xff0000);
-             utils.fillRect(g, x+1, y+fontblack.getHeight(), WIDTH_OF_ENTERTEXT_BOX-1, ydiff);
-             y=yorig;
-
-             y=drawMeWrapped(g,x,y,message,fontblack,"/",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);*/
-             //y-=fontblack.getHeight();
          }
      }
-g.setClip(s);
+    g.setClip(s);
 
      x=SMALLGAP;
      y=SMALLGAP;
@@ -1742,7 +1558,7 @@ g.setClip(s);
 
 
      x+=WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
-      y=2+SMALLGAP+fontblack.getHeight()*2;
+     y=2+SMALLGAP+fontblack.getHeight()*2;
       
      //user list
      //utils.setColor(g, 0xFFFFFF);
@@ -1779,8 +1595,6 @@ g.setClip(s);
          playerPositions.addElement(new PlayerPos(xval,listY-fontblack.getHeight(),fontblack.stringWidth(user),fontblack.getHeight(),user));
      }
 
-
-
      x=SMALLGAP;
      y+=HEIGHT_OF_USERLIST+SMALLGAP+2;
 
@@ -1794,9 +1608,7 @@ g.setClip(s);
      if (chatText!=null)
      {
         //fontblack.drawString(g, chatText, x+5 , y+5, 0); listY+=fontblack.getHeight();
-         drawMeWrapped(g,x,y,chatText,fontblack,"",false,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
-
-         //utils.fillRect(g,x,y-1,1,fontblack.getHeight());
+         drawMeWrapped(g,x,y,chatText,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
      }
 
      ////2 buttons in bottom right
@@ -1821,30 +1633,7 @@ g.setClip(s);
      fontblack.drawString(g, printme, (x)+15+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
      /////////////////////////
 
-
-     /*printme="Enter your name:";
-     int widthOfPrintMe=(fontblack.stringWidth(printme));
-     int xposTmp=0;
-     int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
-
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     ypos+=fontblack.getHeight()*2;
-
-
-     printme="Enter your name:";
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
-
-     printme=NetworkChatClient.nick;
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);*/
-
-
-     if (showChallengeWindow)
-     {
+     if (showChallengeWindow) {
          utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
         utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
         utils.setColor(g, Color.white);
@@ -1862,8 +1651,7 @@ g.setClip(s);
  }
 
  //paint helpers///////////////
- private void bg(Color col, Graphics g)
- {
+ private void bg(Color col, Graphics g) {
     utils.bg(g,col,WIDTH,HEIGHT);
  }
 
@@ -1873,8 +1661,7 @@ g.setClip(s);
  }
 
  // wrapper around system out to console
- private static void log(String s)
- {
+ private static void log(String s) {
     Utils.log("CustomCanvas{}:" + s);
  }
 GameNetworkClient client;
@@ -1926,12 +1713,9 @@ GameNetworkClient client;
      }
 
      //so our mouse doesnt influence anything
-    if (Bot.FULL_AUTO_PLAY || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) )
-    {
+    if (Bot.FULL_AUTO_PLAY || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
         //_("mouse wont respond");
-    }
-    else
-    {
+    } else {
          log("mouseClicked "+e.getX()+","+e.getY());
    //      GameNetworkClient.SENDCLICK=true;//tells it to send a click over network
          int buttonPressed=-1;
@@ -1945,20 +1729,13 @@ GameNetworkClient client;
          }
          mouseClickedX(e.getX(),e.getY(),buttonPressed);
     }
-
  }
-
-
 
  boolean showChallengeWindow;
  String personToChallenge;
 
- public void mouseClickedX(int x, int y, int buttonPressed)
- {
+ public void mouseClickedX(int x, int y, int buttonPressed) {
     splashCounter=SPLASH_COUNTER+1; //turn off splash if its on
-
-
-
     if (buttonPressed==LEFT_MOUSE_BUTTON)//e.getButton()==e.BUTTON1)
     {
         if (Board.gameComplete)
@@ -1983,8 +1760,7 @@ GameNetworkClient client;
         return; //do nothing else with right click
     }
 
-    switch(state)
-    {
+    switch(state) {
         case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
             //_("OPTIONS_SCREEN_LOCAL_OR_NETWORK");
              touchedButton(x,y);
@@ -2020,27 +1796,6 @@ GameNetworkClient client;
                 checkIfPieceContainerClickedOn(x,y);
                 checkIfDoubleClickedOn(x,y);
                 checkIfResignClickedOn(x,y);
-                if (Board.die2HasBeenUsed || Board.die1HasBeenUsed)
-                 {
-
-                    // board.calculatePotentialMoves(true);//EXPERIMENT, SEE WE ARE USING OLD DIE ROLL SINCE THIS HAPPENS FIRTS
-                 }
-
-
-                // Here we check if both dice have been used so we can move onto next players turn:
-                //UNLESS someone rolled a double
-              /*  if (someoneRolledADouble && doubleRollCounter<=3)
-                {
-                    _("Player is still enjoying his double round so dont move on. x doubleRollCounter:"+doubleRollCounter);
-                   board.calculatePotentialNumberOfMoves=true;//so they get calc'd at start of each go.
-                }
-                else //no double rolled (or double rolls just ended) so proceed normally
-                {
-                    someoneRolledADouble=false;//reset these here since we know its not a double.
-                    doubleRollCounter=0;
-
-                    
-                }*/
                ///// someoneRolledADouble=false;//reset these here since we know its not a double.
                ///////     doubleRollCounter=0;
 
@@ -2053,47 +1808,44 @@ GameNetworkClient client;
 
                     }
             }
-            
          return;
     }
  }
 
- private void RESET_ENTIRE_GAME_VARS()
- {
-     numberOfFirstRollsDone=0;
-     Board.whoseTurnIsIt=Player.WHITE;
-      someoneRolledADouble=false;
- doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
-  numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
-  whitesFirstRollVal=-1;//keep their initial roll to compare them
-  blacksFirstRollVal=-1;
-  showRollButton=true;//false when not needed
-  resetVarsTurn();
- theBarWHITE = new Vector(4);//the bar holds pieces that get killed
- theBarBLACK = new Vector(4);//the bar holds pieces that get killed
+    private void RESET_ENTIRE_GAME_VARS() {
+        Board.whoseTurnIsIt=Player.WHITE;
+        someoneRolledADouble=false;
+        doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
+        numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
+        whitesFirstRollVal=-1;//keep their initial roll to compare them
+        blacksFirstRollVal=-1;
+        showRollButton=true;//false when not needed
+        resetVarsTurn();
+        theBarWHITE = new Vector(4);//the bar holds pieces that get killed
+        theBarBLACK = new Vector(4);//the bar holds pieces that get killed
 
- //these store the pieces that have been sent to the container, when all are in that player wins.
- whitePiecesSafelyInContainer=new Vector(15);
- blackPiecesSafelyInContainer=new Vector(15);
+        //these store the pieces that have been sent to the container, when all are in that player wins.
+        whitePiecesSafelyInContainer=new Vector(15);
+        blackPiecesSafelyInContainer=new Vector(15);
 
-   originalSpikeForPieceSelected=null;
-barPieceStuckOnMouse=false;
- pieceOnMouse=false;//is true when a piece is stuck to mouse
-  pieceStuckToMouse=null;//this is simply a copy of whatever piece (if any) is stuck to mouse
-   //tells them essentials
- showMeFor=0;
+        originalSpikeForPieceSelected=null;
+        barPieceStuckOnMouse=false;
+        pieceOnMouse=false;//is true when a piece is stuck to mouse
+        pieceStuckToMouse=null;//this is simply a copy of whatever piece (if any) is stuck to mouse
+        //tells them essentials
+        showMeFor=0;
 
- message2Players=""+VERSION;
- board=null;
- Die.initialRollText="Roll to see who goes first (white roll)";
- Board.gameComplete=false;
+        message2Players=""+VERSION;
+        board=null;
+        Die.initialRollText="Roll to see who goes first (white roll)";
+        Board.gameComplete=false;
                 whiteResigned=false;
                 blackResigned=false;
 
                 //so it doesnt continuing playin on its own
-Board.HUMAN_VS_COMPUTER=false;
-Bot.dead=true;
- }
+        Board.HUMAN_VS_COMPUTER=false;
+        Bot.dead=true;
+    }
 
  public static void turnOver()
  {
@@ -2893,142 +2645,90 @@ public static boolean I_AM_SERVER;
     //Bot.currentMouseY=pointerY;
     }
  }
- public static boolean DEBUG_CONSOLE=false;
- boolean PAUSED;
- boolean freeze;
- NetworkChatClient chatClient;
- boolean ignoreRepaints=true;
- public static String chatText="";
- //Respond to keypresses.
- public void keyPressed(KeyEvent e)
- {
+
+    public static boolean DEBUG_CONSOLE=false;
+    boolean PAUSED;
+    NetworkChatClient chatClient;
+    boolean ignoreRepaints=true;
+    public static String chatText="";
+    public void keyPressed(KeyEvent e) {
     log("keyPressed");
 
     //TEXT ENTRY IN LOBBY
-    if (state==NETWORKING_LOBBY)
-    {
-        if ( e.getKeyCode()==KeyEvent.VK_ENTER )
-        {
+    if (state==NETWORKING_LOBBY) {
+        if ( e.getKeyCode()==KeyEvent.VK_ENTER) {
             chatClient.send();
             chatText="";
         }
         String letter = ""+e.getKeyChar();
         chatText+=letter;
-                return;
+        return;
     }
-    ////////////////////////
 
     //////////////NAME ENTRY////////
-    if (state==NETWORKING_ENTER_NAME)
-    {
-        if ( e.getKeyCode()==KeyEvent.VK_ENTER )
-        {
+    if (state==NETWORKING_ENTER_NAME) {
+        if ( e.getKeyCode()==KeyEvent.VK_ENTER ) {
             state=NETWORKING_LOBBY;
             chatClient=new NetworkChatClient(this);
-
         }
         if ( (e.getKeyCode()==KeyEvent.VK_DELETE || e.getKeyCode()==KeyEvent.VK_BACK_SPACE || e.getKeyCode()==KeyEvent.VK_SHIFT || e.getKeyCode()==KeyEvent.VK_CAPS_LOCK)
-                && NetworkChatClient.nick.length()>0)
-        {
+                && NetworkChatClient.nick.length()>0) {
             NetworkChatClient.nick=NetworkChatClient.nick.substring(0, NetworkChatClient.nick.length()-1);
-        }
-        else
-        {
+        } else {
             String letter = ""+e.getKeyChar();
-            if ( letter.equals(" ") || NetworkChatClient.nick.length()>10 )
-            {
-
-            }
-            else
-            {
+            if ( letter.equals(" ") || NetworkChatClient.nick.length()>10 ) {
+            } else {
                 NetworkChatClient.nick+=letter;
             }
         }
-        
         return;
     }
-    /////////////////////////////////
 
-
-
-
-    if (e.getKeyCode()==KeyEvent.VK_F1)
-    {
-
-        ignoreRepaints=!ignoreRepaints;
+    if (e.getKeyCode()==KeyEvent.VK_F1) {
+         ignoreRepaints=!ignoreRepaints;
          setIgnoreRepaint(ignoreRepaints);
          jFrame.setResizable(!ignoreRepaints);
          tellPlayers("F1 Pressed, ignoreRepaints is now "+ignoreRepaints);
          log("F1 Pressed, ignoreRepaints is now "+ignoreRepaints);
     }
 
-    if (e.getKeyChar()=='q' || e.getKeyChar()=='Q')//QUIT
-    {
+    if (e.getKeyChar()=='q' || e.getKeyChar()=='Q') {//QUIT
         System.exit(0);
     }
-
-
-    if (e.getKeyChar()=='f' || e.getKeyChar()=='F')//QUIT
-    {
-//setIgnoreRepaint(Bot.FULL_AUTO_PLAY);//this is the key to it not flickering on my desktop
+    if (e.getKeyChar()=='f' || e.getKeyChar()=='F') {//QUIT
         Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
         Board.HUMAN_VS_COMPUTER=!Board.HUMAN_VS_COMPUTER;
         Bot.dead=!Bot.FULL_AUTO_PLAY;
         log("Bot.dead:"+Bot.dead);
         paintRobotMessages=Bot.FULL_AUTO_PLAY;
         log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
-        if (Bot.FULL_AUTO_PLAY)
-        {
+        if (Bot.FULL_AUTO_PLAY) {
             tellRobot(true,"Bot turned on.");
-        }
-        else
-        {
+        } else {
             tellRobot(true,"Bot turned off.");
         }
     }
-    if (e.getKeyChar()=='p' || e.getKeyChar()=='P')//QUIT
-    {
+    if (e.getKeyChar()=='p' || e.getKeyChar()=='P') {//QUIT
         //PAUSE
         PAUSED=!PAUSED;
         Bot.dead=PAUSED;
         log("PAUSED:"+PAUSED);
-
-
     }
-
-
-
-    if (e.getKeyChar()=='s' || e.getKeyChar()=='S')//QUIT
-    {
+    if (e.getKeyChar()=='s' || e.getKeyChar()=='S') {//QUIT
         //PAUSE
         SOUND_ON=!SOUND_ON;
-
         log("SOUND_ON:"+SOUND_ON);
-
-
     }
-    if (DEBUG_CONSOLE && e.getKeyChar()=='x' || e.getKeyChar()=='X')//QUIT
-    {
-                
-        
+    if (DEBUG_CONSOLE && e.getKeyChar()=='x' || e.getKeyChar()=='X') {//QUIT
         sfxError.playSound();
        //// _("play windows test sound");
         ////sfxmouseClick.testSound();
-
-
     }
-    if (DEBUG_CONSOLE && e.getKeyChar()=='j' || e.getKeyChar()=='J')//QUIT
-    {
-
-
+    if (DEBUG_CONSOLE && e.getKeyChar()=='j' || e.getKeyChar()=='J') { // QUIT
         Bot.JUMP_DIRECT_TO_DEST=!Bot.JUMP_DIRECT_TO_DEST;
         log("Bot.JUMP_DIRECT_TO_DEST:"+Bot.JUMP_DIRECT_TO_DEST);
        //// _("play windows test sound");
-        ////sfxmouseClick.testSound();
-
-
     }
-
 
     if (!RELEASE_BUILD && e.getKeyChar()=='c' || e.getKeyChar()=='C')//DEBUG
     {
@@ -3040,40 +2740,14 @@ public static boolean I_AM_SERVER;
         Utils.CANVAS_LOGGING=!Utils.CANVAS_LOGGING;
     }
 
-    if (!RELEASE_BUILD && e.getKeyChar()=='d' || e.getKeyChar()=='D')//DEBUG
-    {
-        //showCollisions=!showCollisions;
-        
-        //
-
-        // make sure home pieces can appear in all right places, including edge spikes
-        //board.initialiseBoard(Board.DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME);
-        //board.initialiseBoard(Board.DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME);
-
-        //Bot.STOPCLICKING=!Bot.STOPCLICKING;
-        //_("STOPCLICKING:"+Bot.STOPCLICKING);
+    if (!RELEASE_BUILD && e.getKeyChar()=='d' || e.getKeyChar()=='D') {
         DEBUG_CONSOLE=!DEBUG_CONSOLE;
     }
-    if (e.getKeyChar()=='t' || e.getKeyChar()=='T')
-    {
+    if (e.getKeyChar()=='t' || e.getKeyChar()=='T') {
         theme++;
         setTheme(theme);
     }
-    /*if (e.getKeyChar()=='z' || e.getKeyChar()=='Z')
-    {
-        DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS=!DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS;
-        _("DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS is "+DEBUG_FORCE_DOUBLES_ON_ORDINARY_ROLLS);
-    }*/
-
-
-    /*if (e.getKeyChar()=='f' || e.getKeyChar()=='F')
-    {
-        freeze=!freeze;
-        _("freeze:"+freeze);
-    }*/
-
-    if (DEBUG_CONSOLE)
-    {
+    if (DEBUG_CONSOLE) {
         if(e.getKeyCode()==KeyEvent.VK_UP)
         {
            log("UP");
@@ -3100,52 +2774,42 @@ public static boolean I_AM_SERVER;
            log("RIGHT");
            debugOptionChanged(DEBUGRIGHT);
         }
+    }
+ }
 
-
-
+    public void keyReleased(KeyEvent e) {
     }
 
- }
+    public void keyTyped(KeyEvent e) {
+    }
 
- public void keyReleased(KeyEvent e)
- {
-        
- }
-
- public void keyTyped(KeyEvent e)
- {
-        
- }
-
- //////////////////THEMES CODE/////////////////
- public static final int DEFAULT   = 0;
- public static final int METALIC   = 1;
- public static final int CLASSIC   = 2;
- public static final int FUNNYMAN  = 3;
- public static final int BUMBLEBEE = 4;
- public static final int MAX_THEMES=4;//this should always equals the last one
- int theme=DEFAULT;
- String themeName;
- boolean firstThemeSet=true;//so we dont tell players when the theme is set upon loading but we do othertimes
- //sets all colours in one go
- public void setTheme(int theme_)
- {
-     
-
+    //////////////////THEMES CODE/////////////////
+    public static final int DEFAULT   = 0;
+    public static final int METALIC   = 1;
+    public static final int CLASSIC   = 2;
+    public static final int FUNNYMAN  = 3;
+    public static final int BUMBLEBEE = 4;
+    public static final int MAX_THEMES = 4; // this should always equals the last one
+    int theme=DEFAULT;
+    String themeName;
+    boolean firstThemeSet=true;//so we dont tell players when the theme is set upon loading but we do othertimes
+    //sets all colours in one go
+    public void setTheme(int theme_) {
      theme=theme_;
      log("theme:"+theme);
-     if (theme>MAX_THEMES)
-     {
+     if (theme>MAX_THEMES) {
          theme=DEFAULT;
      }
 
-     switch(theme)
-     {
-         case DEFAULT:  log("THEME SET TO DEFAULT");themeName="default";
+     switch(theme) {
+         case DEFAULT:  log("THEME SET TO DEFAULT");
+                        themeName="default";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
-                        themecolours=defaultms;   break;
-         case METALIC:  log("THEME SET TO METALIC");themeName="metalic";
+                        themecolours=defaultms;
+                        break;
+         case METALIC:  log("THEME SET TO METALIC");
+                        themeName="metalic";
                         if (!firstThemeSet)
                             tellPlayers("Theme set to "+themeName);
                         themecolours=metalic;     break;
@@ -3166,10 +2830,8 @@ public static boolean I_AM_SERVER;
      }
      firstThemeSet=false;
      //assigns each colour from the one specified
-     for (int i=0; i<themecolours.length; i++)
-     {
-         switch(i)
-         {
+     for (int i=0; i<themecolours.length; i++) {
+         switch(i) {
              case 0: BACKGROUND_COLOUR              =themecolours[i]; break;
              case 1: PANEL_COLOUR                   =themecolours[i]; break;
              case 2: ROLL_BUTTON_COLOUR             =themecolours[i]; break;
@@ -3198,18 +2860,14 @@ public static boolean I_AM_SERVER;
  }
 
  // make colour objects
- public static void makeColourObjects(boolean forceRecreation)
- {
-     if (panel_colour==null || forceRecreation)
-     {
+ public static void makeColourObjects(boolean forceRecreation) {
+     if (panel_colour==null || forceRecreation) {
          panel_colour=new Color(PANEL_COLOUR);
      }
-     if (background_colour==null || forceRecreation)
-     {
+     if (background_colour==null || forceRecreation) {
          background_colour=new Color(BACKGROUND_COLOUR);
      }
-     if (roll_button_colour==null || forceRecreation)
-     {
+     if (roll_button_colour==null || forceRecreation) {
          roll_button_colour= new Color(ROLL_BUTTON_COLOUR);
      }
  }
@@ -3217,73 +2875,58 @@ public static boolean I_AM_SERVER;
  public static ImageObserver this_;
  public static CustomFont fontwhite, fontblack;
  // prepare the customfont
- private void loadCustomFonts()
- {
-     if (fontwhite==null)
-     {
+ private void loadCustomFonts() {
+     if (fontwhite==null) {
          boolean land=false;
          int gap=10;
          String path="/";
          int makeLettersCloserValue=3; // some confusion here, gap is not used, adjust this value to make letters closer or further apart.
          int GAP=3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
-         try
-         {
+         try {
              utils.log("loading fonts:");
              fontwhite = CustomFont.getFont( utils.loadImage(path+"whitefont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
-             if (fontwhite==null)
-             {
+             if (fontwhite==null) {
                  Utils._E("-- fontwhite image is null");
              }
              fontblack = CustomFont.getFont( utils.loadImage(path+"blackfont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
-             if (fontblack==null)
-             {
+             if (fontblack==null) {
                  Utils._E("-- fontblack image is null");
              }
          }
-         catch(Exception e)
-         {
+         catch(Exception e) {
              Utils._E("== error loading fonts "+e.getMessage());
          }
-      }
-     else
-     {
+      } else {
          log("Fonts already pre-cached...");
      }
  }
 
- //for debugging, paints sytem.out to screen
- public void paintStringsToCanvas(Graphics g)
- {
-     Enumeration e = Utils.systemOuts.elements();
-     int x=3;
-     int y=3;
-     while (e.hasMoreElements())
-     {
-         String printthis = (String)e.nextElement();
-         fontwhite.drawString(g, printthis, x, y, 0);y+=fontwhite.getHeight();
-     }
- }
-static boolean showPlayerMessage=true;
- static long playerMessageSetTimeLong=System.currentTimeMillis();//thjis keeps the version on screen for a few secs at the start
+    //for debugging, paints sytem.out to screen
+    public void paintStringsToCanvas(Graphics g) {
+        Enumeration e = Utils.systemOuts.elements();
+        int x=3;
+        int y=3;
+        while (e.hasMoreElements()) {
+             String printthis = (String)e.nextElement();
+             fontwhite.drawString(g, printthis, x, y, 0);y+=fontwhite.getHeight();
+        }
+    }
+    static boolean showPlayerMessage=true;
+    static long playerMessageSetTimeLong=System.currentTimeMillis();//thjis keeps the version on screen for a few secs at the start
  //sets the vars to allow a message to be shown to the player in bottom right for
  //a while
- public static void tellPlayers(String s)
- {
-    // _("tellPlayers:"+s);
-     showPlayerMessage=true;
-     playerMessageSetTimeLong=System.currentTimeMillis();
-     showMeFor=0;
-     message2Players=s;
- }
- static int showMeForROBOT;
- public static void robotExplain(String s)
- {
-     /////////s+=":"+Board.methodNOW;
-     //_("robotExplain:"+s);
-     showMeForROBOT=0;
-     robotMessageSetTimeLong=System.currentTimeMillis();
-     robotMoveDesc=s;
- }
+    public static void tellPlayers(String s) {
+        showPlayerMessage=true;
+        playerMessageSetTimeLong=System.currentTimeMillis();
+        showMeFor=0;
+        message2Players=s;
+    }
+    static int showMeForROBOT;
+    public static void robotExplain(String s) {
+         showMeForROBOT=0;
+         robotMessageSetTimeLong=System.currentTimeMillis();
+         robotMoveDesc=s;
+    }
  //tells them essentials
  static int showMeFor=0;
  public static final long SHOW_ME_LIMIT=3000;//how long  show player message 1.5 sec
@@ -3291,17 +2934,11 @@ static boolean showPlayerMessage=true;
 
  int messageWidth, messageHeight;
  int messagex,messagey;
- //paint the mssage to the players
- public void paintMessageToPlayers(Graphics g)
- {
+ //paint the message to the players
+ public void paintMessageToPlayers(Graphics g) {
      //utils.setColor(g, Color.BLACK);
      utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-
-     
-
-
-     if (Board.gameComplete)
-     {
+     if (Board.gameComplete) {
          messageWidth=fontwhite.stringWidth(message2Players+"  ");
      messagex=(WIDTH/2)-messageWidth/2;
      messageHeight=fontwhite.getHeight();
@@ -3312,14 +2949,12 @@ static boolean showPlayerMessage=true;
          utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
          //draw message in middle of screen
         fontwhite.drawString(g, message2Players, messagex+7, messagey+1, 0);
-     }
-     else
-     {
+     } else {
          messageWidth=fontwhite.stringWidth(message2Players+"  ");
-     messagex=10;
-     messagey=HEIGHT-(fontwhite.getHeight()+TINY_GAP);
-     messageHeight=fontwhite.getHeight();
-          utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
+         messagex=10;
+        messagey=HEIGHT-(fontwhite.getHeight()+TINY_GAP);
+         messageHeight=fontwhite.getHeight();
+         utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
          utils.setColor(g, Color.WHITE);
          utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
          //draw message in bottom left.
@@ -3329,13 +2964,8 @@ static boolean showPlayerMessage=true;
 
  public static boolean paintRobotMessages;
  //paint the robot message
- public void paintRobotMessage(Graphics g)
- {
-    
-
-     //utils.setColor(g, Color.BLACK);
+ public void paintRobotMessage(Graphics g) {
      utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-     
      messageWidth=fontwhite.stringWidth(robotMoveDesc+"  ");
      messagex=WIDTH-(messageWidth+10);
      messagey=10;//(fontwhite.getHeight()+TINY_GAP);
@@ -3432,20 +3062,13 @@ public static int bumblebee[] = {
                 /*Die.DOT_COLOUR*/                  0xe4ff00
                 };
 
- /////////////////////////////////////////////////////////////////////
-
-
-///ROBOT STUFF
-
-public static void tellRobot(boolean b,String s)
-{
-        if (s!=null)
-        {
+    ///ROBOT STUFF
+    public static void tellRobot(boolean b,String s) {
+        if (s != null) {
             robotExplain(s);
         }
-
-    robotmove=b;
-}
+        robotmove = b;
+    }
 
     Vector textLinesForWrappingTMP;
     boolean allowScrollingDOWN;
@@ -3453,166 +3076,59 @@ public static void tellRobot(boolean b,String s)
     public static  int WRAP_WIDTH_HACK_VAL=0; //15  //ensures that text doesnt go off edge
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
-    public int drawMeWrapped(Graphics g,int x, int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft, int width,boolean justifyRight)
-    {
-        if (wrapMe==null)
-        {
+    public int drawMeWrapped(Graphics g,int x, int y, String wrapMe, CustomFont font, boolean backdrop,
+                             boolean outline, boolean justifyleft, int width, boolean justifyRight) {
+        if (wrapMe==null) {
             /*REMOVED4RELEASE*/
             log("drawMeWrapped received a null string");
         }
-       // /*REMOVED4RELEASE*/_("drawMeWrapped :: "+wrapMe+" newLineChar:"+newLineChar);
-        // TEXTS GET WRAPPED HERE.
+        //////these texts need to be wrapped as they could be long
+        textLinesForWrappingTMP=new Vector();                  //hack
+        textLinesForWrappingTMP = separateTextNEW(wrapMe,/*getWidth()*/width-WRAP_WIDTH_HACK_VAL,getHeight(),font);
 
-
-
-			//////these texts need to be wrapped as they could be long
-			textLinesForWrappingTMP=new Vector();                  //hack
-			textLinesForWrappingTMP = separateTextNEW(wrapMe,/*getWidth()*/width-WRAP_WIDTH_HACK_VAL,getHeight(),newLineChar,font);
-
-        int stringHeight = y;//+paraYoffset;
-        int yValueForOutline=y;//+paraYoffset;
-
-        ///*REMOVED4RELEASE*/_("paraYoffset:"+paraYoffset);
-        int linesDrawn=0;
-
+        int stringHeight = y;
         int Xtmp=x;
-        if (backdrop)//draw box behind text
-        {
-           // g.setColor(Constants.VODAFONE_RED);
-           // g.fillRect(width/2,yValueForOutline-3,width,(font.getHeight()*(textLinesForWrappingTMP.size()+1))-7);
-           // g.setColor(Constants.WHITE_COLOUR);
-           // g.drawRect(width/2,yValueForOutline-3,width,(font.getHeight()*(textLinesForWrappingTMP.size()+1))-7);
-        }
-
-       // allowScrollingUP=true;
-
-
-
-
         for (int i = 0; i < textLinesForWrappingTMP.size(); i++) {
-            if (stringHeight >= 0)//(header.getHeight()*2)-5 &&*/ stringHeight < HEIGHT) // -30 here since we have top and bottom border, and want the very last line to show (was clipped)
-            {
-                //check if user is allowed to scroll up.
-                /*if (stringHeight>header.getHeight()*2)//i==0)
-                {
-                    // we are displaying the first line of the text, this indicates that we dont need to let user scroll up
-                    allowScrollingUP=false;
-                }*/
-
+            if (stringHeight >= 0) {
                 printme=(String)textLinesForWrappingTMP.elementAt(i);
-                if (justifyleft)
-                {
-                    Xtmp=x;//0;//(WIDTH/2)-(font.stringWidth(printme)/2);
-                }
-                else if (justifyRight)
-                {
-                   // printme=printme.trim();
-                    //Xtmp=getWidth()-(Specifics.x_start_point_for_special_background+4+font.stringWidth(printme));//getWidth()-(x+font.stringWidth(printme))+x_start_point_for_special_background;//(x+width)-(x_start_point_for_special_background+(font.stringWidth(printme)));
-                }
-                else
-                {
+                if (justifyleft) {
+                    Xtmp=x;
+                } else if (justifyRight) {
+                } else {
                     Xtmp=(WIDTH/2)-(font.stringWidth(printme)/2);
                 }
-
-              //  if (printme.indexOf(Constants.NEW_LINE)!=-1)
-              //  {
-              //      /*REMOVED4RELEASE*/_("new line detected");
-              //  }
                 //this is a bit of a hack but a legacy form the custom font days
                  //check if the end of the text is reached and control users ability to scroll with bools.
                 //so we dont let them keep scrolling
-                if (printme.indexOf(SPECIAL_END_SYMBOL)!=-1)
-                {
+                if (printme.indexOf(SPECIAL_END_SYMBOL)!=-1) {
                     allowScrollingDOWN=false;
                     /*REMOVED4RELEASE*/
                     log("DONT ALLOW ASCROLL SINCE SPECIAL END SYMBOL DETECTED allowScrollingDOWN:"+allowScrollingDOWN);
                     //ok now remove the special end sybol so it doesnt print
                     printme=printme.substring(0,printme.indexOf(SPECIAL_END_SYMBOL));
-                }
-                else
-                {
+                } else {
                     allowScrollingDOWN=true;
                 }
-                if (backdrop)
-                {
-                    //g.setColor(Constants.WHITE_COLOUR);
-                }
-                else
-                {
-                    //g.setColor(WHITE_COLOUR);
-                }
                 fontblack.drawString( g,printme,Xtmp,stringHeight,0);
-
-
-
-             //   System.out.println(linesDrawn+"/ stringHeight:"+stringHeight+" print line -->"+printme);
-
-                linesDrawn++; // debug, to check we arent drawing lines off screen
-
-
             }
             stringHeight+=(font.getHeight());//-5);
         }
-
-         if (textLinesForWrappingTMP.size()>0)
-         {
-             ///*REMOVED4RELEASE*/_("charsOnScreenY:"+charsOnScreenY);
-            //incrementSizeForScrollBarIndicator=SCROLLBAR_HEIGHT/( textLinesForWrappingTMP.size()-charsOnScreenY );//
-         }
-        if (outline)// draw black outline
-        {
-            //lastColour=g.getColor(); // preserve the current colour set in graphics
-            //g.setColor(Constants.BLACK_COLOUR);
-            //g.drawRect(-1,yValueForOutline-4,WIDTH+1,(font.getHeight()*textLinesForWrappingTMP.size())+2);
-            //g.setColor(lastColour);
-        }
-
         y=stringHeight;
-
-        //draw scrollbar (
-        //this is now done outside this methdo since we want it to paint over the header/footers
-//        /*if (scrollbar)
-//        {
-//            //draw static bit
-//            g.setColor(255,255,255);
-//            g.fillRect(WIDTH-4,0,3,HEIGHT);
-//            g.setColor(255,0,0);
-//
-//            int yPosTmp = - (incrementSizeForScrollBarIndicator * scrollBarPos);
-//            g.fillRect(WIDTH-4,yPosTmp,3,incrementSizeForScrollBarIndicator);
-//            ///*REMOVED4RELEASE*/_("yPosTmp:"+yPosTmp+" scrollBarPos:"+scrollBarPos+" incrementSizeForScrollBarIndicator:"+incrementSizeForScrollBarIndicator);
-//
-//
-//        }*/
-
         return y;
     }
 
-  public static Vector separateTextNEW(String string, int width, int height, String newLineChar, CustomFont font)
-    {
-       // _("separateTextNEW:"+string);
-
-	//int linesThatCanFitOnScreen = (height/font.getHeight())+1;
-
+  public static Vector separateTextNEW(String string, int width, int height, CustomFont font) {
         Vector lines = new Vector();
         String theText=string;
         String aline="";
-        int startpoint=0;
 
         StringTokenizer st = new StringTokenizer(theText," ");
-        String s=null;
+        String s;
 		boolean fitsVertically=true;
 		int verticalSpaceUsed=0;
-        while (st.hasMoreElements() && fitsVertically)
-        {
-			if (verticalSpaceUsed>height)
-			{
-				//fitsVertically=false;
-				//System.out.println("verticalSpaceUsed:"+verticalSpaceUsed);
-			}
+        while (st.hasMoreElements() && fitsVertically) {
              s = st.nextToken();//if its not null s failed to get used last time
              s=s.trim();
-            // T._(".word:"+s);
              if (s.equals("[p]") || s.equals("[br]") || s.equals("[br2]") || s.equals("[br][br]"))//<p>"))
              {
                  // [p] [br] [br][br] ALL WORK LIKE HTMLS <P>
@@ -3627,23 +3143,17 @@ public static void tellRobot(boolean b,String s)
                  }
                  aline="";
                  s=null;
-             }
-             else
-             {
+             } else {
                      //_("word:"+s);
-                    if (font.stringWidth(aline+" "+s)<width)
-                    {
+                    if (font.stringWidth(aline+" "+s)<width) {
                         aline+=s+" ";
                         s=null;
-                    }
-                    else
-                    {
+                    } else {
                         //_("aNEW LINE:"+aline);
                         lines.addElement(aline);
 						verticalSpaceUsed+=font.getHeight()+2;
                         aline="";
                     }
-                    //if (s!=null)
                     {
                         if (!st.hasMoreElements() )
                         {
@@ -3660,13 +3170,9 @@ public static void tellRobot(boolean b,String s)
 								verticalSpaceUsed+=font.getHeight()+2;
                                  //_("cNEW LINE:"+aline);
                             }
-                        }
-                        else
-                        {
-                            if (s!=null)
-                            {
-                                if (s.equals("[p]")|| s.equals("[br]") ||  s.equals("[br2]") || s.equals("[br][br]"))
-                                {
+                        } else {
+                            if (s!=null) {
+                                if (s.equals("[p]")|| s.equals("[br]") ||  s.equals("[br2]") || s.equals("[br][br]")) {
                                     lines.addElement(aline);
 									verticalSpaceUsed+=font.getHeight();
                                     if (!s.equals("[br2]"))//dont add a empty line if its a br2
@@ -3675,21 +3181,13 @@ public static void tellRobot(boolean b,String s)
 										verticalSpaceUsed+=font.getHeight()+2;
                                      }
                                      aline="";
-
-                                     s=null;
-
-                                    // _(">>> new line");
-                                }
-                                else
-                                {
+                                } else {
                                     aline+=""+s+" ";
                                 }
                             }
                         }
                     }
              }
-
-
         }
         return lines;
     }
