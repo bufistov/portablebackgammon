@@ -385,13 +385,13 @@ public class Spike
             spikeName.equals("24")
            )
         {
-            //_("make spike black");
+            //log("make spike black");
             g.setColor(Color.BLACK);
             return true;
         }
         else
         {
-            //_("make spike white");
+            //log("make spike white");
             g.setColor(Color.WHITE);
             return false;
         }

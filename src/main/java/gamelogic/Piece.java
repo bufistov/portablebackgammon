@@ -159,7 +159,7 @@ public class Piece {
     
     public void unstickFromMouse()
     {
-        //_("unstickFromMouse");
+        //log("unstickFromMouse");
         stickToMouse=false;
     }
 

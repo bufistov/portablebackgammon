@@ -15,18 +15,22 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
+
+    private static  int WRAP_WIDTH_HACK_VAL = 0; //15  //ensures that text doesnt go off edge
+
     public static final String VERSION="v0.0.1";
     public static final boolean RELEASE_BUILD=false;
     public static boolean SOUND_ON=true;
     public static boolean showCollisions=false; // debug
     boolean PAINT_STATE=false;                  //debug
     public static final String DEBUG_HEADER="Midokura Backgammon game (DEBUG MODE):";
+
+    public static int TINY_GAP = 5; // when we need a tiny gap
         
     // possible states:
     public static final int SPLASH_SCREEN=0;
     public static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK=1; // local or network?
     public static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN=2; //play human or cpu?
-    public static final int OPTIONS_SCREEN_NETWORK_USERNAME_OF_OPPONENT=3;
     public static final int GAME_IN_PROGRESS=4;
     public static final int NETWORKING_ENTER_NAME=5;
     public static final int NETWORKING_LOBBY=6;
@@ -57,9 +61,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int ULTIMATE_WIDTH  =-1; // this is the width of the entire canvas (ie not just board itself but also panel etc)
     public static int ULTIMATE_HEIGHT =-1; //
 
+    private CustomFont fontwhite, fontblack;
     boolean INFO=false;    // 'about box' toggle
     Utils utils = new Utils();   // Hardware Abstraction Layer
-    public static int state;             // current state
+    public static int state;
     String stateString;
     int PANEL_WIDTH=0;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
@@ -73,27 +78,85 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     Graphics2D g;
     BufferStrategy bufferStrategy;
 
+    public static boolean NETWORK_GAME_IN_PROCESS;
+    public static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled,
+        sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
+    public static Sound sfxdouble, sfxResign;
+
+    // Garbage
+    static String robotMoveDesc = "Bot loaded.";
+    boolean flip;
+    int paraYoffset=0;
+    int OUTLINE_FOR_CHAT_BOXES=0;
+    Vector playerPositions;
+    boolean buttonPressed;
+    //prefs button x,y width and height
+    int prefw=20;
+    int prefh=20;
+    int prefx=ULTIMATE_WIDTH-(Board.BORDER+prefw+TINY_GAP/2);
+    int prefy=Board.BORDER;
+    public static long FIFTY_SECONDS=50000L;
+    public static long TEN_SECONDS=10000L;
+    static long robotMessageTimePassedLong;
+    static long playerMessageTimePassedLong;
+    static long robotMessageSetTimeLong;
+    public static int TRANSPARENCY_LEVEL=100;
+
+    Board board;
+    private int y;
+    private int x;
+    private int splashCounter;
+
+    //for collisions.
+    public static int whiteContainerX;
+    public static int whiteContainerY;
+    public static int whiteContainerWidth;
+    public static int whiteContainerHeight;
+    public static int blackContainerX;
+    public static int blackContainerY;
+    public static int blackContainerWidth;
+    public static int blackContainerHeight;
+
+    //use these to detect if the roll button was clicked.
+    int rollButtonX;
+    int rollButtonY;
+    int rollButtonW;
+    int rollButtonH;
+
+    public static int numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
+    int whitesFirstRollVal=-1;//keep their initial roll to compare them
+    int blacksFirstRollVal=-1;
+    public static boolean showRollButton=true;//false when not needed
+
+    public static int D1lastDieRoll_toSendOverNetwork;
+    public static int D2lastDieRoll_toSendOverNetwork;
+    public static boolean someoneRolledADouble=false;
+    public static int doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
+    //ie, we want them to have 4 rolls if thats the case and not 2
+
+    //for glowy buttons
+    public static final int GLOW_INCREMENTER=15;
+    boolean glowA, glowB;
+
     /* This class is used basically for calling the right paint methods
      * based on state, these paint due to this class being a subclass of canvas.
     */
     CustomCanvas(JFrame jFrame_) {
         log("CustomCanvas made.");
+        board = new Board();
         bot.start();
        
         // j2se specifics
-        jFrame=jFrame_;
+        jFrame = jFrame_;
         addMouseListener(this);
         addMouseMotionListener( this );
         addKeyListener( this );
-        //set icon in corner
+        // set icon in corner
         jFrame.setIconImage(utils.loadImage("/icon.gif"));
-
         jFrame.setResizable(false);
         // WindowResizeMonitor.register(jFrame, this);
-
         setTheme(theme);
         makeColourObjects(false);
-        this_=this; // make a copy of this image observer to pass into custom font
         loadCustomFonts();
         loadImages();
 
@@ -114,11 +177,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
           setIgnoreRepaint(true);
         }
     }
-
-    public static boolean NETWORK_GAME_IN_PROCESS;
-    public static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled,
-        sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
-    public static Sound sfxdouble, sfxResign;
 
     @Override
     public void paint(Graphics g_) {
@@ -141,22 +199,21 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         if (drawPointer) {
             if (NETWORK_GAME_IN_PROCESS) {
-                utils.drawImage(g, pointer, pointerX, pointerY + 6, this_);//this 6 lines it up
+                utils.drawImage(g, pointer, pointerX, pointerY + 6, this);//this 6 lines it up
                 Board.mouseHoverX = pointerX;//e.getX();
                 Board.mouseHoverY = pointerY;//e.getY();
             } else {
                 if (Bot.getFullAutoPlay()) {
-                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this_);//this 6 lines it up
+                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this);//this 6 lines it up
                     Board.mouseHoverX = Bot.x;//e.getX();
                     Board.mouseHoverY = Bot.y;//e.getY();
                 } else {
                     if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE) {
                         Main.hideMousePointer(false);
                     } else if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK) {
-                        /// _("bot.dead set to false");
                         Main.hideMousePointer(true);
                         Bot.dead = false;
-                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this_);//this 6 lines it up
+                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this);//this 6 lines it up
                         Board.mouseHoverX = Bot.x;//e.getX();
                         Board.mouseHoverY = Bot.y;//e.getY();
                     } else {
@@ -176,17 +233,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // implements double buffering, phase is 1 or 2, 1 is called before
     // painting and 2 is called after. Any other phase is erroneous
-    private void doubleBuffering(int phase)
-    {
-        if (phase==1)
-        {
+    private void doubleBuffering(int phase) {
+        if (phase==1) {
             //START DBL BUFFERING
             this.createBufferStrategy(2); // must be after we are visible!
             bufferStrategy = this.getBufferStrategy();
             g = (Graphics2D)bufferStrategy.getDrawGraphics();
         } else if (phase==2) {
             bufferStrategy.show();
-
         } else {
             Utils._E("doubleBuffering() phase was invalid "+phase);
         }
@@ -243,8 +297,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //draws any of the extras:
     //debug info, about box, messages to players etc
-    private void drawExtras(Graphics g)
-    {
+    private void drawExtras(Graphics g) {
         if (PAINT_STATE) // purely for debugging, the state is painted in the corner
         {
             paintState(g);
@@ -262,30 +315,17 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
              //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
               //could be a bit over the top for what im doign (todo optimise?)
             playerMessageTimePassedLong=System.currentTimeMillis()-playerMessageSetTimeLong;
-             //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
-
-             /*if (playerMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
-             {
-                 playerMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
-                 playerMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
-             }*/
-            //_("playerMessageTimePassedLong:"+playerMessageTimePassedLong);
-            if(playerMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
-            {
+            if(playerMessageTimePassedLong<SHOW_ME_LIMIT ) {  //paint messages to players
                 paintMessageToPlayers(g);
-            } else {
-                if (state==GAME_IN_PROGRESS)
-                    showPlayerMessage=false;
-            }
+            } else if (state==GAME_IN_PROGRESS)
+                showPlayerMessage = false;
         }
-        if (Bot.dead==false)
-        {
-            if (paintRobotMessages)
-            {
+        if (Bot.dead == false) {
+            if (paintRobotMessages) {
                   //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
                   //could be a bit over the top for what im doign (todo optimise?)
                 robotMessageTimePassedLong=System.currentTimeMillis()-robotMessageSetTimeLong;
-                // _("robotMessageTimePassedLong:"+robotMessageTimePassedLong);
+                // log("robotMessageTimePassedLong:"+robotMessageTimePassedLong);
 
                  if (robotMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
                  {
@@ -302,12 +342,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             paintDebugBox(g);
         }
     }
-    public static long FIFTY_SECONDS=50000L;
-    public static long TEN_SECONDS=10000L;
-    static long robotMessageTimePassedLong;
-    static long playerMessageTimePassedLong;
-    static long robotMessageSetTimeLong;
-    public static int TRANSPARENCY_LEVEL=100;
 
     //paints the about box
     private void paintAboutBox(Graphics g) {
@@ -342,85 +376,102 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         printme="Developed by www.garethmurfin.co.uk";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
     }
 
- //paints the about box
- private void paintDebugBox(Graphics g) {
-    infoCounter++;
-    if (infoCounter>SPLASH_COUNTER) {
-        infoCounter=0;
-        INFO=false;
-    }
+    //paints the about box
+    private void paintDebugBox(Graphics g) {
+        infoCounter++;
+        if (infoCounter > SPLASH_COUNTER) {
+            infoCounter = 0;
+            INFO = false;
+        }
 
-    utils.setColor(g, 0,0,0,125);
-    x=10;
-    y=10;
-    utils.fillRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
-    utils.setColor(g, Color.yellow);
-    utils.drawRoundRect(g, x, y, WIDTH/2, HEIGHT-40);
+        utils.setColor(g, 0, 0, 0, 125);
+        x = 10;
+        y = 10;
+        utils.fillRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
+        utils.setColor(g, Color.yellow);
+        utils.drawRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
 
-    x+=5;
-    y+=TINY_GAP;
-    //paint the about box
-    String printme="Backgammon ("+VERSION+") DEBUG CONSOLE";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+        x += 5;
+        y += TINY_GAP;
+        //paint the about box
+        String printme = "Backgammon (" + VERSION + ") DEBUG CONSOLE";
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
 
-    printme="DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS;
-    //Highlighter to indicate if its on this option
-    if (debugMenuPos==0) {
-        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
-    //option itself, 
-    fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+        printme = "DELAY_BETWEEN_CLICKS_MILLIS:" + Bot.DELAY_BETWEEN_CLICKS_MILLIS;
+        //Highlighter to indicate if its on this option
+        if (debugMenuPos == 0) {
+            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+        }
+        //option itself,
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
 
 
-    printme="ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS;
-    //Highlighter to indicate if its on this option
-    if (debugMenuPos==1) {
-        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
-    //option itself,
-    fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+        printme = "ROBOT_DELAY_AFTER_CLICKS:" + Bot.ROBOT_DELAY_AFTER_CLICKS;
+        //Highlighter to indicate if its on this option
+        if (debugMenuPos == 1) {
+            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+        }
+        //option itself,
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
 
-     printme="paintRobotMessages:"+paintRobotMessages;
-    //Highlighter to indicate if its on this option
-    if (debugMenuPos==2) {
-        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
-    //option itself,
-    fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+        printme = "paintRobotMessages:" + paintRobotMessages;
+        //Highlighter to indicate if its on this option
+        if (debugMenuPos == 2) {
+            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+        }
+        //option itself,
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
 
-    printme="FULL_AUTO_PLAY:"+Bot.getFullAutoPlay();
-    //Highlighter to indicate if its on this option
-    if (debugMenuPos==3) {
-        utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
-    //option itself,
-    fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+        printme = "FULL_AUTO_PLAY:" + Bot.getFullAutoPlay();
+        //Highlighter to indicate if its on this option
+        if (debugMenuPos == 3) {
+            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+        }
+        //option itself,
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
 
-    y += 10;
+        y += 10;
 
-    String[] helpMessages = {"Q = QUIT",
-        "P = PAUSE (bot dead? " + Bot.dead + ")",
-        "D = DEBUG CONSOLE (" + DEBUG_CONSOLE + ")",
-        "T = THEME (" + themeName + ")", "C = COLLISIONS ("+showCollisions+")",
-        "L = CANVAS LOGGING ("+Utils.CANVAS_LOGGING+")", "S = SOUND ("+SOUND_ON+")", "X = TEST SOUND",
-        "J = JUMP TO DESTINATION: unknown",
-        "F = FULL_AUTO_PLAY: unknwon"};
-    for (String message: helpMessages) {
-        fontwhite.drawString(g, message, x, y,0);
+        String[] helpMessages = {"Q = QUIT",
+            "P = PAUSE (bot dead? " + Bot.dead + ")",
+            "D = DEBUG CONSOLE (" + DEBUG_CONSOLE + ")",
+            "T = THEME (" + themeName + ")", "C = COLLISIONS (" + showCollisions + ")",
+            "L = CANVAS LOGGING (" + Utils.CANVAS_LOGGING + ")", "S = SOUND (" + SOUND_ON + ")", "X = TEST SOUND",
+            "J = JUMP TO DESTINATION: unknown",
+            "F = FULL_AUTO_PLAY: unknwon"};
+        for (String message : helpMessages) {
+            fontwhite.drawString(g, message, x, y, 0);
+            y += fontblack.getHeight();
+        }
+        y += 5;
+        printme = Board.ROBOT_DESTINATION_MESSAGE;
+
+        y = drawMeWrapped(g, x, y, printme, fontwhite, false, false, true, WIDTH / 2, false);
+        if (robotMoveDesc.length() < 20)//avoid printing textual things, just moves.
+        {
+            printme = "Bot is thinking:" + robotMoveDesc;
+            fontwhite.drawString(g, printme, x, y, 0);
+            y += fontblack.getHeight();
+        }
+        if (Board.listBotsOptions && Board.botOptions.length() > 4) {//avoid printing textual things, just moves.
+            printme = "Alternatives:";
+            fontwhite.drawString(g, printme, x, y, 0);/////y+=fontblack.getHeight();
+            //Graphics g,int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft)
+            printme = Board.botOptions;
+            y = drawMeWrapped(g, x, y, printme, fontwhite, false, false, true, WIDTH / 2, false);
+        }
+        printme = "BAR:W(" + theBarWHITE.size() + "),B(" + theBarBLACK.size() + ")";
+        fontwhite.drawString(g, printme, x, y, 0);
+        y += fontblack.getHeight();
+        printme = "DIE Used?:(" + Board.die1HasBeenUsed + "),(" + Board.die2HasBeenUsed + ")";
+        fontwhite.drawString(g, printme, x, y, 0);
         y += fontblack.getHeight();
     }
-    y+=5;
-    printme=Board.ROBOT_DESTINATION_MESSAGE;
-
-    y=drawMeWrapped(g,x,y,printme,fontwhite,false,false,true,WIDTH/2,false);
-    if (robotMoveDesc.length()<20)//avoid printing textual things, just moves.
-    {
-        printme="Bot is thinking:"+robotMoveDesc;fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    }
-    if (Board.listBotsOptions && Board.botOptions.length()>4) {//avoid printing textual things, just moves.
-        printme="Alternatives:";fontwhite.drawString(g, printme,x,y,0);/////y+=fontblack.getHeight();
-        //Graphics g,int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft)
-        printme=Board.botOptions;
-        y=drawMeWrapped(g,x,y,printme,fontwhite,false,false,true,WIDTH/2,false);
-    }
-    printme="BAR:W("+theBarWHITE.size()+"),B("+theBarBLACK.size()+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="DIE Used?:("+Board.die1HasBeenUsed+"),("+Board.die2HasBeenUsed+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
- }
 
     int debugMenuPos=0;
     public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
@@ -432,62 +483,63 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int DEBUGLEFT=1;
     public static final int DEBUGRIGHT=2;
 
- private void debugOptionChanged(int direction) {
-     switch(debugMenuPos) {
-         //DELAY_BETWEEN_CLICKS_MILLIS
-         case DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS:
-             if (direction==DEBUGLEFT) {
-                 Bot.DELAY_BETWEEN_CLICKS_MILLIS -=10;
-                 log("DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS);
-             }
-             if (direction==DEBUGRIGHT) {
-                 Bot.DELAY_BETWEEN_CLICKS_MILLIS +=10;
-                 log("DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS);
-             }
-             break;
-         //DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS
-         case DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS:
-             if (direction==DEBUGLEFT) {
-                 Bot.ROBOT_DELAY_AFTER_CLICKS-=10;
-                 log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
-             }
-             if (direction==DEBUGRIGHT) {
-                 Bot.ROBOT_DELAY_AFTER_CLICKS+=10;
-                 log("ROBOT_DELAY_AFTER_CLICKS:"+Bot.ROBOT_DELAY_AFTER_CLICKS);
-             }
-             break;
-             //DEBUG_OPTION_paintRobotMessages
-         case DEBUG_OPTION_paintRobotMessages:
-             if (direction==DEBUGLEFT) {
-                 paintRobotMessages=!paintRobotMessages;
-                 log("paintRobotMessages:"+paintRobotMessages);
-             }
-             if (direction==DEBUGRIGHT) {
-                 paintRobotMessages=!paintRobotMessages;
-                 log("paintRobotMessages:"+paintRobotMessages);
-             }
-             break;
-             //DELAY_BETWEEN_CLICKS_MILLIS
-         case DEBUG_OPTION_FULL_AUTO_PLAY:
-             if (direction == DEBUGLEFT) {
-                 Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
-                 log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
-             }
-             if (direction == DEBUGRIGHT) {
-                 Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
-                 log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
-             }
-             break;
-         default:
-             Utils._E("UNKNOWN DEBUG OPTION CHANGED:"+debugMenuPos);
-             break;
-     }
- }
+    private void debugOptionChanged(int direction) {
+        switch (debugMenuPos) {
+            //DELAY_BETWEEN_CLICKS_MILLIS
+            case DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS:
+                if (direction == DEBUGLEFT) {
+                    Bot.DELAY_BETWEEN_CLICKS_MILLIS -= 10;
+                    log("DELAY_BETWEEN_CLICKS_MILLIS:" + Bot.DELAY_BETWEEN_CLICKS_MILLIS);
+                }
+                if (direction == DEBUGRIGHT) {
+                    Bot.DELAY_BETWEEN_CLICKS_MILLIS += 10;
+                    log("DELAY_BETWEEN_CLICKS_MILLIS:" + Bot.DELAY_BETWEEN_CLICKS_MILLIS);
+                }
+                break;
+            //DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS
+            case DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS:
+                if (direction == DEBUGLEFT) {
+                    Bot.ROBOT_DELAY_AFTER_CLICKS -= 10;
+                    log("ROBOT_DELAY_AFTER_CLICKS:" + Bot.ROBOT_DELAY_AFTER_CLICKS);
+                }
+                if (direction == DEBUGRIGHT) {
+                    Bot.ROBOT_DELAY_AFTER_CLICKS += 10;
+                    log("ROBOT_DELAY_AFTER_CLICKS:" + Bot.ROBOT_DELAY_AFTER_CLICKS);
+                }
+                break;
+            //DEBUG_OPTION_paintRobotMessages
+            case DEBUG_OPTION_paintRobotMessages:
+                if (direction == DEBUGLEFT) {
+                    paintRobotMessages = !paintRobotMessages;
+                    log("paintRobotMessages:" + paintRobotMessages);
+                }
+                if (direction == DEBUGRIGHT) {
+                    paintRobotMessages = !paintRobotMessages;
+                    log("paintRobotMessages:" + paintRobotMessages);
+                }
+                break;
+            //DELAY_BETWEEN_CLICKS_MILLIS
+            case DEBUG_OPTION_FULL_AUTO_PLAY:
+                if (direction == DEBUGLEFT) {
+                    Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
+                    log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
+                }
+                if (direction == DEBUGRIGHT) {
+                    Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
+                    log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
+                }
+                break;
+            default:
+                Utils._E("UNKNOWN DEBUG OPTION CHANGED:" + debugMenuPos);
+                break;
+        }
+    }
 
     //paints the state - for debugging.
     private void paintState(Graphics g) {
         fontblack.drawString(g,stateString,20,20,0);
     }
+
     int infoCounter=0;
     Image splashScreenLogo,splashScreenLogoSmall;
     Image op,admin;
@@ -515,10 +567,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     ///////// ALL PAINT STATE METHODS //////////////////////
-    int y;
-    int x;
-    int splashCounter;
-
     private void paint_SPLASH_SCREEN(Graphics g) {
         utils.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
         utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
@@ -528,7 +576,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
              int xdebug=10;
              fontblack.drawString(g, DEBUG_HEADER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
              fontblack.drawString(g, VERSION,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
-             fontblack.drawString(g, splashCounter+"/"+SPLASH_COUNTER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
+             fontblack.drawString(g, splashCounter+"/"+SPLASH_COUNTER,xdebug,ydebug,0);
         }
         if (splashCounter++ > SPLASH_COUNTER) {
             log("Splash done.");
@@ -536,672 +584,607 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
- //prefs button x,y width and height
- int prefw=20;
- int prefh=20;
- int prefx=ULTIMATE_WIDTH-(Board.BORDER+prefw+TINY_GAP/2);
- int prefy=Board.BORDER;
+    private void paint_POST_SPLASH_SCREEN(Graphics g) {
+        utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT); // paint entire background
+        utils.setColor(g, Color.WHITE);
 
- Board board;
- public static int TINY_GAP=5;//when we need a tiny gap
- private void paint_POST_SPLASH_SCREEN(Graphics g) {
-      utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT); // paint entire background
-      if (board==null) {
-          board = new Board();
-      }
-      utils.setColor(g,Color.WHITE);
+        //paint board and its containing parts
+        board.paint(g, WIDTH, HEIGHT);
+        //paint the message panel to the right with players name etc
+        utils.setColor(g, panel_colour);
+        utils.fillRect(g, WIDTH, Board.BORDER, PANEL_WIDTH, HEIGHT - (Board.BORDER * 2));
 
-      //paint board and its containing parts
-      board.paint(g,WIDTH,HEIGHT);
-      //paint the message panel to the right with players name etc
-      utils.setColor(g,panel_colour);
-      utils.fillRect(g,WIDTH,Board.BORDER,PANEL_WIDTH,HEIGHT-(Board.BORDER*2));
+        //draw the preferences button
+        prefw = 20;
+        prefh = 20;
+        prefx = ULTIMATE_WIDTH - (Board.BORDER + prefw + TINY_GAP / 2);
+        prefy = Board.BORDER;
 
-      //draw the preferences button
-      prefw=20;
-      prefh=20;
-      prefx=ULTIMATE_WIDTH-(Board.BORDER+prefw+TINY_GAP/2);
-      prefy=Board.BORDER;
+        //draw a circle with an 'i' inside.
+        utils.setColor(g, Color.blue);
+        utils.fillCircle(g, prefx, prefy, prefw, prefh);
+        utils.setColor(g, Color.white);
+        utils.drawCircle(g, prefx, prefy, prefw, prefh);
+        fontwhite.drawString(g, "i", prefx + 4, prefy + 2, 0);
+        //////////
+        if (showCollisions) {
+            utils.setColor(g, Color.RED);
+            utils.drawRect(g, prefx, prefy, prefw, prefh);
+        }
 
-      //draw a circle with an 'i' inside.
-      utils.setColor(g, Color.blue);
-      utils.fillCircle(g, prefx, prefy, prefw, prefh);
-      utils.setColor(g, Color.white);
-      utils.drawCircle(g, prefx, prefy, prefw, prefh);
-      fontwhite.drawString(g, "i", prefx+4, prefy+2,0);
-      //////////
-      if (showCollisions) {
-          utils.setColor(g, Color.RED);
-          utils.drawRect(g, prefx, prefy, prefw, prefh);
-      }
+        //draw panel text:
+        int xpos = WIDTH + TINY_GAP;
 
-      //draw panel text:
-      int xpos=WIDTH+TINY_GAP;
-     
-      //draw the piece container
-      int heightOf3LinesOfText=(fontwhite.getHeight()*3)+(Board.BORDER*2)+TINY_GAP;
-      int containerSubSize=HEIGHT/70;
-      int containerWidth=PANEL_WIDTH/3;
-      int topOfPieceContainer=HEIGHT-((containerSubSize*15)+heightOf3LinesOfText);
+        //draw the piece container
+        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (Board.BORDER * 2) + TINY_GAP;
+        int containerSubSize = HEIGHT / 70;
+        int containerWidth = PANEL_WIDTH / 3;
+        int topOfPieceContainer = HEIGHT - ((containerSubSize * 15) + heightOf3LinesOfText);
 
-       if (Board.allBlackPiecesAreHome) {
-           utils.setColor(g, Color.GREEN);
-           if (Board.pulsateBlackContainer) {
-               utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
-           }
-       } else {
+        if (Board.allBlackPiecesAreHome) {
+            utils.setColor(g, Color.GREEN);
+            if (Board.pulsateBlackContainer) {
+                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+            }
+        } else {
             utils.setColor(g, Color.WHITE);
-       }
-      //draw black players piece container
-      drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
-              containerSubSize,heightOf3LinesOfText, Player.BLACK);
-     
-      heightOf3LinesOfText=(fontwhite.getHeight()*3)+Board.BORDER+TINY_GAP;
-      topOfPieceContainer=heightOf3LinesOfText;
+        }
+        //draw black players piece container
+        drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
+            containerSubSize, heightOf3LinesOfText, Player.BLACK);
 
-      if (Board.allWhitePiecesAreHome) {
-           utils.setColor(g, Color.GREEN);
-           if (Board.pulsateWhiteContainer) {
-               utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
-           }
-       } else {
+        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + Board.BORDER + TINY_GAP;
+        topOfPieceContainer = heightOf3LinesOfText;
+
+        if (Board.allWhitePiecesAreHome) {
+            utils.setColor(g, Color.GREEN);
+            if (Board.pulsateWhiteContainer) {
+                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+            }
+        } else {
             utils.setColor(g, Color.WHITE);
-       }
-      //draw white players piece container
-      drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
-              containerSubSize,heightOf3LinesOfText,Player.WHITE);
+        }
+        //draw white players piece container
+        drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
+            containerSubSize, heightOf3LinesOfText, Player.WHITE);
 
-      int pieceOnBarY=(HEIGHT/2)-Piece.PIECE_DIAMETER;
-      //Draw pieces on the bar//////////////
-      Enumeration eW = theBarWHITE.elements();
-      while (eW.hasMoreElements()) {
-          Piece p = (Piece)eW.nextElement();
-          p.paint(g,(WIDTH/2)-Piece.PIECE_DIAMETER/2,pieceOnBarY-=Piece.PIECE_DIAMETER);
-      }
-      pieceOnBarY=(HEIGHT/2);
-      Enumeration eB = theBarBLACK.elements();
-      while (eB.hasMoreElements()) {
-          Piece p = (Piece)eB.nextElement();
-          p.paint(g,(WIDTH/2)-Piece.PIECE_DIAMETER/2,pieceOnBarY+=Piece.PIECE_DIAMETER);
-      }
-      drawHUDtext(xpos);
- }
- //for collisions.
- public static int whiteContainerX;
- public static int whiteContainerY;
- public static int whiteContainerWidth;
- public static int whiteContainerHeight;
- public static int blackContainerX;
- public static int blackContainerY;
- public static int blackContainerWidth;
- public static int blackContainerHeight;
+        int pieceOnBarY = (HEIGHT / 2) - Piece.PIECE_DIAMETER;
+        //Draw pieces on the bar//////////////
+        Enumeration eW = theBarWHITE.elements();
+        while (eW.hasMoreElements()) {
+            Piece p = (Piece) eW.nextElement();
+            p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY -= Piece.PIECE_DIAMETER);
+        }
+        pieceOnBarY = (HEIGHT / 2);
+        Enumeration eB = theBarBLACK.elements();
+        while (eB.hasMoreElements()) {
+            Piece p = (Piece) eB.nextElement();
+            p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
+        }
+        drawHUDtext(xpos);
+    }
 
- //draws the little holder where the pieces go
- private void drawPieceContainer(Graphics g, int xpos, int topOfPieceContainer,
+    //draws the little holder where the pieces go
+    private void drawPieceContainer(Graphics g, int xpos, int topOfPieceContainer,
             int containerWidth, int containerSubSize, int heightOf3LinesOfText,
             int player) {
 
-     int piecesOnContainer=0;
-     if (player==Player.WHITE) {
-        piecesOnContainer=whitePiecesSafelyInContainer.size();
-     } else if (player==Player.BLACK) {
-         piecesOnContainer=blackPiecesSafelyInContainer.size();
-     }
-     int myX=WIDTH+((PANEL_WIDTH/4)-(containerWidth/2));
-     int myY=topOfPieceContainer;
-     for (int i=0; i<15; i++) {
-         
-         //simply draws the containers green if players have all their pieces in the home section 
-         //and therefore the piece containers are 'live' and ready for action
-        
-         myY=myY+containerSubSize;
-         if (i<piecesOnContainer) {
-             Color originalColor = utils.getColor();
-             utils.setColor(g,Color.ORANGE);
-             
-             utils.fillRect(g, myX, myY, containerWidth , containerSubSize );
-             utils.setColor(g,originalColor);
-         }
-         utils.drawRect(g, myX, myY, containerWidth , containerSubSize );
-     }
-     //update collision data
-     if (player==Player.WHITE) {
-         whiteContainerX=myX;
-         whiteContainerY=myY-(containerSubSize*14);
-         whiteContainerWidth=containerWidth;
-         whiteContainerHeight=containerSubSize*15;
-         if (showCollisions) {
-             utils.setColor(g,Color.RED);
-             utils.drawRect(g, whiteContainerX, whiteContainerY,whiteContainerWidth,whiteContainerHeight );
-         }
-     } else if (player==Player.BLACK) {
-         blackContainerX=myX;
-         blackContainerY=myY-(containerSubSize*14);
-         blackContainerWidth=containerWidth;
-         blackContainerHeight=containerSubSize*15;
-         if (showCollisions) {
-             utils.setColor(g,Color.RED);
-             utils.drawRect(g, blackContainerX, blackContainerY,blackContainerWidth,blackContainerHeight );
-         }
-     } else {
-         Utils._E("drawPieceContainer has been given incorrect player number!");
-     }
- }
+        int piecesOnContainer = 0;
+        if (player == Player.WHITE) {
+            piecesOnContainer = whitePiecesSafelyInContainer.size();
+        } else if (player == Player.BLACK) {
+            piecesOnContainer = blackPiecesSafelyInContainer.size();
+        }
+        int myX = WIDTH + ((PANEL_WIDTH / 4) - (containerWidth / 2));
+        int myY = topOfPieceContainer;
+        for (int i = 0; i < 15; i++) {
 
-    //String printme;//reused for many text that is printed
+            //simply draws the containers green if players have all their pieces in the home section
+            //and therefore the piece containers are 'live' and ready for action
 
-    //use these to detect if the roll button was clicked.
-    int rollButtonX;
-    int rollButtonY;
-    int rollButtonW;
-    int rollButtonH;
+            myY = myY + containerSubSize;
+            if (i < piecesOnContainer) {
+                Color originalColor = utils.getColor();
+                utils.setColor(g, Color.ORANGE);
+
+                utils.fillRect(g, myX, myY, containerWidth, containerSubSize);
+                utils.setColor(g, originalColor);
+            }
+            utils.drawRect(g, myX, myY, containerWidth, containerSubSize);
+        }
+        //update collision data
+        if (player == Player.WHITE) {
+            whiteContainerX = myX;
+            whiteContainerY = myY - (containerSubSize * 14);
+            whiteContainerWidth = containerWidth;
+            whiteContainerHeight = containerSubSize * 15;
+            if (showCollisions) {
+                utils.setColor(g, Color.RED);
+                utils.drawRect(g, whiteContainerX, whiteContainerY, whiteContainerWidth, whiteContainerHeight);
+            }
+        } else if (player == Player.BLACK) {
+            blackContainerX = myX;
+            blackContainerY = myY - (containerSubSize * 14);
+            blackContainerWidth = containerWidth;
+            blackContainerHeight = containerSubSize * 15;
+            if (showCollisions) {
+                utils.setColor(g, Color.RED);
+                utils.drawRect(g, blackContainerX, blackContainerY, blackContainerWidth, blackContainerHeight);
+            }
+        } else {
+            Utils._E("drawPieceContainer has been given incorrect player number!");
+        }
+    }
 
     //draw all of the text on the panel
- private void drawHUDtext(int xpos) {
-     int ypos=Board.BORDER+TINY_GAP;
-     //draw black players score at top
-     String printme = "White ("+board.getBlackPlayer().name+")";
-     if (board.whoseTurnIsIt==Player.WHITE) {
-         printme+="*";
-     }
-     fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-
-     printme="Pips: "+calculatePips(Player.WHITE);/*board.getBlackPlayer().pips*/;   fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-     printme="Score: "+board.getBlackPlayer().score;   fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-     //draw white players score at bot
-     ypos=HEIGHT-9-(Board.BORDER*2)-(fontwhite.getHeight()*2);
-     printme="Brown ("+board.getWhitePlayer().name+")";
-     if (board.whoseTurnIsIt==Player.BLACK) {
-         printme+="*";
-     }
-     fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-     printme="Pips: "+calculatePips(Player.BLACK);/*board.getWhitePlayer().pips;*/   fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-     printme="Score: "+board.getWhitePlayer().score;   fontwhite.drawString(g, printme,  xpos, ypos, 0);ypos+=fontwhite.getHeight();
-
-     int xposTmp=-1;
-     ypos=(HEIGHT/2)-((fontwhite.getHeight()*4)/2);
-     printme="Match Points: "+board.matchPoints;
-     int widthOfPrintMe=(fontwhite.stringWidth(printme));
-     xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
-     fontwhite.drawString(g, printme, xposTmp, ypos, 0);ypos+=fontwhite.getHeight();
-
-     utils.setColor(g, roll_button_colour);
-      
-     //---- draw buttons
-     ///////// double button
-     printme="Double";
-     widthOfPrintMe=(fontwhite.stringWidth(printme));
-     xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
-     utils.setColor(g, roll_button_colour);
-     ypos+=10;
-     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
-     fontwhite.drawString(g, printme, xposTmp , ypos+1, 0);
-     ////
-     doubleX=xposTmp-10;
-     doubleY=ypos;
-     doubleWidth=widthOfPrintMe+20;
-     doubleHeight=(fontwhite.getHeight()) ;
-     if (showCollisions) {
-          utils.setColor(g, Color.red);
-          utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
-      }
-
-     //draw the 'Roll' button
-     ///////// roll button (on board itself (could be either side)
-     printme=""+Die.rollString;//either says roll or 'roll to see who goes first' ..
-     widthOfPrintMe=(fontwhite.stringWidth(printme));
-
-     //only show roll button when required
-     if (CustomCanvas.showRollButton) {
-         //draw in centre:
-         xposTmp=((WIDTH/2))-widthOfPrintMe/2;
-
-         utils.setColor(g, roll_button_colour);
-         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
-
-         if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.getFullAutoPlay()  || numberOfFirstRollsDone==1 ) {
-             if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
-                 log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
-             } else {
-                Board.setBotDestination((xposTmp-10)+(widthOfPrintMe+20)/2,ypos+(fontwhite.getHeight())/2,"PRESS ROLL BUTTON");
-             }
-         }
-         
-         /////for collisions
-         rollButtonX=xposTmp-10;
-         rollButtonY=ypos;
-         rollButtonW=widthOfPrintMe+20;
-         rollButtonH=(fontwhite.getHeight());
-         //////////
-         if (CustomCanvas.showCollisions) {
-            utils.setColor(g,Color.RED);
-            utils.drawRect(g,rollButtonX, rollButtonY,rollButtonW, rollButtonH);
+    private void drawHUDtext(int xpos) {
+        int ypos = Board.BORDER + TINY_GAP;
+        //draw black players score at top
+        String printme = "White (" + board.getBlackPlayer().name + ")";
+        if (board.whoseTurnIsIt == Player.WHITE) {
+            printme += "*";
         }
-         fontblack.drawString(g, printme, xposTmp , ypos+1, 0);ypos+=fontwhite.getHeight();
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
 
-     } else {
-         //still knock y down so other buttons draw inline.
-         ypos+=fontwhite.getHeight();
-     }
-
-     ///////// resign button
-     printme="Resign";
-     widthOfPrintMe=(fontwhite.stringWidth(printme));
-     xposTmp=(WIDTH+PANEL_WIDTH/2)-((widthOfPrintMe/2)+TINY_GAP);
-     utils.setColor(g, roll_button_colour);
-     ypos+=10;
-     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
-     fontwhite.drawString(g, printme, xposTmp , ypos+1, 0);
-
-     resignX=xposTmp-10;
-      resignY=ypos;
-      resignWidth=widthOfPrintMe+20;
-      resignHeight=(fontwhite.getHeight());
-
-      if (showCollisions) {
-          utils.setColor(g, Color.red);
-          utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
-      }
- }
-
- //returns the current pip count doe the player passed in.
- private int calculatePips(int player) {
-     int pips=0;
-    
-     /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
-      * counting the number of pieces of that colour on the spike, then multiply that by the amount of spikes it is away from the
-      * end of the board (INCLUDING the one to get onto the pice container), add these all up . as an example the starting pip count is 167 because:
-      * 2 pieces on spike 0 (23 steps from end) * 2 = 48
-      * 5 pieces on spike 11 (13 steps from end)*5=65
-      * 3 pieces on spike 16 (8 steps from end) *3 = 24
-      * 6 pieces on spike 18 (5 steps from the end) *6 =30
-      * total is 167
-      */
-     Enumeration e = board.spikes.elements();
-     if (player==Player.WHITE)
-     {
-         //works for white logic is simple
-        for (int i=0; i<24;i++)
-         {
-             Spike spike = (Spike)board.spikes.elementAt(i);
-             if (spike.getAmountOfPieces(player)>0)
-             {
-                 pips+=(i+1)*spike.getAmountOfPieces(player);
-             }
-         }
-     } else {
-         //logic for black takes some thinking about!
-         int j=0;
-        for (int i=23; i>=0;i--)
-         {
-             Spike spike = (Spike)board.spikes.elementAt(i);
-             if (spike.getAmountOfPieces(player)>0)
-             {
-                 pips+=(j+1)*spike.getAmountOfPieces(player);
-             }
-             j++;
-         }
-     }
-     return pips;
- }
-
- //for glowy buttons
- public static final int GLOW_INCREMENTER=15;
- boolean glowA, glowB;
-
- // simply sets glow to true if the mouse is over the button
- // glow is a boolean used to make the button glow when pointer is over it.
- private void glowButton(int x, int y) {
-     if (x>=buttonxA && x<=buttonxA+buttonwA)
-     {
-        if (y>=buttonyA && y<=buttonyA+buttonhA)
-        {
-             ///_("glow button");
-             glowA=true;
+        printme = "Pips: " + calculatePips(Player.WHITE);/*board.getBlackPlayer().pips*/
+        ;
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
+        printme = "Score: " + board.getBlackPlayer().score;
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
+        //draw white players score at bot
+        ypos = HEIGHT - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
+        printme = "Brown (" + board.getWhitePlayer().name + ")";
+        if (board.whoseTurnIsIt == Player.BLACK) {
+            printme += "*";
         }
-     }
-     if (x>=buttonxB && x<=buttonxB+buttonwB)
-     {
-        if (y>=buttonyB && y<=buttonyB+buttonhB)
-        {
-             ///_("glow button");
-             glowB=true;
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
+        printme = "Pips: " + calculatePips(Player.BLACK);/*board.getWhitePlayer().pips;*/
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
+        printme = "Score: " + board.getWhitePlayer().score;
+        fontwhite.drawString(g, printme, xpos, ypos, 0);
+        ypos += fontwhite.getHeight();
+
+        int xposTmp = -1;
+        ypos = (HEIGHT / 2) - ((fontwhite.getHeight() * 4) / 2);
+        printme = "Match Points: " + board.matchPoints;
+        int widthOfPrintMe = (fontwhite.stringWidth(printme));
+        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        fontwhite.drawString(g, printme, xposTmp, ypos, 0);
+        ypos += fontwhite.getHeight();
+        utils.setColor(g, roll_button_colour);
+
+        //---- draw buttons
+        ///////// double button
+        printme = "Double";
+        widthOfPrintMe = (fontwhite.stringWidth(printme));
+        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        utils.setColor(g, roll_button_colour);
+        ypos += 10;
+        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
+        fontwhite.drawString(g, printme, xposTmp, ypos + 1, 0);
+        ////
+        doubleX = xposTmp - 10;
+        doubleY = ypos;
+        doubleWidth = widthOfPrintMe + 20;
+        doubleHeight = (fontwhite.getHeight());
+        if (showCollisions) {
+            utils.setColor(g, Color.red);
+            utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
         }
-     }
 
-     if (glowA || glowB)
-     {
-         glowCounter+=GLOW_INCREMENTER;
-         if (glowCounter>255)
-         {
-             if (glowCounter>355)
-             {
-                glowCounter=GLOW_INITIAL_VALUE;
-             }
-         }
-     }
- }
+        //draw the 'Roll' button
+        ///////// roll button (on board itself (could be either side)
+        printme = "" + Die.rollString;//either says roll or 'roll to see who goes first' ..
+        widthOfPrintMe = (fontwhite.stringWidth(printme));
 
- boolean buttonPressed;
- // this deals with touching the 'virtual' buttons
- // a mouse event is passed in to grab the x,y values from
- private boolean touchedButton(int x,int y) {
-     buttonPressed=false;
-     switch(state)
-     {
-         ///////////////////////////////////////////
-         case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
-             //check buttons (local player, network play)
-             checkAndDealWithTopButtonPressed_localplay(x,y);
-             checkAndDealWithBotButtonPressed_networkplay(x,y);
-          break;
-         //////////////////////////////////////
-         case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
-             //check buttons (computer player, human player)
-             checkAndDealWithTopButtonPressed_computerPlayer(x,y);
-             checkAndDealWithTopButtonPressed_humanPlayer(x,y);
-         break;
-         //////////////////////////////////////
-         case GAME_IN_PROGRESS:
-             //CHECK IF ROLL DICE BUTTON WAS PRESSED AND DEAL WITH IT////////
-             //tellRobot(true,"dddd");
-             if (showRollButton) {
-                checkAndDealWithRollDiceButton(x,y);
-             } else {
-                 //ROBOT LOOK FOR RELEVANT SPIKES..
-             }
-             //Other in game buttons go here, like double up, resign etc.
-             break;
-     }
-     return buttonPressed;
- }
+        //only show roll button when required
+        if (CustomCanvas.showRollButton) {
+            //draw in centre:
+            xposTmp = ((WIDTH / 2)) - widthOfPrintMe / 2;
 
- //works out if the bottom button is pressed (in this state the 'computer player' button)
- //and deals with it
- private void checkAndDealWithTopButtonPressed_computerPlayer(int x,int y) {
-     if (x>=buttonxA && x<=buttonxA+buttonwA) {
-        if (y>=buttonyA && y<=buttonyA+buttonhA) {
-             log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
-             buttonPressed=true;
-             typeOfOpponent=CPU;//REMOVE ME???? TODOOOO
+            utils.setColor(g, roll_button_colour);
+            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
 
-             //if (typeOfOpponent==CPU)
-             //{
-                 Board.HUMAN_VS_COMPUTER=true;
-                 Bot.dead=false;//give him life
-                 log("CPU OPPONENT PRIMED.");
-            // }
-
-             state=GAME_IN_PROGRESS;
-
-             if (typeOfPlay==LOCAL_PLAY) {
-                log("Selected LOCAL play against CPU");
-             } else {
-                 log("Selected NETWORK play against CPU");
-             }
-        }
-     }
- }
-
- //works out if the bottom button is pressed (in this state the 'human player' button)
- //and deals with it
- private void checkAndDealWithTopButtonPressed_humanPlayer(int x,int y)
- {
-     //check if bottom button is pressed (human player)
-     if (x>=buttonxB && x<=buttonxB+buttonwB)
-     {
-        if (y>=buttonyB && y<=buttonyB+buttonhB)
-        {
-             log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
-             buttonPressed=true;
-             typeOfOpponent=HUMAN;
-             state=GAME_IN_PROGRESS;
-
-              Board.HUMAN_VS_COMPUTER=false;
-              log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
-
-             if (typeOfPlay==LOCAL_PLAY) {
-                log("Selected LOCAL play against HUMAN");
-             } else {
-                 log("Selected NETWORK play against HUMAN");
-             }
-        }
-     }
- }
-
- //works out if the bottom button is pressed (in this state the 'network play' button)
- //and deals with it
- private void checkAndDealWithBotButtonPressed_networkplay(int x,int y) {
-     //check if bottom button is pressed (NETWORK)
-     if (x>=buttonxB && x<=buttonxB+buttonwB)
-     {
-        if (y>=buttonyB && y<=buttonyB+buttonhB)
-        {
-             log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-             typeOfPlay=NETWORK_PLAY;
-             buttonPressed=true;
-
-             state=NETWORKING_ENTER_NAME;
-        }
-     }
- }
-
- //works out if the top button is pressed (in this state the 'local play' button)
- //and deals with it
- private void checkAndDealWithTopButtonPressed_localplay(int x,int y) {
-     if (x>=buttonxA && x<=buttonxA+buttonwA)
-     {
-        if (y>=buttonyA && y<=buttonyA+buttonhA) {
-             log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-             typeOfPlay=LOCAL_PLAY;
-             buttonPressed=true;
-
-             state=OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
-             robotmove=true;
-        }
-     }
- }
-  
- //detects if the roll dice button has been pressed, and if so, reacts
- //accordingly
- private void checkAndDealWithRollDiceButton(int x,int y)//MouseEvent e)
- {
-     if (x>=rollButtonX && x<=rollButtonX+rollButtonW) {
-        if (y>=rollButtonY && y<=rollButtonY+rollButtonH) {
-            log("Roll Dice button clicked.");
-            Board.die1HasBeenUsed=false;
-            Board.die2HasBeenUsed=false;
-            showDice=true;//show the die now theyve clicked roll.
-            sfxDiceRoll.playSound();
-            ////////IF OPENING DICE ROLLS
-            //if numberOfFirstRollsDone is less than 2
-            //we know its the very start of the game, each player
-            //gets to roll one die - highest roll indicates who
-            //takes the first go.
-            if (numberOfFirstRollsDone<=1) {
-                log("OPENING ROLL (numberOfFirstRollsDone:"+numberOfFirstRollsDone+")");
-                //ie the one each you get to see how starts.
-                dealWithOpeningRolls();
-                  //kick start the bot
-            } else {
-            //////////////////////////////
-            //ORDINARY ROLLS/////////////
-                log("ORDINARY ROLL");
-                dealWithOrdinaryRolls();
+            if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK || Bot.getFullAutoPlay() || numberOfFirstRollsDone == 1) {
+                if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
+                    log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
+                } else {
+                    Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2, ypos + (fontwhite.getHeight()) / 2, "PRESS ROLL BUTTON");
+                }
             }
-            buttonPressed=true;//just to print out to us it was pressed.
+
+            /////for collisions
+            rollButtonX = xposTmp - 10;
+            rollButtonY = ypos;
+            rollButtonW = widthOfPrintMe + 20;
+            rollButtonH = (fontwhite.getHeight());
+            //////////
+            if (CustomCanvas.showCollisions) {
+                utils.setColor(g, Color.RED);
+                utils.drawRect(g, rollButtonX, rollButtonY, rollButtonW, rollButtonH);
+            }
+            fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
+            ypos += fontwhite.getHeight();
+
+        } else {
+            //still knock y down so other buttons draw inline.
+            ypos += fontwhite.getHeight();
         }
-     }
-  }
+
+        ///////// resign button
+        printme = "Resign";
+        widthOfPrintMe = (fontwhite.stringWidth(printme));
+        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        utils.setColor(g, roll_button_colour);
+        ypos += 10;
+        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
+        fontwhite.drawString(g, printme, xposTmp, ypos + 1, 0);
+
+        resignX = xposTmp - 10;
+        resignY = ypos;
+        resignWidth = widthOfPrintMe + 20;
+        resignHeight = (fontwhite.getHeight());
+
+        if (showCollisions) {
+            utils.setColor(g, Color.red);
+            utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
+        }
+    }
+
+    //returns the current pip count doe the player passed in.
+    private int calculatePips(int player) {
+        int pips = 0;
+
+        /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
+         * counting the number of pieces of that colour on the spike, then multiply that by the amount of spikes it is away from the
+         * end of the board (INCLUDING the one to get onto the pice container), add these all up . as an example the starting pip count is 167 because:
+         * 2 pieces on spike 0 (23 steps from end) * 2 = 48
+         * 5 pieces on spike 11 (13 steps from end)*5=65
+         * 3 pieces on spike 16 (8 steps from end) *3 = 24
+         * 6 pieces on spike 18 (5 steps from the end) *6 =30
+         * total is 167
+         */
+        Enumeration e = board.spikes.elements();
+        if (player == Player.WHITE) {
+            //works for white logic is simple
+            for (int i = 0; i < 24; i++) {
+                Spike spike = (Spike) board.spikes.elementAt(i);
+                if (spike.getAmountOfPieces(player) > 0) {
+                    pips += (i + 1) * spike.getAmountOfPieces(player);
+                }
+            }
+        } else {
+            //logic for black takes some thinking about!
+            int j = 0;
+            for (int i = 23; i >= 0; i--) {
+                Spike spike = (Spike) board.spikes.elementAt(i);
+                if (spike.getAmountOfPieces(player) > 0) {
+                    pips += (j + 1) * spike.getAmountOfPieces(player);
+                }
+                j++;
+            }
+        }
+        return pips;
+    }
+
+    // simply sets glow to true if the mouse is over the button
+    // glow is a boolean used to make the button glow when pointer is over it.
+    private void glowButton(int x, int y) {
+        if (x >= buttonxA && x <= buttonxA + buttonwA) {
+            if (y >= buttonyA && y <= buttonyA + buttonhA) {
+                ///log("glow button");
+                glowA = true;
+            }
+        }
+        if (x >= buttonxB && x <= buttonxB + buttonwB) {
+            if (y >= buttonyB && y <= buttonyB + buttonhB) {
+                ///log("glow button");
+                glowB = true;
+            }
+        }
+
+        if (glowA || glowB) {
+            glowCounter += GLOW_INCREMENTER;
+            if (glowCounter > 255) {
+                if (glowCounter > 355) {
+                    glowCounter = GLOW_INITIAL_VALUE;
+                }
+            }
+        }
+    }
+
+    // this deals with touching the 'virtual' buttons
+    // a mouse event is passed in to grab the x,y values from
+    private boolean touchedButton(int x,int y) {
+        buttonPressed = false;
+        switch (state) {
+            ///////////////////////////////////////////
+            case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
+                //check buttons (local player, network play)
+                checkAndDealWithTopButtonPressed_localplay(x, y);
+                checkAndDealWithBotButtonPressed_networkplay(x, y);
+                break;
+            //////////////////////////////////////
+            case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
+                //check buttons (computer player, human player)
+                checkAndDealWithTopButtonPressed_computerPlayer(x, y);
+                checkAndDealWithTopButtonPressed_humanPlayer(x, y);
+                break;
+            //////////////////////////////////////
+            case GAME_IN_PROGRESS:
+                //CHECK IF ROLL DICE BUTTON WAS PRESSED AND DEAL WITH IT////////
+                if (showRollButton) {
+                    checkAndDealWithRollDiceButton(x, y);
+                } else {
+                    //ROBOT LOOK FOR RELEVANT SPIKES..
+                }
+                //Other in game buttons go here, like double up, resign etc.
+                break;
+        }
+        return buttonPressed;
+    }
+
+    //works out if the bottom button is pressed (in this state the 'computer player' button)
+    //and deals with it
+    private void checkAndDealWithTopButtonPressed_computerPlayer(int x, int y) {
+        if (x >= buttonxA && x <= buttonxA + buttonwA) {
+            if (y >= buttonyA && y <= buttonyA + buttonhA) {
+                log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
+                buttonPressed = true;
+                typeOfOpponent = CPU;//REMOVE ME???? TODOOOO
+                Board.HUMAN_VS_COMPUTER = true;
+                Bot.dead = false;//give him life
+                log("CPU OPPONENT PRIMED.");
+                state = GAME_IN_PROGRESS;
+
+                if (typeOfPlay == LOCAL_PLAY) {
+                    log("Selected LOCAL play against CPU");
+                } else {
+                    log("Selected NETWORK play against CPU");
+                }
+            }
+        }
+    }
+
+    //works out if the bottom button is pressed (in this state the 'human player' button)
+    //and deals with it
+    private void checkAndDealWithTopButtonPressed_humanPlayer(int x,int y) {
+        //check if bottom button is pressed (human player)
+        if (x >= buttonxB && x <= buttonxB + buttonwB) {
+            if (y >= buttonyB && y <= buttonyB + buttonhB) {
+                log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
+                buttonPressed = true;
+                typeOfOpponent = HUMAN;
+                state = GAME_IN_PROGRESS;
+
+                Board.HUMAN_VS_COMPUTER = false;
+                log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
+
+                if (typeOfPlay == LOCAL_PLAY) {
+                    log("Selected LOCAL play against HUMAN");
+                } else {
+                    log("Selected NETWORK play against HUMAN");
+                }
+            }
+        }
+    }
+
+     //works out if the bottom button is pressed (in this state the 'network play' button)
+     //and deals with it
+    private void checkAndDealWithBotButtonPressed_networkplay(int x,int y) {
+        //check if bottom button is pressed (NETWORK)
+        if (x >= buttonxB && x <= buttonxB + buttonwB) {
+            if (y >= buttonyB && y <= buttonyB + buttonhB) {
+                log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
+                typeOfPlay = NETWORK_PLAY;
+                buttonPressed = true;
+
+                state = NETWORKING_ENTER_NAME;
+            }
+        }
+    }
+
+    //works out if the top button is pressed (in this state the 'local play' button)
+    //and deals with it
+    private void checkAndDealWithTopButtonPressed_localplay(int x,int y) {
+        if (x >= buttonxA && x <= buttonxA + buttonwA) {
+            if (y >= buttonyA && y <= buttonyA + buttonhA) {
+                log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
+                typeOfPlay = LOCAL_PLAY;
+                buttonPressed = true;
+                state = OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
+            }
+        }
+    }
+  
+    //detects if the roll dice button has been pressed, and if so, reacts
+    //accordingly
+    private void checkAndDealWithRollDiceButton(int x, int y) {
+        if (x >= rollButtonX && x <= rollButtonX + rollButtonW) {
+            if (y >= rollButtonY && y <= rollButtonY + rollButtonH) {
+                log("Roll Dice button clicked.");
+                Board.die1HasBeenUsed = false;
+                Board.die2HasBeenUsed = false;
+                showDice = true;//show the die now theyve clicked roll.
+                sfxDiceRoll.playSound();
+                ////////IF OPENING DICE ROLLS
+                //if numberOfFirstRollsDone is less than 2
+                //we know its the very start of the game, each player
+                //gets to roll one die - highest roll indicates who
+                //takes the first go.
+                if (numberOfFirstRollsDone <= 1) {
+                    log("OPENING ROLL (numberOfFirstRollsDone:" + numberOfFirstRollsDone + ")");
+                    //ie the one each you get to see how starts.
+                    dealWithOpeningRolls();
+                    //kick start the bot
+                } else {
+                    //////////////////////////////
+                    //ORDINARY ROLLS/////////////
+                    log("ORDINARY ROLL");
+                    dealWithOrdinaryRolls();
+                }
+                buttonPressed = true;//just to print out to us it was pressed.
+            }
+        }
+    }
  
- //deals with an ordinary roll, that is sets the 2 die values to new random ones
- private void dealWithOrdinaryRolls() {
-     log("----------- dealWithOrdinaryRolls -----------");
-     if (Board.whoseTurnIsIt==Player.WHITE) {
-         log("white will roll both die now.");
-         // note we pass in null in here which tells it to roll both die for us directly
-         playerRolls(Player.WHITE, null,false);
-         
-     } else if (Board.whoseTurnIsIt==Player.BLACK) {
-         log("black will roll both die now.");
-         // note we pass in null in here which tells it to roll both die for us directly
-         playerRolls(Player.BLACK,null,false);
-        
-     } else {
-         Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
-     }
- }
+    //deals with an ordinary roll, that is sets the 2 die values to new random ones
+    private void dealWithOrdinaryRolls() {
+        log("----------- dealWithOrdinaryRolls -----------");
+        if (Board.whoseTurnIsIt == Player.WHITE) {
+            log("white will roll both die now.");
+            // note we pass in null in here which tells it to roll both die for us directly
+            playerRolls(Player.WHITE, null, false);
 
- //deals with the implementation details of the opening rolls, that is each player
- //gets one roll to decide who goes first, then the winner takes both of these values
- //as their opening move.
- private void dealWithOpeningRolls() {
-     log("----------- dealWithOpeningRolls -----------");
-     numberOfFirstRollsDone++;
-    log("first roll. "+numberOfFirstRollsDone);
+        } else if (Board.whoseTurnIsIt == Player.BLACK) {
+            log("black will roll both die now.");
+            // note we pass in null in here which tells it to roll both die for us directly
+            playerRolls(Player.BLACK, null, false);
 
-    // WHITE rolls first to see who starts
-    if (numberOfFirstRollsDone==1) {
-        playerRolls(Player.WHITE, board.die1,true);
-    } else //THEN black rolls his try to see who goes first
-    if (numberOfFirstRollsDone==2) {
-        playerRolls(Player.BLACK, board.die2,true);
-
-        //check who was higher and therefore goes first
-        if (blacksFirstRollVal>whitesFirstRollVal) {
-            playerWonRollOff(Player.BLACK);
-        } else if (whitesFirstRollVal>blacksFirstRollVal) {
-            playerWonRollOff(Player.WHITE);
-        } else if (blacksFirstRollVal==whitesFirstRollVal) {
-            log("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
-            tellPlayers("Both players rolled the same! Re-roll.");
-            numberOfFirstRollsDone=0;
-            blacksFirstRollVal=-1;
-            whitesFirstRollVal=-1;
-            sfxDoubleRolled.playSound();
-            //this leaves it in a state where it simply allows this cycle to
-            //repeat until the die rolls are different.
+        } else {
+            Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
         }
     }
- }
 
- //does some basic stuff regarding a player winning a roll off
- //and makes sure that board.whoseTurnIsIt is updated with the right value
- private void playerWonRollOff(int player) {
-     if (player==Player.BLACK) {
-        log("BLACK won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
-        tellPlayers("Black won the roll off: "+blacksFirstRollVal+" to "+whitesFirstRollVal);
-        board.whoseTurnIsIt=Player.BLACK;
-        //theyve rolled now time to move their pieces
-     } else
-     if (player==Player.WHITE) {
-        log("WHITE won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
-        tellPlayers("White won the roll off: "+whitesFirstRollVal+" to "+blacksFirstRollVal);
-        board.whoseTurnIsIt=Player.WHITE;
-        //theyve rolled now time to move their pieces
-     } else {
-         Utils._E("playerWonRollOff received an invalid player colour "+player);
-     }
-    if (CustomCanvas.numberOfFirstRollsDone>1)//ie if game started.
-    {
-     //hide roll button while they move their pieces.
-     showRollButton=false;
-     log("hiding show roll button");
+     //deals with the implementation details of the opening rolls, that is each player
+     //gets one roll to decide who goes first, then the winner takes both of these values
+     //as their opening move.
+    private void dealWithOpeningRolls() {
+        log("----------- dealWithOpeningRolls -----------");
+        numberOfFirstRollsDone++;
+        log("first roll. " + numberOfFirstRollsDone);
+
+        // WHITE rolls first to see who starts
+        if (numberOfFirstRollsDone == 1) {
+            playerRolls(Player.WHITE, board.die1, true);
+        } else if (numberOfFirstRollsDone == 2) {
+            playerRolls(Player.BLACK, board.die2, true);
+
+            //check who was higher and therefore goes first
+            if (blacksFirstRollVal > whitesFirstRollVal) {
+                playerWonRollOff(Player.BLACK);
+            } else if (whitesFirstRollVal > blacksFirstRollVal) {
+                playerWonRollOff(Player.WHITE);
+            } else if (blacksFirstRollVal == whitesFirstRollVal) {
+                log("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
+                tellPlayers("Both players rolled the same! Re-roll.");
+                numberOfFirstRollsDone = 0;
+                blacksFirstRollVal = -1;
+                whitesFirstRollVal = -1;
+                sfxDoubleRolled.playSound();
+                //this leaves it in a state where it simply allows this cycle to
+                //repeat until the die rolls are different.
+            }
+        }
     }
- }
 
- public static int D1lastDieRoll_toSendOverNetwork;
- public static int D2lastDieRoll_toSendOverNetwork;
- public static boolean someoneRolledADouble=false;
- public static int doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
-                         //ie, we want them to have 4 rolls if thats the case and not 2
+    //does some basic stuff regarding a player winning a roll off
+    //and makes sure that board.whoseTurnIsIt is updated with the right value
+    private void playerWonRollOff(int player) {
+        if (player == Player.BLACK) {
+            log("BLACK won the roll off: " + blacksFirstRollVal + " to " + whitesFirstRollVal);
+            tellPlayers("Black won the roll off: " + blacksFirstRollVal + " to " + whitesFirstRollVal);
+            board.whoseTurnIsIt = Player.BLACK;
+            //theyve rolled now time to move their pieces
+        } else if (player == Player.WHITE) {
+            log("WHITE won the roll off: " + whitesFirstRollVal + " to " + blacksFirstRollVal);
+            tellPlayers("White won the roll off: " + whitesFirstRollVal + " to " + blacksFirstRollVal);
+            board.whoseTurnIsIt = Player.WHITE;
+            //theyve rolled now time to move their pieces
+        } else {
+            Utils._E("playerWonRollOff received an invalid player colour " + player);
+        }
+        if (CustomCanvas.numberOfFirstRollsDone > 1)//ie if game started.
+        {
+            //hide roll button while they move their pieces.
+            showRollButton = false;
+            log("hiding show roll button");
+        }
+    }
 
- //forces doubles on ordinary rolls, PURELY for checking the doubles implementation is bug free
- //this should never be true unless debugging.
+     //forces doubles on ordinary rolls, PURELY for checking the doubles implementation is bug free
+     //this should never be true unless debugging.
 
- // deals with a player rolling a dice, accepts an int representing either
- // BLACK or WHITE, die is the die which the player should roll.
- //openingRolls is passed in as true if the rolls are opening ones.
- // note that:
- // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
- //accessing the dice objects directly, since we really want them to roll simulatenously so to speak
- private void playerRolls(int player, Die die,boolean openingRolls) {
-     if (player==Player.WHITE) {
-         if (openingRolls) {   // an opening roll.
-             int val = die.roll();
-             System.out.println("updateDieRollRemotely");
-             if (I_AM_CLIENT)
-             {
-                 D1lastDieRoll_toSendOverNetwork=val;
-                 GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-             }
-             if (I_AM_SERVER)
-             {
-                 val=Integer.parseInt(doComms.D1remoteDieRoll);
-                 die.setValue(val);
-             }
-             log("White rolled:"+val);
-             whitesFirstRollVal=val;
-             tellPlayers("White's opening roll "+whitesFirstRollVal);
-         } else {
-             //ordinary roll.
-             int val  = board.die1.roll();
-             D1lastDieRoll_toSendOverNetwork=val;
-             GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-             int val2 = board.die2.roll();
-             D2lastDieRoll_toSendOverNetwork=val2;
-             GameNetworkClient.SENDCLICK_AND_DIEVALUE2=true;//tells it to send a click over network
-             log("####################################White rolled:"+val+", "+val2);
-             tellPlayers("White rolled:"+val+"-"+val2);
-             
-             if (val==val2) {
-                 log("White Double!");
-                 tellPlayers("White rolled:"+val+"-"+val2+" (Double)");
-                 someoneRolledADouble=true;
-                 doubleRollCounter=0;
-                 sfxDoubleRolled.playSound();
-             }
-             showRollButton=false;//dont show it now theyve just rolled.
-         }
-     } else if (player==Player.BLACK) {
-         if (openingRolls) {   //its an opening roll.
-             int val = die.roll();
-            D1lastDieRoll_toSendOverNetwork=val;
-             GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-             log("Black rolled:"+val);
-             blacksFirstRollVal=val;
-             tellPlayers("Black's opening roll "+blacksFirstRollVal);
-         } else {
-             //ordinary roll.
-             int val  = board.die1.roll();
-             D1lastDieRoll_toSendOverNetwork=val;
-             GameNetworkClient.SENDCLICK_AND_DIEVALUE1=true;//tells it to send a click over network
-             int val2 = board.die2.roll();
-             D2lastDieRoll_toSendOverNetwork=val2;
-             GameNetworkClient.SENDCLICK_AND_DIEVALUE2=true;//tells it to send a click over network
-             log("#####################################################Black rolled:"+val+", "+val2);
-             tellPlayers("Black rolled:"+val+"-"+val2);
-             
-             if (val==val2)
-             {
-                 log("Black Double!");
-                 tellPlayers("Black rolled:"+val+"-"+val2+" (Double)");
-                 someoneRolledADouble=true;
-                 doubleRollCounter=0;
-                 sfxDoubleRolled.playSound();
-             }
-             showRollButton=false;//dont show it now theyve just rolled.
-         }
-     } else {
-         Utils._E("playerRolls() received an invalid player colour.");
-     }
-     board.calculatePotentialNumberOfMoves=true;
- }
+     // deals with a player rolling a dice, accepts an int representing either
+     // BLACK or WHITE, die is the die which the player should roll.
+     //openingRolls is passed in as true if the rolls are opening ones.
+     // note that:
+     // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
+     //accessing the dice objects directly, since we really want them to roll simulatenously so to speak
+    private void playerRolls(int player, Die die,boolean openingRolls) {
+        if (player == Player.WHITE) {
+            if (openingRolls) {   // an opening roll.
+                int val = die.roll();
+                System.out.println("updateDieRollRemotely");
+                if (I_AM_CLIENT) {
+                    D1lastDieRoll_toSendOverNetwork = val;
+                    GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
+                }
+                if (I_AM_SERVER) {
+                    val = Integer.parseInt(doComms.D1remoteDieRoll);
+                    die.setValue(val);
+                }
+                log("White rolled:" + val);
+                whitesFirstRollVal = val;
+                tellPlayers("White's opening roll " + whitesFirstRollVal);
+            } else {
+                //ordinary roll.
+                int val = board.die1.roll();
+                D1lastDieRoll_toSendOverNetwork = val;
+                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
+                int val2 = board.die2.roll();
+                D2lastDieRoll_toSendOverNetwork = val2;
+                GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true;//tells it to send a click over network
+                log("####################################White rolled:" + val + ", " + val2);
+                tellPlayers("White rolled:" + val + "-" + val2);
 
-    public static int numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
-    int whitesFirstRollVal=-1;//keep their initial roll to compare them
-    int blacksFirstRollVal=-1;
-    public static boolean showRollButton=true;//false when not needed
+                if (val == val2) {
+                    log("White Double!");
+                    tellPlayers("White rolled:" + val + "-" + val2 + " (Double)");
+                    someoneRolledADouble = true;
+                    doubleRollCounter = 0;
+                    sfxDoubleRolled.playSound();
+                }
+                showRollButton = false;//dont show it now theyve just rolled.
+            }
+        } else if (player == Player.BLACK) {
+            if (openingRolls) {   //its an opening roll.
+                int val = die.roll();
+                D1lastDieRoll_toSendOverNetwork = val;
+                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
+                log("Black rolled:" + val);
+                blacksFirstRollVal = val;
+                tellPlayers("Black's opening roll " + blacksFirstRollVal);
+            } else {
+                //ordinary roll.
+                int val = board.die1.roll();
+                D1lastDieRoll_toSendOverNetwork = val;
+                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
+                int val2 = board.die2.roll();
+                D2lastDieRoll_toSendOverNetwork = val2;
+                GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true;//tells it to send a click over network
+                log("#####################################################Black rolled:" + val + ", " + val2);
+                tellPlayers("Black rolled:" + val + "-" + val2);
+
+                if (val == val2) {
+                    log("Black Double!");
+                    tellPlayers("Black rolled:" + val + "-" + val2 + " (Double)");
+                    someoneRolledADouble = true;
+                    doubleRollCounter = 0;
+                    sfxDoubleRolled.playSound();
+                }
+                showRollButton = false;//dont show it now theyve just rolled.
+            }
+        } else {
+            Utils._E("playerRolls() received an invalid player colour.");
+        }
+        board.calculatePotentialNumberOfMoves = true;
+    }
 
     //clears the potential spikes used for highlighting possible moves,
     //once cleared they are recreated as needed.
@@ -1212,7 +1195,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Board.copy_of_reachableFromDie2=null;
         Board.copy_of_reachableFromBothDice=null;
     }
-
 
     public static boolean showDice;
     //this needs to be called when swapping turns form one player to another
@@ -1245,134 +1227,103 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int GLOW_INITIAL_VALUE=125;
     int glowCounter=GLOW_INITIAL_VALUE;
 
+    private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
+        ////
+        String printme = question; //"Please select";
+        int widthOfPrintMe;
+        int xposTmp = 0;
+        int ypos = (ULTIMATE_HEIGHT / 2) - fontblack.getHeight() * 5;
 
- private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
-     ////
-     String printme = question; //"Please select";
-     int widthOfPrintMe;
-     int xposTmp = 0;
-     int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
+        widthOfPrintMe = (fontblack.stringWidth(printme));
+        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
+        ////
 
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     ////
+        ypos += fontblack.getHeight() * 2;
 
-     ypos+=fontblack.getHeight()*2;
-      
-     ////
-     printme=buttonAstr;//" Local Play ";
-     widthOfPrintMe=(fontblack.stringWidth(printme));
- 
-     //---- draw buttons
-     ///////// 'local' button
-     
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
- 
-     /////
-     //make button glow if pointer is over it
-     if (glowA)
-     {
-         if (glowCounter<255)
-         {
-            utils.setColor(g, new Color(glowCounter,0,0));
-         }
-         else
-         {
-            utils.setColor(g, new Color(255,0,0));
-         }
-         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
-         glowA=false;
-     }
-     utils.setColor(g, Color.black);
-     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
+        printme = buttonAstr;//" Local Play ";
 
-     
-     //if (robotmove)
-    // {
-         robotMoveDesc="Bot Loaded. Answer: ("+question+") ";
-         Board.setBotDestination((xposTmp-10)+(widthOfPrintMe+20)/2,ypos+(fontblack.getHeight()/2),"Bot Loaded. Answer: ("+question+") ");
+        //---- draw buttons
+        ///////// 'local' button
 
-        // Bot.destX=(xposTmp-10)+(widthOfPrintMe+20)/2;
-       //  Bot.destY=ypos+(fontblack.getHeight()/2);
-         /////bot.click();
-         tellRobot(false,robotMoveDesc); 
-        // desinationsFromWhichSource="Bot C";
+        widthOfPrintMe = (fontblack.stringWidth(printme));
+        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
 
-     //}
-     /////
+        /////
+        //make button glow if pointer is over it
+        if (glowA) {
+            if (glowCounter < 255) {
+                utils.setColor(g, new Color(glowCounter, 0, 0));
+            } else {
+                utils.setColor(g, new Color(255, 0, 0));
+            }
+            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+            glowA = false;
+        }
+        utils.setColor(g, Color.black);
+        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
 
-     /////for collision of button
-     buttonxA=xposTmp-10;
-     buttonyA=ypos;
-     buttonwA=widthOfPrintMe+20;
-     buttonhA=(fontblack.getHeight());
-     if (showCollisions)
-     {
-         utils.setColor(g, Color.red);
-         utils.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
-     }
-     /////
+        robotMoveDesc = "Bot Loaded. Answer: (" + question + ") ";
+        Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2, ypos + (fontblack.getHeight() / 2),
+            "Bot Loaded. Answer: (" + question + ") ");
+        tellRobot(false, robotMoveDesc);
 
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     
-     ////
+        /////for collision of button
+        buttonxA = xposTmp - 10;
+        buttonyA = ypos;
+        buttonwA = widthOfPrintMe + 20;
+        buttonhA = (fontblack.getHeight());
+        if (showCollisions) {
+            utils.setColor(g, Color.red);
+            utils.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
+        }
 
-     ///////
-     printme="or";
-     ypos +=(fontblack.getHeight()*2);
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     //////
+        fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
 
-     ///////// 'network' button
-     printme=buttonBstr;//"Network Play";
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     utils.setColor(g, Color.BLACK);
-     ypos+=fontblack.getHeight()*2;
+        ///////
+        printme = "or";
+        ypos += (fontblack.getHeight() * 2);
+        widthOfPrintMe = (fontblack.stringWidth(printme));
+        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
+        //////
 
-     /////
-     //make button glow if pointer is over it
-     if (glowB)
-     {
-         if (glowCounter<255)
-         {
-            utils.setColor(g, new Color(0,0,glowCounter));
-         }
-         else
-         {
-            utils.setColor(g, new Color(0,0,255));
-         }
+        ///////// 'network' button
+        printme = buttonBstr;//"Network Play";
+        widthOfPrintMe = (fontblack.stringWidth(printme));
+        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        utils.setColor(g, Color.BLACK);
+        ypos += fontblack.getHeight() * 2;
 
-         utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
-         glowB=false;
-     }
-     utils.setColor(g, Color.black);
-     utils.drawRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontblack.getHeight()) );
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     ////
+        /////
+        //make button glow if pointer is over it
+        if (glowB) {
+            if (glowCounter < 255) {
+                utils.setColor(g, new Color(0, 0, glowCounter));
+            } else {
+                utils.setColor(g, new Color(0, 0, 255));
+            }
 
-     /////for collision of button
-     buttonxB=xposTmp-10;
-     buttonyB=ypos;
-     buttonwB=widthOfPrintMe+20;
-     buttonhB=(fontblack.getHeight());
-     if (showCollisions)
-     {
-        utils.setColor(g, Color.red);
-        utils.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
-     }
-     /////
+            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+            glowB = false;
+        }
+        utils.setColor(g, Color.black);
+        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+        fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
 
-     //draw a little version of the logo in the bottom right
-     utils.drawImage(g, splashScreenLogoSmall, ULTIMATE_WIDTH-((splashScreenLogoSmall.getWidth(this_)/2)+20), ULTIMATE_HEIGHT-splashScreenLogoSmall.getHeight(this_), this_);
- }
-
- public static boolean robotmove=true;
- static String robotMoveDesc="Bot loaded.";
+        /////for collision of button
+        buttonxB = xposTmp - 10;
+        buttonyB = ypos;
+        buttonwB = widthOfPrintMe + 20;
+        buttonhB = (fontblack.getHeight());
+        if (showCollisions) {
+            utils.setColor(g, Color.red);
+            utils.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
+        }
+        //draw a little version of the logo in the bottom right
+        utils.drawImage(g, splashScreenLogoSmall, ULTIMATE_WIDTH - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
+            ULTIMATE_HEIGHT - splashScreenLogoSmall.getHeight(this), this);
+    }
 
  private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
      //reuse an existing method, they both simply have 2 buttons on them
@@ -1442,10 +1393,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontblack.drawString(g, printme, xposTmp , y, 0);
     }
 
-    boolean flip;
-    int paraYoffset=0;
-    int OUTLINE_FOR_CHAT_BOXES=0;
-    Vector playerPositions;
     private void paint_NETWORKING_LOBBY(Graphics g) {
         TRANSPARENCY_LEVEL=255;
         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
@@ -1557,11 +1504,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
          String user = (String) e.nextElement();
          int xval=0;
          if (user.equals("ChanServ")) {
-             utils.drawImage(g, op,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
+             utils.drawImage(g, op,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user,  xval, listY, 0); listY+=fontblack.getHeight();
          } else if (user.equals("Admin")) {
-             utils.drawImage(g, admin,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
+             utils.drawImage(g, admin,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user, xval , listY, 0); listY+=fontblack.getHeight();
          } else {
@@ -2068,7 +2015,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                      }
                      else
                      {
-                         //_("NO WE CANT DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
+                         //log("NO WE CANT DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
                      }
                  }
              }
@@ -2402,7 +2349,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public void mouseMoved(MouseEvent e) {
          //so our mouse doesnt influence anything
         if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
-            //_("mouse wont respond");
+            //log("mouse wont respond");
         } else {
             if (NETWORK_GAME_IN_PROCESS) {
                 if (I_AM_CLIENT && Board.whoseTurnIsIt==Player.WHITE) {
@@ -2629,46 +2576,46 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
  }
 
  // make colour objects
- public static void makeColourObjects(boolean forceRecreation) {
-     if (panel_colour==null || forceRecreation) {
-         panel_colour=new Color(PANEL_COLOUR);
-     }
-     if (background_colour==null || forceRecreation) {
-         background_colour=new Color(BACKGROUND_COLOUR);
-     }
-     if (roll_button_colour==null || forceRecreation) {
-         roll_button_colour= new Color(ROLL_BUTTON_COLOUR);
-     }
- }
+    public static void makeColourObjects(boolean forceRecreation) {
+        if (panel_colour == null || forceRecreation) {
+            panel_colour = new Color(PANEL_COLOUR);
+        }
+        if (background_colour == null || forceRecreation) {
+            background_colour = new Color(BACKGROUND_COLOUR);
+        }
+        if (roll_button_colour == null || forceRecreation) {
+            roll_button_colour = new Color(ROLL_BUTTON_COLOUR);
+        }
+    }
 
-    public static ImageObserver this_;
-    public static CustomFont fontwhite, fontblack;
     // prepare the customfont
- private void loadCustomFonts() {
-     if (fontwhite==null) {
-         boolean land=false;
-         int gap=10;
-         String path="/";
-         int makeLettersCloserValue=3; // some confusion here, gap is not used, adjust this value to make letters closer or further apart.
-         int GAP=3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
-         try {
-             utils.log("loading fonts:");
-             fontwhite = CustomFont.getFont( utils.loadImage(path+"whitefont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
-             if (fontwhite==null) {
-                 Utils._E("-- fontwhite image is null");
-             }
-             fontblack = CustomFont.getFont( utils.loadImage(path+"blackfont.png"), CustomFont.SIZE_SMALL,    CustomFont.STYLE_PLAIN, land,32,93,GAP,gap,true);
-             if (fontblack==null) {
-                 Utils._E("-- fontblack image is null");
-             }
-         }
-         catch(Exception e) {
-             Utils._E("== error loading fonts "+e.getMessage());
-         }
-      } else {
-         log("Fonts already pre-cached...");
-     }
- }
+    private void loadCustomFonts() {
+        if (fontwhite == null) {
+            boolean land = false;
+            int gap = 10;
+            String path = "/";
+            int GAP = 3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
+            try {
+                utils.log("loading fonts:");
+                fontwhite = CustomFont.getFont(utils.loadImage(path + "whitefont.png"),
+                    CustomFont.SIZE_SMALL,
+                    CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
+                if (fontwhite == null) {
+                    Utils._E("-- fontwhite image is null");
+                }
+                fontblack = CustomFont.getFont(utils.loadImage(path + "blackfont.png"),
+                    CustomFont.SIZE_SMALL,
+                    CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
+                if (fontblack == null) {
+                    Utils._E("-- fontblack image is null");
+                }
+            } catch (Exception e) {
+                Utils._E("== error loading fonts " + e.getMessage());
+            }
+        } else {
+            log("Fonts already pre-cached...");
+        }
+    }
 
     //for debugging, paints sytem.out to screen
     public void paintStringsToCanvas(Graphics g) {
@@ -2832,17 +2779,15 @@ public static int bumblebee[] = {
                 };
 
     ///ROBOT STUFF
-    public static void tellRobot(boolean b,String s) {
+    public static void tellRobot(boolean b, String s) {
         if (s != null) {
             robotExplain(s);
         }
-        robotmove = b;
     }
 
     Vector textLinesForWrappingTMP;
     boolean allowScrollingDOWN;
     String SPECIAL_END_SYMBOL="::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
-    public static  int WRAP_WIDTH_HACK_VAL=0; //15  //ensures that text doesnt go off edge
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
     public int drawMeWrapped(Graphics g,int x, int y, String wrapMe, CustomFont font, boolean backdrop,
@@ -2886,77 +2831,54 @@ public static int bumblebee[] = {
         return y;
     }
 
-  public static Vector separateTextNEW(String string, int width, int height, CustomFont font) {
+    public static Vector separateTextNEW(String string, int width, int height, CustomFont font) {
         Vector lines = new Vector();
-        String theText=string;
-        String aline="";
-
-        StringTokenizer st = new StringTokenizer(theText," ");
+        String theText = string;
+        String aline = "";
+        StringTokenizer st = new StringTokenizer(theText, " ");
         String s;
-		boolean fitsVertically=true;
-		int verticalSpaceUsed=0;
+        boolean fitsVertically = true;
         while (st.hasMoreElements() && fitsVertically) {
-             s = st.nextToken();//if its not null s failed to get used last time
-             s=s.trim();
-             if (s.equals("[p]") || s.equals("[br]") || s.equals("[br2]") || s.equals("[br][br]"))//<p>"))
-             {
-                 // [p] [br] [br][br] ALL WORK LIKE HTMLS <P>
-                 // [br2] works like HTMLS <BR>
-
-                 //_("NEW LINE >>>>");
-                 lines.addElement(aline);
-                 if (!s.equals("[br2]"))//dont add a empty line if its a br2
-                 {
+            s = st.nextToken(); // if its not null s failed to get used last time
+            s = s.trim();
+            if (s.equals("[p]") || s.equals("[br]") || s.equals("[br2]") || s.equals("[br][br]")) {
+                //<p>"))
+                // [p] [br] [br][br] ALL WORK LIKE HTMLS <P>
+                // [br2] works like HTMLS <BR>
+                lines.addElement(aline);
+                if (!s.equals("[br2]")) {//dont add a empty line if its a br2
                     lines.addElement(" ");
-					verticalSpaceUsed+=font.getHeight()+2;
-                 }
-                 aline="";
-                 s=null;
-             } else {
-                     //_("word:"+s);
-                    if (font.stringWidth(aline+" "+s)<width) {
-                        aline+=s+" ";
-                        s=null;
+                }
+                aline = "";
+            } else {
+                if (font.stringWidth(aline + " " + s) < width) {
+                    aline += s + " ";
+                    s = null;
+                } else {
+                    lines.addElement(aline);
+                    aline = "";
+                }
+                if (!st.hasMoreElements()) {
+                    //if its finished just add last bit now to new line
+                    if (s != null && (!s.equals("[p]") || s.equals("[br2]") || s.equals("[br]") || s.equals("[br][br]"))) {
+                        lines.addElement(aline + "" + s);
                     } else {
-                        //_("aNEW LINE:"+aline);
-                        lines.addElement(aline);
-						verticalSpaceUsed+=font.getHeight()+2;
-                        aline="";
+                        lines.addElement(aline.trim());
                     }
-                    {
-                        if (!st.hasMoreElements() )
-                        {
-                            //if its finished just add last bit now to new line
-                            if (s!=null && (!s.equals("[p]") ||  s.equals("[br2]") || s.equals("[br]") || s.equals("[br][br]")))
-                            {
-                                lines.addElement(aline+""+s);
-								verticalSpaceUsed+=font.getHeight();
-                                //_("bNEW LINE:"+aline);
+                } else {
+                    if (s != null) {
+                        if (s.equals("[p]") || s.equals("[br]") || s.equals("[br2]") || s.equals("[br][br]")) {
+                            lines.addElement(aline);
+                            if (!s.equals("[br2]")) {//dont add a empty line if its a br2
+                                lines.addElement(" ");
                             }
-                            else
-                            {
-                                lines.addElement(aline.trim());
-								verticalSpaceUsed+=font.getHeight()+2;
-                                 //_("cNEW LINE:"+aline);
-                            }
+                            aline = "";
                         } else {
-                            if (s!=null) {
-                                if (s.equals("[p]")|| s.equals("[br]") ||  s.equals("[br2]") || s.equals("[br][br]")) {
-                                    lines.addElement(aline);
-									verticalSpaceUsed+=font.getHeight();
-                                    if (!s.equals("[br2]"))//dont add a empty line if its a br2
-                                     {
-                                        lines.addElement(" ");
-										verticalSpaceUsed+=font.getHeight()+2;
-                                     }
-                                     aline="";
-                                } else {
-                                    aline+=""+s+" ";
-                                }
-                            }
+                            aline += "" + s + " ";
                         }
                     }
-             }
+                }
+            }
         }
         return lines;
     }
