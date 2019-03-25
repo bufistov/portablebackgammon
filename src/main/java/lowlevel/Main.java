@@ -10,19 +10,23 @@ import java.awt.Toolkit;
 import java.awt.Dimension;
 import java.awt.image.*;
 
-public class Main
-{
-     public static final boolean CENTRALISE_ON_SECOND_MONITOR=false;//for testing on my 2 monitr setup.
-     public static Canvas canvas;
-     public static JFrame frame;
+public class Main {
 
-     private static final int FRAME_DELAY_MILLIS = 50;//50;//20; // 20ms. implies 50fps (1000/20) = 50
-     private static boolean gameThreadIsRunning = true;
-     public static void main(String[] args)
-     {
+    public static final boolean CENTRALISE_ON_SECOND_MONITOR = false; // for testing on my 2 monitr setup.
+    public static Canvas canvas;
+    public static JFrame frame;
+    public static final int WINDOWY_MINUS=50;
+
+    private static int insetY;
+    private static int insetX;
+    private static final int FRAME_DELAY_MILLIS = 50;//50;//20; // 20ms. implies 50fps (1000/20) = 50
+    private static boolean gameThreadIsRunning = true;
+    private static int windowX;
+    private static int windowY;
+
+     public static void main(String[] args) {
          log("Main called, Backgammon starting.");
          frame = new JFrame();
-
          log("insetY:" + insetY + ", insetX" + insetX);
          canvas = new CustomCanvas(frame); // create our canvas object that has custom rendering in it.
          frame.getContentPane().add(canvas);
@@ -57,27 +61,18 @@ public class Main
      }
 
      static boolean isHidden;
-     public static void hideMousePointer(boolean hide)
-     {
-         if (hide && !isHidden)
-         {
+     public static void hideMousePointer(boolean hide) {
+         if (hide && !isHidden) {
             isHidden=true;
             int[] pixels = new int[16 * 16];
             Image image = Toolkit.getDefaultToolkit().createImage( new MemoryImageSource(16, 16, pixels, 0, 16));
             Cursor transparentCursor =  Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), "invisibleCursor");
             frame.setCursor(transparentCursor);
-         }
-         else if (!hide && isHidden)
-         {
+         } else if (!hide && isHidden) {
              isHidden=false;
              frame.setCursor(null);
          }
      }
-
-     public static int insetY;
-     public static int insetX;
-
-     public static final int WINDOWY_MINUS=50;
 
      private static void centralise(JFrame frame) {
         // get dimensions of the screen for centreing window later
@@ -85,15 +80,11 @@ public class Main
 	    // Centre the window
         if (CENTRALISE_ON_SECOND_MONITOR) {
             frame.setLocation((screenDim.width),(screenDim.height/8)-WINDOWY_MINUS);
-        }
-        else
-        {
+        } else {
             frame.setLocation((screenDim.width/2)-frame.getWidth()/2,(screenDim.height/2)-(frame.getHeight()/2)-WINDOWY_MINUS);
         }
      }
 
-     static int windowX;
-     static int windowY;
      public static int getWindowXpos() {
          return windowX;
      }

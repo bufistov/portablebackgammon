@@ -145,7 +145,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 Board.mouseHoverX = pointerX;//e.getX();
                 Board.mouseHoverY = pointerY;//e.getY();
             } else {
-                if (Bot.FULL_AUTO_PLAY) {
+                if (Bot.getFullAutoPlay()) {
                     utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this_);//this 6 lines it up
                     Board.mouseHoverX = Bot.x;//e.getX();
                     Board.mouseHoverY = Bot.y;//e.getY();
@@ -326,7 +326,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int yabout=(HEIGHT/4)+TINY_GAP;
 
         //paint the about box
-        printme="Forumosa Backgammon ("+VERSION+")";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+        String printme="Forumosa Backgammon ("+VERSION+")";
+        fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);
+        yabout += fontblack.getHeight();
         printme="- www.forumosa.com -";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
         printme=" ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
         printme="Keys:    ";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
@@ -358,9 +360,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     x+=5;
     y+=TINY_GAP;
     //paint the about box
-    printme="Backgammon ("+VERSION+") DEBUG CONSOLE";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
+    String printme="Backgammon ("+VERSION+") DEBUG CONSOLE";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
-    printme="TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS;
+    printme="DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS;
     //Highlighter to indicate if its on this option
     if (debugMenuPos==0) {
         utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
@@ -382,25 +384,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
-    printme="FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY;
+    printme="FULL_AUTO_PLAY:"+Bot.getFullAutoPlay();
     //Highlighter to indicate if its on this option
     if (debugMenuPos==3) {
         utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme+" "), fontwhite.getHeight());}
     //option itself,
     fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
 
-    y+=10;
-    printme="Q = QUIT";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="P = PAUSE (bot dead? "+Bot.dead+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="D = DEBUG CONSOLE ("+DEBUG_CONSOLE+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="T = THEME ("+themeName+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="C = COLLISIONS ("+showCollisions+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="L = CANVAS LOGGING ("+Utils.CANVAS_LOGGING+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="S = SOUND ("+SOUND_ON+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="X = TEST SOUND";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="J = JUMP TO DESTINATION ("+Bot.JUMP_DIRECT_TO_DEST+")";fontwhite.drawString(g, printme,x,y,0);y+=fontblack.getHeight();
-    printme="F = FULL_AUTO_PLAY ("+Bot.FULL_AUTO_PLAY+")";fontwhite.drawString(g, printme,x,y,0);//y+=fontblack.getHeight();
+    y += 10;
 
+    String[] helpMessages = {"Q = QUIT",
+        "P = PAUSE (bot dead? " + Bot.dead + ")",
+        "D = DEBUG CONSOLE (" + DEBUG_CONSOLE + ")",
+        "T = THEME (" + themeName + ")", "C = COLLISIONS ("+showCollisions+")",
+        "L = CANVAS LOGGING ("+Utils.CANVAS_LOGGING+")", "S = SOUND ("+SOUND_ON+")", "X = TEST SOUND",
+        "J = JUMP TO DESTINATION: unknown",
+        "F = FULL_AUTO_PLAY: unknwon"};
+    for (String message: helpMessages) {
+        fontwhite.drawString(g, message, x, y,0);
+        y += fontblack.getHeight();
+    }
     y+=5;
     printme=Board.ROBOT_DESTINATION_MESSAGE;
 
@@ -431,15 +434,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
  private void debugOptionChanged(int direction) {
      switch(debugMenuPos) {
-         //TIME_DELAY_BETWEEN_CLICKS
+         //DELAY_BETWEEN_CLICKS_MILLIS
          case DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS:
              if (direction==DEBUGLEFT) {
-                 Bot.TIME_DELAY_BETWEEN_CLICKS-=10;
-                 log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
+                 Bot.DELAY_BETWEEN_CLICKS_MILLIS -=10;
+                 log("DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS);
              }
              if (direction==DEBUGRIGHT) {
-                 Bot.TIME_DELAY_BETWEEN_CLICKS+=10;
-                 log("TIME_DELAY_BETWEEN_CLICKS:"+Bot.TIME_DELAY_BETWEEN_CLICKS);
+                 Bot.DELAY_BETWEEN_CLICKS_MILLIS +=10;
+                 log("DELAY_BETWEEN_CLICKS_MILLIS:"+Bot.DELAY_BETWEEN_CLICKS_MILLIS);
              }
              break;
          //DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS
@@ -464,15 +467,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                  log("paintRobotMessages:"+paintRobotMessages);
              }
              break;
-             //TIME_DELAY_BETWEEN_CLICKS
+             //DELAY_BETWEEN_CLICKS_MILLIS
          case DEBUG_OPTION_FULL_AUTO_PLAY:
-             if (direction==DEBUGLEFT) {
-                 Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
-                 log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
+             if (direction == DEBUGLEFT) {
+                 Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
+                 log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
              }
-             if (direction==DEBUGRIGHT) {
-                 Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
-                 log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
+             if (direction == DEBUGRIGHT) {
+                 Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
+                 log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
              }
              break;
          default:
@@ -511,30 +514,27 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
- ///////// ALL PAINT STATE METHODS //////////////////////
- int y;
- int x;
- int splashCounter;
+    ///////// ALL PAINT STATE METHODS //////////////////////
+    int y;
+    int x;
+    int splashCounter;
 
- private void paint_SPLASH_SCREEN(Graphics g) {
-
-     utils.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
-     utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
-     utils.setColor(g,Color.BLACK);
-
-     if (showCollisions) {
-         int ydebug=10;
-         int xdebug=10;
-         fontblack.drawString(g, DEBUG_HEADER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
-         fontblack.drawString(g, VERSION,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
-         fontblack.drawString(g, splashCounter+"/"+SPLASH_COUNTER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
-     }
-     if (splashCounter++ > SPLASH_COUNTER) {
-        log("Splash done.");
-        state=OPTIONS_SCREEN_LOCAL_OR_NETWORK;
-        
-     }
- }
+    private void paint_SPLASH_SCREEN(Graphics g) {
+        utils.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
+        utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
+        utils.setColor(g,Color.BLACK);
+        if (showCollisions) {
+             int ydebug=10;
+             int xdebug=10;
+             fontblack.drawString(g, DEBUG_HEADER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
+             fontblack.drawString(g, VERSION,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
+             fontblack.drawString(g, splashCounter+"/"+SPLASH_COUNTER,xdebug,ydebug,0);ydebug+=fontblack.getHeight();
+        }
+        if (splashCounter++ > SPLASH_COUNTER) {
+            log("Splash done.");
+            state = OPTIONS_SCREEN_LOCAL_OR_NETWORK;
+        }
+    }
 
  //prefs button x,y width and height
  int prefw=20;
@@ -688,21 +688,19 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
      }
  }
 
- String printme;//reused for many text that is printed
+    //String printme;//reused for many text that is printed
 
- //use these to detect if the roll button was clicked.
- int rollButtonX;
- int rollButtonY;
- int rollButtonW;
- int rollButtonH;
+    //use these to detect if the roll button was clicked.
+    int rollButtonX;
+    int rollButtonY;
+    int rollButtonW;
+    int rollButtonH;
 
- public static final String STAR="*";
- //draw all of the text on the panel
- private void drawHUDtext(int xpos)
- {
+    //draw all of the text on the panel
+ private void drawHUDtext(int xpos) {
      int ypos=Board.BORDER+TINY_GAP;
      //draw black players score at top
-     printme="White ("+board.getBlackPlayer().name+")";
+     String printme = "White ("+board.getBlackPlayer().name+")";
      if (board.whoseTurnIsIt==Player.WHITE) {
          printme+="*";
      }
@@ -761,9 +759,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
          utils.setColor(g, roll_button_colour);
          utils.fillRoundRect(g, xposTmp-10, ypos, widthOfPrintMe+20, (fontwhite.getHeight()) );
 
-         if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.FULL_AUTO_PLAY  || numberOfFirstRollsDone==1 ) {
-             if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll)
-             {
+         if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK || Bot.getFullAutoPlay()  || numberOfFirstRollsDone==1 ) {
+             if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
                  log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
              } else {
                 Board.setBotDestination((xposTmp-10)+(widthOfPrintMe+20)/2,ypos+(fontwhite.getHeight())/2,"PRESS ROLL BUTTON");
@@ -1201,66 +1198,59 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
      board.calculatePotentialNumberOfMoves=true;
  }
 
- public static int numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
- int whitesFirstRollVal=-1;//keep their initial roll to compare them 
- int blacksFirstRollVal=-1;
- public static boolean showRollButton=true;//false when not needed
+    public static int numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
+    int whitesFirstRollVal=-1;//keep their initial roll to compare them
+    int blacksFirstRollVal=-1;
+    public static boolean showRollButton=true;//false when not needed
 
- //clears the potential spikes used for highlighting possible moves,
- //once cleared they are recreated as needed.
- private static void clearPotentialSpikes()
- {
-     log("clearPotentialSpikes");
-     //Clear all the copy spikes so the valid options vanish
-     Board.copy_of_reachableFromDie1=null;
-     Board.copy_of_reachableFromDie2=null;
-     Board.copy_of_reachableFromBothDice=null;
- }
-
- 
- public static boolean showDice;
- //this needs to be called when swapping turns form one player to another
- //to ensure things behave correctly.
- public static void resetVarsTurn()
- {
-     log("resetVarsTurn");
-
-     //so it doesnt think dice have been used anymore
-     Board.die1HasBeenUsed=false;
-     Board.die2HasBeenUsed=false;
-
-     clearPotentialSpikes();
-
-     //make sure roll button gets redrawn
-     showRollButton=true;
-     showDice=false;//dont draw til the next player clicks roll.
-
-     Board.calculatePotentialNumberOfMoves=true;//so they get calc'd at start of each go.
-     someoneRolledADouble=false;
-     doubleRollCounter=0;
+    //clears the potential spikes used for highlighting possible moves,
+    //once cleared they are recreated as needed.
+    private static void clearPotentialSpikes() {
+        log("clearPotentialSpikes");
+        //Clear all the copy spikes so the valid options vanish
+        Board.copy_of_reachableFromDie1=null;
+        Board.copy_of_reachableFromDie2=null;
+        Board.copy_of_reachableFromBothDice=null;
+    }
 
 
- }
+    public static boolean showDice;
+    //this needs to be called when swapping turns form one player to another
+    //to ensure things behave correctly.
+    public static void resetVarsTurn() {
+        log("resetVarsTurn");
 
- //for screens with 2 buttons this is button 1
- int buttonxA, buttonyA;
- int buttonwA, buttonhA;
- //and button 2
- int buttonxB, buttonyB;
- int buttonwB, buttonhB;
+        //so it doesnt think dice have been used anymore
+        Board.die1HasBeenUsed = false;
+        Board.die2HasBeenUsed = false;
 
- public static final int GLOW_INITIAL_VALUE=125;
- int glowCounter=GLOW_INITIAL_VALUE;
+        clearPotentialSpikes();
 
- ////boolean robotmove=true;
+        //make sure roll button gets redrawn
+        showRollButton = true;
+        showDice = false; // dont draw til the next player clicks roll.
 
- private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question)
- {
+        Board.calculatePotentialNumberOfMoves = true; // so they get calc'd at start of each go.
+        someoneRolledADouble = false;
+        doubleRollCounter = 0;
+    }
 
+    // for screens with 2 buttons this is button 1
+    int buttonxA, buttonyA;
+    int buttonwA, buttonhA;
+    //and button 2
+    int buttonxB, buttonyB;
+    int buttonwB, buttonhB;
+
+    public static final int GLOW_INITIAL_VALUE=125;
+    int glowCounter=GLOW_INITIAL_VALUE;
+
+
+ private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
      ////
-     printme=question;//"Please select";
-     int widthOfPrintMe=(fontblack.stringWidth(printme));
-     int xposTmp=0;
+     String printme = question; //"Please select";
+     int widthOfPrintMe;
+     int xposTmp = 0;
      int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
 
      widthOfPrintMe=(fontblack.stringWidth(printme));
@@ -1417,97 +1407,93 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         return full;
     }
 
-  public static String serverIP = null;
-  private void paint_NETWORKING_ENTER_NAME(Graphics g) {
-     if (serverIP==null)
-     {
+    public static String serverIP = null;
+    private void paint_NETWORKING_ENTER_NAME(Graphics g) {
+        if (serverIP==null) {
          log("GRABBING SERVER IP");
          serverIP=readStringFromWeb("http://www.alphasoftware.org/backgammon/serverip.txt");
           log(" SERVER IP:"+serverIP);
-     }
+        }
 
-     printme="Enter your name:";
-     int widthOfPrintMe=(fontblack.stringWidth(printme));
-     int xposTmp=0;
-     int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
+        String printme="Enter your name:";
+        int widthOfPrintMe=(fontblack.stringWidth(printme));
+        int xposTmp=0;
+        int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
 
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-     ypos+=fontblack.getHeight()*2;
+        widthOfPrintMe=(fontblack.stringWidth(printme));
+        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
+        ypos+=fontblack.getHeight()*2;
 
-     
-     printme="Enter your name:";
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
-     
-     printme=NetworkChatClient.nick;
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
 
-     printme="Chat Server Address: "+serverIP;//NetworkChatClient.theURL;
-     widthOfPrintMe=(fontblack.stringWidth(printme));
-     xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-     y=ULTIMATE_HEIGHT-(fontblack.getHeight()+25);
-     fontblack.drawString(g, printme, xposTmp , y, 0);
+        printme="Enter your name:";
+        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
 
- }
+        printme=NetworkChatClient.nick;
+        widthOfPrintMe=(fontblack.stringWidth(printme));
+        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
 
- boolean flip;
- int paraYoffset=0;
- int OUTLINE_FOR_CHAT_BOXES=0;
- Vector playerPositions;
- private void paint_NETWORKING_LOBBY(Graphics g)
- {
-     TRANSPARENCY_LEVEL=255;
-   // utils.setColor(g,0);
-    utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-    utils.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
-     int SMALLGAP=5;
+        printme="Chat Server Address: "+serverIP;//NetworkChatClient.theURL;
+        widthOfPrintMe=(fontblack.stringWidth(printme));
+        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        y=ULTIMATE_HEIGHT-(fontblack.getHeight()+25);
+        fontblack.drawString(g, printme, xposTmp , y, 0);
+    }
 
-     x=SMALLGAP;
-     y=SMALLGAP+fontblack.getHeight()*2;
+    boolean flip;
+    int paraYoffset=0;
+    int OUTLINE_FOR_CHAT_BOXES=0;
+    Vector playerPositions;
+    private void paint_NETWORKING_LOBBY(Graphics g) {
+        TRANSPARENCY_LEVEL=255;
+        utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
+        utils.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
+        int SMALLGAP=5;
 
-     int BORDER=10;
-     int WIDTH_OF_MESSAGE_TEXT  = ((ULTIMATE_WIDTH-ULTIMATE_WIDTH/6)-BORDER);
-     int HEIGHT_OF_MESSAGE_TEXT = ((ULTIMATE_HEIGHT-ULTIMATE_HEIGHT/8)-(BORDER+y+SMALLGAP))+2;
-     int WIDTH_OF_USERLIST  = ULTIMATE_WIDTH-(WIDTH_OF_MESSAGE_TEXT+BORDER+SMALLGAP);
-     int HEIGHT_OF_USERLIST = HEIGHT_OF_MESSAGE_TEXT+1;
-     int WIDTH_OF_ENTERTEXT_BOX=WIDTH_OF_MESSAGE_TEXT;
-     int HEIGHT_OF_ENTERTEXT_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
+        x=SMALLGAP;
+        y=SMALLGAP+fontblack.getHeight()*2;
 
-     int HEIGHT_OF_TOPIC_AND_NEWS_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
-     y=SMALLGAP;
-     
-     ///////////////////////////////////////////
+        int BORDER=10;
+        int WIDTH_OF_MESSAGE_TEXT  = ((ULTIMATE_WIDTH-ULTIMATE_WIDTH/6)-BORDER);
+        int HEIGHT_OF_MESSAGE_TEXT = ((ULTIMATE_HEIGHT-ULTIMATE_HEIGHT/8)-(BORDER+y+SMALLGAP))+2;
+        int WIDTH_OF_USERLIST  = ULTIMATE_WIDTH-(WIDTH_OF_MESSAGE_TEXT+BORDER+SMALLGAP);
+        int HEIGHT_OF_USERLIST = HEIGHT_OF_MESSAGE_TEXT+1;
+        int WIDTH_OF_ENTERTEXT_BOX=WIDTH_OF_MESSAGE_TEXT;
+        int HEIGHT_OF_ENTERTEXT_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
 
-     x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
-     //info box top right (amount of users and ops)
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-     fontblack.drawString(g, ""+NetworkChatClient.userList.size()+" users", x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
-     ////////////////////////////////////////////
-     
-     x=SMALLGAP;
-     y=SMALLGAP+fontblack.getHeight()*2;
+        int HEIGHT_OF_TOPIC_AND_NEWS_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
+        y=SMALLGAP;
 
-     Shape s = g.getClip();
-     g.setClip(x-2, y+3, WIDTH_OF_MESSAGE_TEXT+5, HEIGHT_OF_MESSAGE_TEXT);
+        ///////////////////////////////////////////
 
-     //message text
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+        x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
+        //info box top right (amount of users and ops)
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        fontblack.drawString(g, ""+NetworkChatClient.userList.size()+" users", x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
+        ////////////////////////////////////////////
 
-     int listY=y+SMALLGAP;
-     int topofChatBox=listY;
+        x=SMALLGAP;
+        y=SMALLGAP+fontblack.getHeight()*2;
 
-     Enumeration e = null;
-     if (NetworkChatClient.messageText!=null) {
+        Shape s = g.getClip();
+        g.setClip(x-2, y+3, WIDTH_OF_MESSAGE_TEXT+5, HEIGHT_OF_MESSAGE_TEXT);
+
+        //message text
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+
+        int listY=y+SMALLGAP;
+        int topofChatBox=listY;
+
+        Enumeration e = null;
+        if (NetworkChatClient.messageText!=null) {
          y=SMALLGAP+fontblack.getHeight()*2;
          y+=paraYoffset;//scrolls it
          e = NetworkChatClient.messageText.elements();
@@ -1542,275 +1528,242 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
              }
          }
-     }
-    g.setClip(s);
+        }
+        g.setClip(s);
 
-     x=SMALLGAP;
-     y=SMALLGAP;
-     // header for topic and live news/////////draw here so it covers over scrolled text from messages
-     //utils.setColor(g, 0xFFFFFF);
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        x = SMALLGAP;
+        y = SMALLGAP;
 
-     fontblack.drawString(g, NetworkChatClient.topic, x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
+        // header for topic and live news/////////draw here so it covers over scrolled text from messages
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
 
+        fontblack.drawString(g, NetworkChatClient.topic, x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
 
-     x+=WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
-     y=2+SMALLGAP+fontblack.getHeight()*2;
-      
-     //user list
-     //utils.setColor(g, 0xFFFFFF);
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+        x += WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
+        y = 2+SMALLGAP+fontblack.getHeight()*2;
 
-     listY=y+SMALLGAP;
-     e = NetworkChatClient.userList.elements();
-     playerPositions=new Vector();
-     while (e.hasMoreElements())
-     {
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+
+        listY = y + SMALLGAP;
+        e = NetworkChatClient.userList.elements();
+        playerPositions = new Vector();
+        while (e.hasMoreElements()) {
          String user = (String) e.nextElement();
          int xval=0;
-         if (user.equals("ChanServ"))
-         {
+         if (user.equals("ChanServ")) {
              utils.drawImage(g, op,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user,  xval, listY, 0); listY+=fontblack.getHeight();
-         }
-         else if (user.equals("Admin"))
-         {
+         } else if (user.equals("Admin")) {
              utils.drawImage(g, admin,x+SMALLGAP+3 , listY+fontblack.getHeight()/2, this_);
              xval=x+3+SMALLGAP*2;
              fontblack.drawString(g, user, xval , listY, 0); listY+=fontblack.getHeight();
-         }
-         else
-         {
+         } else {
              xval=x+SMALLGAP ;
             fontblack.drawString(g, user, xval, listY, 0); listY+=fontblack.getHeight();
          }
          //so we know if we clicked on one
          playerPositions.addElement(new PlayerPos(xval,listY-fontblack.getHeight(),fontblack.stringWidth(user),fontblack.getHeight(),user));
-     }
+        }
 
-     x=SMALLGAP;
-     y+=HEIGHT_OF_USERLIST+SMALLGAP+2;
+        x = SMALLGAP;
+        y += HEIGHT_OF_USERLIST + SMALLGAP + 2;
 
-     //enter text box
-    // utils.setColor(g, 0xFFFFFF);
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+        //enter text box
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
 
-     if (chatText!=null)
-     {
-        //fontblack.drawString(g, chatText, x+5 , y+5, 0); listY+=fontblack.getHeight();
-         drawMeWrapped(g,x,y,chatText,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
-     }
+        if (chatText != null) {
+            drawMeWrapped(g,x,y,chatText,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
+        }
 
-     ////2 buttons in bottom right
-     x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
-     //button 1
-     //utils.setColor(g, 0xFFFFFF);
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     printme="Options";
-     fontblack.drawString(g, printme, (x)+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
+        //// 2 buttons in bottom right
+        x += WIDTH_OF_MESSAGE_TEXT + SMALLGAP;
+        //button 1
+        //utils.setColor(g, 0xFFFFFF);
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        String printme="Options";
+        fontblack.drawString(g, printme, (x)+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
 
-     y+=(HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP)/2;
-     //button 2
-   //  utils.setColor(g, 0xFFFFFF);
-     utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-     utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-     utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-     printme="Leave";
-     fontblack.drawString(g, printme, (x)+15+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
-     /////////////////////////
+        y+=(HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP)/2;
+        //button 2
+        //  utils.setColor(g, 0xFFFFFF);
+        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
+        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        printme="Leave";
+        fontblack.drawString(g, printme, (x)+15+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
+        /////////////////////////
 
-     if (showChallengeWindow) {
-         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
-        utils.setColor(g, Color.white);
-        utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+        if (showChallengeWindow) {
+            utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
+            utils.fillRoundRect(g, WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2);
+            utils.setColor(g, Color.white);
+            utils.drawRoundRect(g, WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2);
 
-        int xabout=WIDTH/2;
-        int yabout=(HEIGHT/4)+TINY_GAP;
+            int xabout = WIDTH / 2;
+            int yabout = (HEIGHT / 4) + TINY_GAP;
 
-        //paint the about box
-        printme="Challenge this player?";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-        printme=personToChallenge;fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
-        printme="IP:";fontwhite.drawString(g, printme,xabout-fontwhite.stringWidth(printme)/2,yabout,0);yabout+=fontblack.getHeight();
+            //paint the about box
+            printme = "Challenge this player?";
+            fontwhite.drawString(g, printme, xabout - fontwhite.stringWidth(printme) / 2, yabout, 0);
+            yabout += fontblack.getHeight();
+            printme = personToChallenge;
+            fontwhite.drawString(g, printme, xabout - fontwhite.stringWidth(printme) / 2, yabout, 0);
+            yabout += fontblack.getHeight();
+            printme = "IP:";
+            fontwhite.drawString(g, printme, xabout - fontwhite.stringWidth(printme) / 2, yabout, 0);
+        }
+    }
 
-     }
- }
+    //paint helpers///////////////
+    private void bg(Color col, Graphics g) {
+        utils.bg(g,col,WIDTH,HEIGHT);
+    }
 
- //paint helpers///////////////
- private void bg(Color col, Graphics g) {
-    utils.bg(g,col,WIDTH,HEIGHT);
- }
+    // gets called each frame to repaint
+    public void update(Graphics g) {
+        paint(g);
+    }
 
- // gets called each frame to repaint
- public void update(Graphics g) {
-    paint(g);
- }
+    // wrapper around system out to console
+    private static void log(String s) {
+        Utils.log("CustomCanvas{}:" + s);
+    }
 
- // wrapper around system out to console
- private static void log(String s) {
-    Utils.log("CustomCanvas{}:" + s);
- }
-GameNetworkClient client;
- public static final int LEFT_MOUSE_BUTTON=0;
- public static final int RIGHT_MOUSE_BUTTON=1;
- /*
-  * left click is used for everything, apart from cancelling which is done with
-  * right button, for instance once a piece is stuck to the pointer right click
-  * will return it to its original position (cancel the move)
-  */
- //////// INPUT METHODS ////////////////
- public void mouseClicked(MouseEvent e)
- {
+    GameNetworkClient client;
+    public static final int LEFT_MOUSE_BUTTON=0;
+    public static final int RIGHT_MOUSE_BUTTON=1;
 
-     if (state==NETWORKING_ENTER_NAME)
-     {
-         if (e.getY()>ULTIMATE_HEIGHT-50)
-         {
-             NetworkChatClient.theURL=NetworkChatClient.localURL;
-             System.out.println("swapped to local url");
-         }
-         return;
-     }
-     if (state==NETWORKING_LOBBY)
-     {
-         //check who they clicked on
-         Enumeration ee = playerPositions.elements();
-         while (ee.hasMoreElements())
-         {
-              
-             PlayerPos pos = (PlayerPos) ee.nextElement();
-             if (e.getX()>=pos.x && e.getX()<=pos.x+pos.width &&
-                 e.getY()>=pos.y && e.getY()<=pos.y+pos.height
-                     )
-             {
-                 log("Clicked on:"+pos.name);
-                 showChallengeWindow=true;
-                 personToChallenge=pos.name;
-                 String theirIP=personToChallenge.substring( personToChallenge.indexOf("@")+1,personToChallenge.length() );
-                 log("IP TO CONNECT TO:"+theirIP);
-
-//                 connectToSocket(theirIP);
-                 client = new GameNetworkClient();
-                  Thread t = new Thread(client);
+    /**
+    * left click is used for everything, apart from cancelling which is done with
+    * right button, for instance once a piece is stuck to the pointer right click
+    * will return it to its original position (cancel the move)
+    */
+    //////// INPUT METHODS ////////////////
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        if (state == NETWORKING_ENTER_NAME) {
+            if (e.getY() > ULTIMATE_HEIGHT - 50) {
+                NetworkChatClient.theURL = NetworkChatClient.localURL;
+                System.out.println("swapped to local url");
+            }
+            return;
+        }
+        if (state == NETWORKING_LOBBY) {
+            //check who they clicked on
+            Enumeration ee = playerPositions.elements();
+            while (ee.hasMoreElements()) {
+                PlayerPos pos = (PlayerPos) ee.nextElement();
+                if (e.getX() >= pos.x && e.getX() <= pos.x + pos.width &&
+                    e.getY() >= pos.y && e.getY() <= pos.y + pos.height
+                    ) {
+                    log("Clicked on:" + pos.name);
+                    showChallengeWindow = true;
+                    personToChallenge = pos.name;
+                    String theirIP = personToChallenge.substring(personToChallenge.indexOf("@") + 1, personToChallenge.length());
+                    log("IP TO CONNECT TO:" + theirIP);
+                    client = new GameNetworkClient();
+                    Thread t = new Thread(client);
                     t.start();
-             }
-         }
-         return;
-     }
-
-     //so our mouse doesnt influence anything
-    if (Bot.FULL_AUTO_PLAY || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
-        //_("mouse wont respond");
-    } else {
-         log("mouseClicked "+e.getX()+","+e.getY());
-   //      GameNetworkClient.SENDCLICK=true;//tells it to send a click over network
-         int buttonPressed=-1;
-         if (e.getButton()==e.BUTTON1)
-        {
-             buttonPressed=LEFT_MOUSE_BUTTON;
-         }
-         if (e.getButton()==e.BUTTON3)
-        {
-         buttonPressed=RIGHT_MOUSE_BUTTON;
-         }
-         mouseClickedX(e.getX(),e.getY(),buttonPressed);
-    }
- }
-
- boolean showChallengeWindow;
- String personToChallenge;
-
- public void mouseClickedX(int x, int y, int buttonPressed) {
-    splashCounter=SPLASH_COUNTER+1; //turn off splash if its on
-    if (buttonPressed==LEFT_MOUSE_BUTTON)//e.getButton()==e.BUTTON1)
-    {
-        if (Board.gameComplete)
-        {
-            board.RESET_ENTIRE_GAME_VARS();
-            RESET_ENTIRE_GAME_VARS();
-            splashCounter=0;
-            state=SPLASH_SCREEN;
+                }
+            }
+            return;
         }
-        //_("LEFT BUTTON PRESSED");
-        /////// CustomCanvas.sfxmouseClick.playSound();
-    }
-    if (buttonPressed==RIGHT_MOUSE_BUTTON)//e.getButton()==e.BUTTON3)
-    {
-        log("RIGHT BUTTON PRESSED");
-        unstickPieceFromMouse();
-        if (board!=null)
-        {
-            board.calculatePotentialNumberOfMoves=true;
-            board.thereAreOptions=false;
+
+        //so our mouse doesnt influence anything
+        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
+        } else {
+            log("mouseClicked "+e.getX()+","+e.getY());
+            int buttonPressed=-1;
+            if (e.getButton()==e.BUTTON1) {
+                buttonPressed = LEFT_MOUSE_BUTTON;
+            }
+            if (e.getButton() == e.BUTTON3) {
+                buttonPressed=RIGHT_MOUSE_BUTTON;
+            }
+            mouseClickedX(e.getX(), e.getY(), buttonPressed);
         }
-        return; //do nothing else with right click
     }
 
-    switch(state) {
-        case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
-            //_("OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-             touchedButton(x,y);
-             return;
-        case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
-             touchedButton(x,y);
-             return;
-        case GAME_IN_PROGRESS:
-             touchedButton(x,y);
+    boolean showChallengeWindow;
+    String personToChallenge;
 
-             if (showRollButton)
-             {
-                 log("respond to no clicks as the roll button is up");
-                 
-                 //only thign that will respond is the about window
-                 //brings up the about window.
-                checkIfPrefsButtonClickedOn(x,y);
-                 return;
-             }
-            //Making a move//////////
-            //to move a piece the player simply once clicks
-            //on a piece they wish to move - then if it has valid moves -
-            //it attaches to the mouse pointer and can be placed either
-            //on one of the valid potential spikes- or returned to where it
-            //was initially by right clicking (and no move has been used)
-            checkIfPieceClickedOn(x,y);//detects what piece (if any was clicked on)
+    public void mouseClickedX(int x, int y, int buttonPressed) {
+        splashCounter = SPLASH_COUNTER + 1; // turn off splash if its on
+        if (buttonPressed == LEFT_MOUSE_BUTTON) {
+            if (Board.gameComplete) {
+                board.RESET_ENTIRE_GAME_VARS();
+                RESET_ENTIRE_GAME_VARS();
+                splashCounter=0;
+                state=SPLASH_SCREEN;
+            }
+        }
+        if (buttonPressed == RIGHT_MOUSE_BUTTON) {
+            log("RIGHT BUTTON PRESSED");
+            unstickPieceFromMouse();
+            if (board != null) {
+                board.calculatePotentialNumberOfMoves = true;
+                board.thereAreOptions = false;
+            }
+            return; //do nothing else with right click
+        }
 
-            //once a piece is stuck to the pointer, we place it on a spike
-            //IFF that spike is one of its valid moves.
-            if (CustomCanvas.numberOfFirstRollsDone>1)//ie if game started.
-            {
-                checkIfSpikeClickedOn(x,y);//detects what spike (if any was clicked on)
-                checkIfPieceContainerClickedOn(x,y);
-                checkIfDoubleClickedOn(x,y);
-                checkIfResignClickedOn(x,y);
-               ///// someoneRolledADouble=false;//reset these here since we know its not a double.
-               ///////     doubleRollCounter=0;
+        switch(state) {
+            case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
+                touchedButton(x, y);
+                return;
+            case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
+                touchedButton(x, y);
+                return;
+            case GAME_IN_PROGRESS:
+                touchedButton(x, y);
 
+                if (showRollButton) {
+                    log("respond to no clicks as the roll button is up");
+                    //only thign that will respond is the about window
+                    //brings up the about window.
+                    checkIfPrefsButtonClickedOn(x, y);
+                    return;
+                }
+                //Making a move//////////
+                //to move a piece the player simply once clicks
+                //on a piece they wish to move - then if it has valid moves -
+                //it attaches to the mouse pointer and can be placed either
+                //on one of the valid potential spikes- or returned to where it
+                //was initially by right clicking (and no move has been used)
+                checkIfPieceClickedOn(x, y);//detects what piece (if any was clicked on)
 
-                //if both dice used move to next turn
-                    if (Board.die1HasBeenUsed && Board.die2HasBeenUsed)
-                    {
+                //once a piece is stuck to the pointer, we place it on a spike
+                //IFF that spike is one of its valid moves.
+                if (CustomCanvas.numberOfFirstRollsDone > 1)//ie if game started.
+                {
+                    checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
+                    checkIfPieceContainerClickedOn(x, y);
+                    checkIfDoubleClickedOn(x, y);
+                    checkIfResignClickedOn(x, y);
+                    //if both dice used move to next turn
+                    if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
                         log("GO TO NEW TURN AA");
                         turnOver();
 
                     }
-            }
-         return;
+                }
+                return;
+        }
     }
- }
 
     private void RESET_ENTIRE_GAME_VARS() {
         Board.whoseTurnIsIt=Player.WHITE;
@@ -1847,194 +1800,154 @@ GameNetworkClient client;
         Bot.dead=true;
     }
 
- public static void turnOver()
- {
-     log("---- THIS TURN IS OVER ----");
-                        if (Board.whoseTurnIsIt==Player.WHITE)
-                        {
-                            Board.whoseTurnIsIt=Player.BLACK;
-                            log("BLACKS TURN");
-                            tellPlayers("Black's turn to roll.");
+    public static void turnOver() {
+        log("---- THIS TURN IS OVER ----");
+        if (Board.whoseTurnIsIt == Player.WHITE) {
+            Board.whoseTurnIsIt = Player.BLACK;
+            log("BLACKS TURN");
+            tellPlayers("Black's turn to roll.");
+        } else {
+            Board.whoseTurnIsIt = Player.WHITE;
+            log("WHITES TURN");
+            tellPlayers("White's turn to roll.");
+        }
+        resetVarsTurn(); // so a turn can start a fresh.
+    }
 
-                        }
-                        else
-                        {
-                            Board.whoseTurnIsIt=Player.WHITE;
-                            log("WHITES TURN");
-                            tellPlayers("White's turn to roll.");
-
-                        }
-                        resetVarsTurn(); // so a turn can start a fresh.
- }
- //this method will "unstick" a piece from the mouse by flagging the piece itself
- //as no longer stuck, it is used when right clicking to cancel a move
- //but also once a piece has actually been moved.
- private void unstickPieceFromMouse()
- {
-      if (pieceStuckToMouse!=null)
-        {
-            //_("piece unstuck.");
+    //this method will "unstick" a piece from the mouse by flagging the piece itself
+    //as no longer stuck, it is used when right clicking to cancel a move
+    //but also once a piece has actually been moved.
+    private void unstickPieceFromMouse() {
+        if (pieceStuckToMouse!=null) {
             pieceStuckToMouse.unstickFromMouse();
         }
         pieceOnMouse=false;
         barPieceStuckOnMouse=false;
 
-
-
-if (board==null)
-{
-    log("board null");
-    return;
-}
-
-         board.SPtheMoveToMake=null;//reset the move to make once a move is made or right click
-
-        //experimental,
-       // board.calculatePotentialMoves(true);
-        board.calculatePotentialNumberOfMoves=true;//so they get calc'd at start of each go.
-
-        Board.spikesAllowedToMoveToFromBar=new Vector(4);//RESET THIS HERE?
-pieceStuckToMouse=null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
- }
-
- //checks if the prefs button is pressed and deals with it if so
- private void checkIfPrefsButtonClickedOn(int x,int y)
- {
-     if (x>=prefx && x<=prefx+prefw)
-     {
-         if (y>=prefy && y<=prefy+prefh)
-         {
-             log("Prefs button clicked.");
-             INFO=!INFO;
-             if (INFO)
-             {
-                 tellPlayers("About");
-             }
-         }
-     }
- }
-
- int doubleX;
- int doubleY;
- int doubleWidth;
- int doubleHeight;
- int resignX;
- int resignY;
- int resignWidth;
- int resignHeight;
-private void checkIfDoubleClickedOn(int x,int y)
-{
-     int myX=doubleX;
-     int myY=doubleY;
-     int myWidth=doubleWidth;
-     int myHeight=doubleHeight;
-     if (x>=myX && x<(myX+myWidth))
-    {
-        if (y>myY && y<(myY+myHeight))
-        {
-            log("DOUBLE CLICKED ON!");
-            sfxdouble.playSound();
-            if (Board.whoseTurnIsIt==Player.WHITE)
-            {
-                tellPlayers("White just doubled.");
-            }
-            else
-            {
-                tellPlayers("Black just doubled.");
-            }
+        if (board == null) {
+            log("board null");
+            return;
         }
-     }
-}
-private void checkIfResignClickedOn(int x,int y)
-{
-     int myX=resignX;
-     int myY=resignY;
-     int myWidth=resignWidth;
-     int myHeight=resignHeight;
-     if (x>=myX && x<(myX+myWidth))
-    {
-        if (y>myY && y<(myY+myHeight))
-        {
-            log("RESIGN CLICKED ON!");
-            sfxResign.playSound();
-            if (Board.whoseTurnIsIt==Player.WHITE)
-            {
-                Board.gameComplete=true;
-                whiteResigned=true;
-                Board.gameCompleteString="White has resigned. Black has won!";
-            }
-            else
-            {
-                Board.gameComplete=true;
-                blackResigned=true;
-                Board.gameCompleteString="Black has resigned. White has won!";
-            }
-        }
-     }
-}
-public static boolean whiteResigned;
-public static boolean blackResigned;
- private void checkIfPieceContainerClickedOn(int x,int y)
-{
-     int myX=0;
-     int myY=0;
-     int myWidth=0;
-     int myHeight=0;
-     String clickedOnText="NONE";
-     if (Board.whoseTurnIsIt==Player.WHITE)
-     {
-         myX=whiteContainerX;
-         myY=whiteContainerY;
-         myWidth=whiteContainerWidth;
-         myHeight=whiteContainerHeight;
-         clickedOnText="WHITE CONTAINER CLICKED ON";
-     }
-     else
-     if (Board.whoseTurnIsIt==Player.BLACK)
-     {
-         myX=blackContainerX;
-         myY=blackContainerY;
-         myWidth=blackContainerWidth;
-         myHeight=blackContainerHeight;
-         clickedOnText="BLACK CONTAINER CLICKED ON";
-     }
-     else
-     {
-         Utils._E("checkIfPieceContainerClickedOn knows not whom click upon it!");
-     }
+        board.SPtheMoveToMake=null; // reset the move to make once a move is made or right click
+        board.calculatePotentialNumberOfMoves = true; // so they get calc'd at start of each go.
+        Board.spikesAllowedToMoveToFromBar = new Vector(4); // RESET THIS HERE?
+        pieceStuckToMouse = null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
+    }
 
-    if (x>=myX && x<(myX+myWidth))
-    {
-        if (y>myY && y<(myY+myHeight))
+    //checks if the prefs button is pressed and deals with it if so
+    private void checkIfPrefsButtonClickedOn(int x,int y) {
+        if (x>=prefx && x<=prefx+prefw)
         {
-            log(""+clickedOnText);
-            //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
-            //then we simply let it go into the piece container.
-            if (Board.pulsateWhiteContainer && pieceOnMouse && Board.whoseTurnIsIt==Player.WHITE)
-            {
-                log("WHITE put in container");
-                //remove from spike
-                //add to container vector
-                int correctDie=Board.whichDieGetsUsToPieceContainer;
-                boolean pieceWillGoToContainer=true;
-                placePieceRemoveOldOneAndSetDieToUsed(correctDie,pieceWillGoToContainer);
-                //continue
-            }else
-            //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
-            //then we simply let it go into the piece container.
-            if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt==Player.BLACK)
-            {
-                log("BLACK put in container");
-                //remove from spike
-                //add to container vector
-                int correctDie=Board.whichDieGetsUsToPieceContainer;
-                boolean pieceWillGoToContainer=true;
-                placePieceRemoveOldOneAndSetDieToUsed(correctDie,pieceWillGoToContainer);
-                //continue
+            if (y >= prefy && y <= prefy + prefh) {
+                log("Prefs button clicked.");
+                INFO = !INFO;
+                if (INFO) {
+                    tellPlayers("About");
+                }
             }
         }
     }
-}
+
+    int doubleX;
+    int doubleY;
+    int doubleWidth;
+    int doubleHeight;
+    int resignX;
+    int resignY;
+    int resignWidth;
+    int resignHeight;
+
+    private void checkIfDoubleClickedOn(int x,int y) {
+        int myX = doubleX;
+        int myY = doubleY;
+        int myWidth = doubleWidth;
+        int myHeight = doubleHeight;
+        if (x >= myX && x < (myX + myWidth)) {
+            if (y > myY && y < (myY + myHeight)) {
+                log("DOUBLE CLICKED ON!");
+                sfxdouble.playSound();
+                if (Board.whoseTurnIsIt == Player.WHITE) {
+                    tellPlayers("White just doubled.");
+                } else {
+                    tellPlayers("Black just doubled.");
+                }
+            }
+        }
+    }
+
+    private void checkIfResignClickedOn(int x, int y) {
+        int myX = resignX;
+        int myY = resignY;
+        int myWidth = resignWidth;
+        int myHeight = resignHeight;
+        if (x >= myX && x < (myX+myWidth)) {
+            if (y>myY && y<(myY+myHeight)) {
+                log("RESIGN CLICKED ON!");
+                sfxResign.playSound();
+                if (Board.whoseTurnIsIt==Player.WHITE) {
+                    Board.gameComplete = true;
+                    whiteResigned = true;
+                    Board.gameCompleteString="White has resigned. Black has won!";
+                } else {
+                    Board.gameComplete=true;
+                    blackResigned=true;
+                    Board.gameCompleteString="Black has resigned. White has won!";
+                }
+            }
+        }
+    }
+    public static boolean whiteResigned;
+    public static boolean blackResigned;
+    private void checkIfPieceContainerClickedOn(int x,int y) {
+        int myX = 0;
+        int myY = 0;
+        int myWidth = 0;
+        int myHeight = 0;
+        String clickedOnText = "NONE";
+        if (Board.whoseTurnIsIt == Player.WHITE) {
+            myX = whiteContainerX;
+            myY = whiteContainerY;
+            myWidth = whiteContainerWidth;
+            myHeight = whiteContainerHeight;
+            clickedOnText = "WHITE CONTAINER CLICKED ON";
+        } else if (Board.whoseTurnIsIt == Player.BLACK) {
+            myX = blackContainerX;
+            myY = blackContainerY;
+            myWidth = blackContainerWidth;
+            myHeight = blackContainerHeight;
+            clickedOnText = "BLACK CONTAINER CLICKED ON";
+        } else {
+            Utils._E("checkIfPieceContainerClickedOn knows not whom click upon it!");
+        }
+
+        if (x >= myX && x < (myX + myWidth)) {
+            if (y > myY && y < (myY + myHeight)) {
+                log("" + clickedOnText);
+                //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
+                //then we simply let it go into the piece container.
+                if (Board.pulsateWhiteContainer && pieceOnMouse && Board.whoseTurnIsIt == Player.WHITE) {
+                    log("WHITE put in container");
+                    //remove from spike
+                    //add to container vector
+                    int correctDie = Board.whichDieGetsUsToPieceContainer;
+                    boolean pieceWillGoToContainer = true;
+                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, pieceWillGoToContainer);
+                    //continue
+                } else
+                    //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
+                    //then we simply let it go into the piece container.
+                    if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt == Player.BLACK) {
+                        log("BLACK put in container");
+                        //remove from spike
+                        //add to container vector
+                        int correctDie = Board.whichDieGetsUsToPieceContainer;
+                        boolean pieceWillGoToContainer = true;
+                        placePieceRemoveOldOneAndSetDieToUsed(correctDie, pieceWillGoToContainer);
+                        //continue
+                    }
+            }
+        }
+    }
 
 
  //indicates if this mouse click has been on a spike
@@ -2042,19 +1955,16 @@ public static boolean blackResigned;
  {
     // grab the spikes, loop thru them checking to
     // see if the user clicked on that spike
-    if (board==null)
-    {
+    if (board==null) {
         log("game not ready. (splash still up)");
         return;
     }
 
 
     Enumeration spikes_e = board.spikes.elements();
-    while(spikes_e.hasMoreElements())
-    {
+    while(spikes_e.hasMoreElements()) {
         Spike spike = (Spike) spikes_e.nextElement();
-        if (spike.userClickedOnThis(x,y))
-        {
+        if (spike.userClickedOnThis(x,y)) {
              log("Spike was clicked on ("+spike.getSpikeNumber()+")");
 
              /* REMOVING A PIECE FROM ONE SPIKE AND ADDING IT TO ANOTHER.
@@ -2069,14 +1979,8 @@ public static boolean blackResigned;
               * from the initial spike and add it to the new one, as shown below:
               */
 
-              //this isnt needed at this point (is it?)
-            /////  if (board.copy_of_reachableFromDie1==null)
-            ///////  {   _("copy_of_reachableFromDie1 not ready yet.");
-            ///////      return;
-             ////// }
              // find out if this is a valid spiek to go to from bar
-             if (barPieceStuckOnMouse)
-             {
+             if (barPieceStuckOnMouse) {
                  log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()"+Board.spikesAllowedToMoveToFromBar.size());
                  Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
                  while (e.hasMoreElements())
@@ -2171,68 +2075,23 @@ public static boolean blackResigned;
 
 
              //DIE1 MOVE
-             if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie1!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie1.getSpikeNumber())
-             {
+             if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie1!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie1.getSpikeNumber()) {
                  log("clicked on valid potential spike (die1)");
-
                  placePieceRemoveOldOneAndSetDieToUsed(1,false);
-                 
-
-                 //set the old potential spike to null since they are no longer valid
-                 //EXPERIMENTAL!
-                 //////////// board.copy_of_reachableFromDie1=null;
-                  ///////////// board.copy_of_reachableFromBothDice=null;
-
-
-
-     //YES THIS IS NEEDED
-                   return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
+                 return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
              }
-
-             //this isnt needed at this point (is it?)
-           ///   if (board.copy_of_reachableFromDie2==null)
-             // {   _("copy_of_reachableFromDie2 not ready yet.");
-             //     return;
-             // }
-
-             //if (board.copy_of_reachableFromDie2==null){Utils._E("board.copy_of_reachableFromDie2 was null");}
 
              //DIE2 MOVE
-             if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie2!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie2.getSpikeNumber())
-             {
+             if (pieceStuckToMouse!=null && board.copy_of_reachableFromDie2!=null && spike.getSpikeNumber()==board.copy_of_reachableFromDie2.getSpikeNumber()) {
                  log("clicked on valid potential spike (die2)");
-
                  placePieceRemoveOldOneAndSetDieToUsed(2,false);
-
-
-                 //set the old potential spike to null since they are no longer valid
-                 //EXPERIMENTAL!
-                 //////// board.copy_of_reachableFromDie2=null;
-                 ///////////  board.copy_of_reachableFromBothDice=null;
-
-                 //YES THIS IS NEEDED
-                   return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
+                 return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
              }
 
-             //this isnt needed at this point (is it?)
-            //  if (board.copy_of_reachableFromBothDice==null)
-              //{   _("copy_of_reachableFromBothDice not ready yet.");
-            //      return;
-            //  }
-
              //DIE1 + DIE2 MOVE
-             if (pieceStuckToMouse!=null && board.copy_of_reachableFromBothDice!=null && spike.getSpikeNumber()==board.copy_of_reachableFromBothDice.getSpikeNumber())
-             {
+             if (pieceStuckToMouse!=null && board.copy_of_reachableFromBothDice!=null && spike.getSpikeNumber()==board.copy_of_reachableFromBothDice.getSpikeNumber()) {
                  log("clicked on valid potential spike (die1+die2)");
-
                  placePieceRemoveOldOneAndSetDieToUsed(3,false);
-
-                
-                 //set the old potential spike to null since they are no longer valid
-                 //EXPERIMENTAL!
-                 ///////// board.copy_of_reachableFromDie1=null;
-                 //////// board.copy_of_reachableFromDie2=null;
-                 ////////  board.copy_of_reachableFromBothDice=null;
              }
         }
     }
@@ -2244,25 +2103,19 @@ public static boolean blackResigned;
  //these store the pieces that have been sent to the container, when all are in that player wins.
  public static Vector whitePiecesSafelyInContainer=new Vector(15);
  public static Vector blackPiecesSafelyInContainer=new Vector(15);
+
  // removes piece from the spike it came from, adds it to the new one just clicked on, and sets the die that did this to used
  // dieToSetUnused requires 1 or 2 (representing die 1 or die 2), OR 3 (3 IS BOTH DICE)
  //pieceWillGoToContainer is used ONLY when we are removig a piece from a spike and then adding it to the PIECE CONTAINER, in all other
  //situations its simply removing from one spike and adding to another
- private void placePieceRemoveOldOneAndSetDieToUsed(int dieToSetUnused, boolean pieceWillGoToContainer)
- {
-     log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:"+dieToSetUnused);// board.copy_of_reachableFromDie1:"+board.copy_of_reachableFromDie1+" board.copy_of_reachableFromDie1.pieces.size():"+board.copy_of_reachableFromDie1.pieces.size());
-     if (pieceStuckToMouse==null)
-     {
+ private void placePieceRemoveOldOneAndSetDieToUsed(int dieToSetUnused, boolean pieceWillGoToContainer) {
+     log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:"+dieToSetUnused);
+     if (pieceStuckToMouse==null) {
          Utils._E("pieceStuckToMouse was null somehow");
      }
         //remove piece from its current spike
          originalSpikeForPieceSelected.removePiece(pieceStuckToMouse);
-
-
-         
-
-     if (dieToSetUnused==1)
-     {
+     if (dieToSetUnused==1) {
         if (pieceWillGoToContainer)
         {
             if (Board.whoseTurnIsIt==Player.WHITE)
@@ -2277,50 +2130,33 @@ public static boolean blackResigned;
                  log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                  sfxPutPieceInContainer.playSound();
             } else {Utils._E("whoseTurnIsIt is invalid here.");}
-        }
-        else
-        {
-
+        } else {
              //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
-             if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.BLACK)>0)
-             {
-                
-                    log("WHITE KILLED A BLACK");
-                    Piece firstPiece = (Piece)board.copy_of_reachableFromDie1.pieces.firstElement();
-                    board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
-                    board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
-                    theBarBLACK.add(firstPiece); // add it to the BAR
-                    sfxKilled.playSound();
-                
-             } else
-             if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.WHITE)>0)
-             {
-               
+             if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.BLACK)>0) {
+                log("WHITE KILLED A BLACK");
+                Piece firstPiece = (Piece)board.copy_of_reachableFromDie1.pieces.firstElement();
+                board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
+                board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
+                theBarBLACK.add(firstPiece); // add it to the BAR
+                sfxKilled.playSound();
+             } else if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie1.getAmountOfPieces(Player.WHITE)>0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie1.pieces.firstElement();
                     board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
                     theBarWHITE.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
-                
-             } else
-             ///////////////////////////////////
-             {      
-                    //NORMAL CONDITION
-                     //add it to the spike user just clicked on
-                     board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
+             } else {
+                 //NORMAL CONDITION
+                 //add it to the spike user just clicked on
+                 board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
              }
         }
-
-
          //so player cant use die one again
          //(and it wont come up as a potential valid option)
          Board.die1HasBeenUsed=true;
          log("die1HasBeenUsed A.");
-     }
-     else
-     if (dieToSetUnused==2)
-     {
+     } else if (dieToSetUnused==2) {
          if (pieceWillGoToContainer)
         {
             if (Board.whoseTurnIsIt==Player.WHITE)
@@ -2349,10 +2185,7 @@ public static boolean blackResigned;
                     theBarBLACK.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-             } else
-             if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie2.getAmountOfPieces(Player.WHITE)>0)
-             {
-
+             } else if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromDie2.getAmountOfPieces(Player.WHITE)>0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
@@ -2360,9 +2193,7 @@ public static boolean blackResigned;
                     theBarWHITE.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-             } else
-             ///////////////////////////////////
-             {
+             } else {
                     //NORMAL CONDITION
                      //add it to the spike user just clicked on
                      board.copy_of_reachableFromDie2.addPiece(pieceStuckToMouse);
@@ -2372,12 +2203,8 @@ public static boolean blackResigned;
          //(and it wont come up as a potential valid option)
          Board.die2HasBeenUsed=true;
          log("die2HasBeenUsed AA.");
-     }
-     else
-     if (dieToSetUnused==3)
-     {
-            if (pieceWillGoToContainer)
-            {
+     } else if (dieToSetUnused==3) {
+            if (pieceWillGoToContainer) {
                 if (Board.whoseTurnIsIt==Player.WHITE)
                 {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
@@ -2390,13 +2217,9 @@ public static boolean blackResigned;
                      log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:"+whitePiecesSafelyInContainer.size());
                      sfxPutPieceInContainer.playSound();
                 } else {Utils._E("whoseTurnIsIt is invalid here.");}
-            }
-            else
-            {
+            } else {
                //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
-             if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.BLACK)>0)
-             {
-
+             if (Board.whoseTurnIsIt==Player.WHITE && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.BLACK)>0) {
                     log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
@@ -2404,10 +2227,7 @@ public static boolean blackResigned;
                     theBarBLACK.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-             } else
-             if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.WHITE)>0)
-             {
-
+             } else if (Board.whoseTurnIsIt==Player.BLACK && board.copy_of_reachableFromBothDice.getAmountOfPieces(Player.WHITE)>0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece)board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
@@ -2415,12 +2235,10 @@ public static boolean blackResigned;
                     theBarWHITE.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-             } else
-             ///////////////////////////////////
-             {
-                    //NORMAL CONDITION
-                     //add it to the spike user just clicked on
-                     board.copy_of_reachableFromBothDice.addPiece(pieceStuckToMouse);
+             } else {
+                //NORMAL CONDITION
+                 //add it to the spike user just clicked on
+                 board.copy_of_reachableFromBothDice.addPiece(pieceStuckToMouse);
              }
             }
           //so player cant use die one OR die two again
@@ -2429,27 +2247,21 @@ public static boolean blackResigned;
           Board.die2HasBeenUsed=true;
 
            log("die1HasBeenUsed B.");
-            log("die2HasBeenUsed B.");
+           log("die2HasBeenUsed B.");
 
-     }
-     else
-     {
+     } else {
          Utils._E("ERROR CANT TELL WHICH DICE TO SET AS UNUSED. dieToSetUnused:"+dieToSetUnused);
      }
      //and make sure nothing is stuck to mouse by finalising move like this
-         unstickPieceFromMouse();
+     unstickPieceFromMouse();
 
-     if (someoneRolledADouble)
-     {
-
+     if (someoneRolledADouble) {
          // this logic was hard to understand when mixed so i duplicated it here due to the subtle diffs
-         switch (dieToSetUnused)
-         {
+         switch (dieToSetUnused) {
              case 1:
                  doubleRollCounter++;
                  log("someoneRolledADouble DIE 1 doubleRollCounter:"+doubleRollCounter);
-                 if (doubleRollCounter<=1)
-                 {
+                 if (doubleRollCounter <= 1) {
                      log("dont hide die yet as it was a double");
                     Board.die1HasBeenUsed=false;// so it doesnt vanish
                  }
@@ -2504,147 +2316,112 @@ public static boolean blackResigned;
 
 
 
- //when the user clicks on a piece and it sticks to the mouse we hold it in
- //pieceStuckToMouse, this variable below is the spike that holds pieceStuckToMouse
- //we use it so we can add/remove the pieceStuckToMouse from this spike if its
- //placed onto a new one.
- Spike originalSpikeForPieceSelected;
-public static boolean barPieceStuckOnMouse;
- //indicates if this mouse click has been on a piece
- private void checkIfPieceClickedOn(int x,int y)
- {
-     if (pieceOnMouse)
-     {
-         //special case, if the player already has a piece stuck on the mouse dont let another
-         //one go on, this causes an error in the game, best way is to simply leap out of
-         //this method here if this is true
-         log("pieceOnMouse special case ignore this piece click");
-         return;
-     }
-     
-     //check pieces on bar
-     if (Board.pickingPieceUpFromBar)
-     {
-         Vector piecesOnTheBar=null;
-         if (Board.whoseTurnIsIt==Player.WHITE)
-         {
-             piecesOnTheBar=theBarWHITE;
-         } else 
-         if (Board.whoseTurnIsIt==Player.BLACK)
-         {
-             piecesOnTheBar=theBarBLACK;
-         }
-         Enumeration e = piecesOnTheBar.elements();
-         while (e.hasMoreElements())
-         {
-             Piece p = (Piece) e.nextElement();
-             if (p.userClickedOnThis(x, y))
-             {
-                 log("PIECE ON THE BAR CLICKED ON.");
-                 p.stickToMouse();
-                 pieceOnMouse=true;
-                 barPieceStuckOnMouse=true;
-                 pieceStuckToMouse=p;
+    //when the user clicks on a piece and it sticks to the mouse we hold it in
+    //pieceStuckToMouse, this variable below is the spike that holds pieceStuckToMouse
+    //we use it so we can add/remove the pieceStuckToMouse from this spike if its
+    //placed onto a new one.
+    Spike originalSpikeForPieceSelected;
+    public static boolean barPieceStuckOnMouse;
+    //indicates if this mouse click has been on a piece
+    private void checkIfPieceClickedOn(int x,int y) {
+        if (pieceOnMouse) {
+            //special case, if the player already has a piece stuck on the mouse dont let another
+            //one go on, this causes an error in the game, best way is to simply leap out of
+            //this method here if this is true
+            log("pieceOnMouse special case ignore this piece click");
+            return;
+        }
 
-
-             }
-         }
-     }
-
-     //grab the spikes, loop thru them checking every single
-    //piece to see if the user clicked on that piece
-    Enumeration spikes_e = board.spikes.elements();
-    while(spikes_e.hasMoreElements())
-    {
-        Spike spike = (Spike) spikes_e.nextElement();
-        Enumeration pieces_e = spike.pieces.elements();
-        while(pieces_e.hasMoreElements())
-        {
-            Piece piece = (Piece) pieces_e.nextElement();
-            if (piece.userClickedOnThis(x, y))
-            {
-                // only allow picking up of OUR OWN pieces
-                // AND check if we already have a piece or not.
-                //this was a bug so hopefully fixed.
-                if (board.allowPieceToStickToMouse && piece.getColour()==Board.whoseTurnIsIt && !pieceOnMouse) //And it has potential moves (i.e. not pointless to pick up)
-                {
-                    log("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
-                    //if this piece has options then we allow it to stick to
-                    //mouse, ie we allow player to pick it up..
-                    piece.stickToMouse();
-                    pieceOnMouse=true;
-                    pieceStuckToMouse=piece;
-                    originalSpikeForPieceSelected=spike;//keep a copy of this piece's original Spike (for removing the piece later if need be)
+        //check pieces on bar
+        if (Board.pickingPieceUpFromBar) {
+            Vector piecesOnTheBar = (Board.whoseTurnIsIt == Player.WHITE) ? theBarWHITE : theBarBLACK;
+            Enumeration e = piecesOnTheBar.elements();
+            while (e.hasMoreElements()) {
+                Piece p = (Piece) e.nextElement();
+                if (p.userClickedOnThis(x, y)) {
+                    log("PIECE ON THE BAR CLICKED ON.");
+                    p.stickToMouse();
+                    pieceOnMouse = true;
+                    barPieceStuckOnMouse = true;
+                    pieceStuckToMouse = p;
                 }
-                log("Piece was clicked on ("+piece+") board.allowPieceToStickToMouse:"+board.allowPieceToStickToMouse+" board.whoseTurnIsIt:"+board.whoseTurnIsIt);
+            }
+        }
+
+        //grab the spikes, loop thru them checking every single
+        //piece to see if the user clicked on that piece
+        Enumeration spikes_e = board.spikes.elements();
+        while(spikes_e.hasMoreElements()) {
+            Spike spike = (Spike) spikes_e.nextElement();
+            Enumeration pieces_e = spike.pieces.elements();
+            while(pieces_e.hasMoreElements()) {
+                Piece piece = (Piece) pieces_e.nextElement();
+                if (piece.userClickedOnThis(x, y)) {
+                    // only allow picking up of OUR OWN pieces
+                    // AND check if we already have a piece or not.
+                    //this was a bug so hopefully fixed.
+                    if (board.allowPieceToStickToMouse && piece.getColour()==Board.whoseTurnIsIt && !pieceOnMouse) {
+                    //And it has potential moves (i.e. not pointless to pick up)
+                        log("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
+                        //if this piece has options then we allow it to stick to
+                        //mouse, ie we allow player to pick it up..
+                        piece.stickToMouse();
+                        pieceOnMouse=true;
+                        pieceStuckToMouse=piece;
+                        originalSpikeForPieceSelected=spike;//keep a copy of this piece's original Spike (for removing the piece later if need be)
+                    }
+                    log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse:" +
+                        board.allowPieceToStickToMouse + " board.whoseTurnIsIt:" + board.whoseTurnIsIt);
+                }
             }
         }
     }
- }
 
- public static boolean pieceOnMouse=false;//is true when a piece is stuck to mouse
- public static Piece pieceStuckToMouse;//this is simply a copy of whatever piece (if any) is stuck to mouse
+    public static boolean pieceOnMouse=false;//is true when a piece is stuck to mouse
+    public static Piece pieceStuckToMouse;//this is simply a copy of whatever piece (if any) is stuck to mouse
 
- public void mouseEntered(MouseEvent e)
- {
-        
- }
+    public void mouseEntered(MouseEvent e) {
+    }
 
- public void mouseExited(MouseEvent e)
- {
-        
- }
+    public void mouseExited(MouseEvent e) {
+    }
 
- public void mousePressed(MouseEvent e)
- {
-        
- }
+    public void mousePressed(MouseEvent e) {
+    }
 
- public void mouseReleased(MouseEvent e)
- {
-        
- }
+    public void mouseReleased(MouseEvent e) {
+    }
 
- public void mouseDragged(MouseEvent e)
- {
+    public void mouseDragged(MouseEvent e) {
         log("mousedragged");
- }
-public static boolean I_AM_CLIENT;
-public static boolean I_AM_SERVER;
- public void mouseMoved(MouseEvent e)
- {
-     //so our mouse doesnt influence anything
-    if (Bot.FULL_AUTO_PLAY || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) )
-    {
-        //_("mouse wont respond");
     }
-    else
-    {
-        if (NETWORK_GAME_IN_PROCESS)
-        {
-            if (I_AM_CLIENT && Board.whoseTurnIsIt==Player.WHITE)
-            {
-                pointerX=e.getX();
-                pointerY=e.getY();
+
+    public static boolean I_AM_CLIENT;
+    public static boolean I_AM_SERVER;
+
+    public void mouseMoved(MouseEvent e) {
+         //so our mouse doesnt influence anything
+        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
+            //_("mouse wont respond");
+        } else {
+            if (NETWORK_GAME_IN_PROCESS) {
+                if (I_AM_CLIENT && Board.whoseTurnIsIt==Player.WHITE) {
+                    pointerX=e.getX();
+                    pointerY=e.getY();
+                }
+                if (I_AM_SERVER && Board.whoseTurnIsIt==Player.BLACK) {
+                    pointerX=e.getX();
+                    pointerY=e.getY();
+                }
             }
-            if (I_AM_SERVER && Board.whoseTurnIsIt==Player.BLACK)
-            {
-                pointerX=e.getX();
-                pointerY=e.getY();
-            }
+
+            //stick these bck in as local play was broke without--
+            pointerX=e.getX();
+            pointerY=e.getY();
+            Board.mouseHoverX=pointerX;//e.getX();
+            Board.mouseHoverY=pointerY;//e.getY();
         }
-
-        //stick these bck in as local play was broke without--
-        pointerX=e.getX();
-                pointerY=e.getY();
-
-        Board.mouseHoverX=pointerX;//e.getX();
-        Board.mouseHoverY=pointerY;//e.getY();
-    
-    //Bot.currentMouseX=pointerX;
-    //Bot.currentMouseY=pointerY;
     }
- }
 
     public static boolean DEBUG_CONSOLE=false;
     boolean PAUSED;
@@ -2655,18 +2432,18 @@ public static boolean I_AM_SERVER;
     log("keyPressed");
 
     //TEXT ENTRY IN LOBBY
-    if (state==NETWORKING_LOBBY) {
-        if ( e.getKeyCode()==KeyEvent.VK_ENTER) {
+    if (state == NETWORKING_LOBBY) {
+        if ( e.getKeyCode() == KeyEvent.VK_ENTER) {
             chatClient.send();
             chatText="";
         }
         String letter = ""+e.getKeyChar();
-        chatText+=letter;
+        chatText += letter;
         return;
     }
 
     //////////////NAME ENTRY////////
-    if (state==NETWORKING_ENTER_NAME) {
+    if (state == NETWORKING_ENTER_NAME) {
         if ( e.getKeyCode()==KeyEvent.VK_ENTER ) {
             state=NETWORKING_LOBBY;
             chatClient=new NetworkChatClient(this);
@@ -2684,7 +2461,7 @@ public static boolean I_AM_SERVER;
         return;
     }
 
-    if (e.getKeyCode()==KeyEvent.VK_F1) {
+    if (e.getKeyCode() == KeyEvent.VK_F1) {
          ignoreRepaints=!ignoreRepaints;
          setIgnoreRepaint(ignoreRepaints);
          jFrame.setResizable(!ignoreRepaints);
@@ -2696,13 +2473,13 @@ public static boolean I_AM_SERVER;
         System.exit(0);
     }
     if (e.getKeyChar()=='f' || e.getKeyChar()=='F') {//QUIT
-        Bot.FULL_AUTO_PLAY=!Bot.FULL_AUTO_PLAY;
+        Bot.setFullAutoPlay(Bot.getFullAutoPlay());
         Board.HUMAN_VS_COMPUTER=!Board.HUMAN_VS_COMPUTER;
-        Bot.dead=!Bot.FULL_AUTO_PLAY;
-        log("Bot.dead:"+Bot.dead);
-        paintRobotMessages=Bot.FULL_AUTO_PLAY;
-        log("FULL_AUTO_PLAY:"+Bot.FULL_AUTO_PLAY);
-        if (Bot.FULL_AUTO_PLAY) {
+        Bot.dead = !Bot.getFullAutoPlay();
+        log("Bot.dead:" + Bot.dead);
+        paintRobotMessages = Bot.getFullAutoPlay();
+        log("FULL_AUTO_PLAY:" + Bot.getFullAutoPlay());
+        if (Bot.getFullAutoPlay()) {
             tellRobot(true,"Bot turned on.");
         } else {
             tellRobot(true,"Bot turned off.");
@@ -2721,17 +2498,9 @@ public static boolean I_AM_SERVER;
     }
     if (DEBUG_CONSOLE && e.getKeyChar()=='x' || e.getKeyChar()=='X') {//QUIT
         sfxError.playSound();
-       //// _("play windows test sound");
-        ////sfxmouseClick.testSound();
-    }
-    if (DEBUG_CONSOLE && e.getKeyChar()=='j' || e.getKeyChar()=='J') { // QUIT
-        Bot.JUMP_DIRECT_TO_DEST=!Bot.JUMP_DIRECT_TO_DEST;
-        log("Bot.JUMP_DIRECT_TO_DEST:"+Bot.JUMP_DIRECT_TO_DEST);
-       //// _("play windows test sound");
     }
 
-    if (!RELEASE_BUILD && e.getKeyChar()=='c' || e.getKeyChar()=='C')//DEBUG
-    {
+    if (!RELEASE_BUILD && e.getKeyChar()=='c' || e.getKeyChar()=='C'){
         showCollisions=!showCollisions;
         //PAINT_STATE=showCollisions;//!PAINT_STATE;
     }
@@ -2872,9 +2641,9 @@ public static boolean I_AM_SERVER;
      }
  }
 
- public static ImageObserver this_;
- public static CustomFont fontwhite, fontblack;
- // prepare the customfont
+    public static ImageObserver this_;
+    public static CustomFont fontwhite, fontblack;
+    // prepare the customfont
  private void loadCustomFonts() {
      if (fontwhite==null) {
          boolean land=false;
@@ -3090,7 +2859,7 @@ public static int bumblebee[] = {
         int Xtmp=x;
         for (int i = 0; i < textLinesForWrappingTMP.size(); i++) {
             if (stringHeight >= 0) {
-                printme=(String)textLinesForWrappingTMP.elementAt(i);
+                String printme = (String)textLinesForWrappingTMP.elementAt(i);
                 if (justifyleft) {
                     Xtmp=x;
                 } else if (justifyRight) {

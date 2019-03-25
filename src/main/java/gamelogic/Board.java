@@ -1897,7 +1897,7 @@ thereAreOptions=false;
             thereAreOptions=false;
             return;
         }
-        if (!Bot.FULL_AUTO_PLAY && HUMAN_VS_COMPUTER && whoseTurnIsIt==Player.WHITE) {
+        if (!Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER && whoseTurnIsIt==Player.WHITE) {
             return;
         }
         Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe; // gets the spike to drop pieces on

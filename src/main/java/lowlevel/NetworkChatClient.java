@@ -408,7 +408,7 @@ public static String localURL="http://localhost:8080/chat2/";
                if (nextLine.contains("COMP VS COMP"))
                {
                    System.out.println("RECEIVED PLAY");
-                   Bot.FULL_AUTO_PLAY=true;
+                   Bot.setFullAutoPlay(true);
                    Bot.dead=false;
                    CustomCanvas.state=CustomCanvas.GAME_IN_PROGRESS;
                    
