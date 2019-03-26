@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
     private static  int WRAP_WIDTH_HACK_VAL = 0; //15  //ensures that text doesnt go off edge
+    private static String SERVER_IP_ADDRESS = "localhost";
 
     public static final String VERSION="v0.0.1";
     public static final boolean RELEASE_BUILD=false;
@@ -30,7 +31,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int SPLASH_SCREEN=0;
     public static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK=1; // local or network?
     public static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN=2; //play human or cpu?
-    public static final int GAME_IN_PROGRESS=4;
+    private final int GAME_IN_PROGRESS=4;
     public static final int NETWORKING_ENTER_NAME=5;
     public static final int NETWORKING_LOBBY=6;
     // intro menu
@@ -51,9 +52,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int ROLL_BUTTON_COLOUR=0xffcc66;
     public static Color panel_colour, background_colour, roll_button_colour;
     public static final int SPLASH_COUNTER=50;
+
     // -- turn on and off anti aliasing
-    public static boolean ANTI_ALIAS=true;
-    public static final int PANEL_SIZE_FRACTION=5; // adjust me to change ratio:
+    private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
     //this simply means the panel will represent one x-th of the available screen,
     // ergo if PANEL_SIZE_FRACTION is 5, it uses 1/5 of the space avail and the game
     // uses the other 4/5
@@ -61,7 +62,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private CustomFont fontwhite, fontblack;
     boolean INFO=false;    // 'about box' toggle
     Utils utils = new Utils();   // Hardware Abstraction Layer
-    public static int state;
+    private static int state;
     String stateString;
     int PANEL_WIDTH=0;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
@@ -179,16 +180,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public void paint(Graphics g_) {
         handleMouse();
         doubleBuffering(1); // pass 1 in to start dbl buffering
-        if (ANTI_ALIAS) {
-            doAntiAliasing();
-        }
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         // whole game canvas:
         WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
         HEIGHT = getHeight();
-        if (ANTI_ALIAS) {
-            paintSwitch(g); // paint with the anti alias Graphics object
-        }
+        paintSwitch(g);
         if (drawPointer) {
             if (NETWORK_GAME_IN_PROCESS) {
                 utils.drawImage(g, pointer, pointerX, pointerY + 6, this);//this 6 lines it up
@@ -236,11 +234,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             Utils._E("doubleBuffering() phase was invalid "+phase);
         }
-    }
-
-    // This will simply suggest anti aliasing and set up g2 as the graphics object to use
-    private void doAntiAliasing() {
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
     // Calls a different paint method based on the current state
@@ -1579,7 +1572,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Utils.log("CustomCanvas{}:" + s);
     }
 
-    GameNetworkClient client;
+    private GameNetworkClient client;
     public static final int LEFT_MOUSE_BUTTON=0;
     public static final int RIGHT_MOUSE_BUTTON=1;
 
@@ -1610,8 +1603,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     showChallengeWindow = true;
                     personToChallenge = pos.name;
                     String theirIP = personToChallenge.substring(personToChallenge.indexOf("@") + 1, personToChallenge.length());
+                    if (theirIP.isEmpty()) {
+                        theirIP = SERVER_IP_ADDRESS;
+                    }
                     log("IP TO CONNECT TO:" + theirIP);
-                    client = new GameNetworkClient();
+                    client = new GameNetworkClient(this, theirIP);
                     Thread t = new Thread(client);
                     t.start();
                 }
@@ -2879,5 +2875,19 @@ public static int bumblebee[] = {
 
     private int preferencesButtonY() {
         return Board.BORDER;
+    }
+
+    public void onHumanPlayerConnectedToServer() {
+        log("Human player connected to server");
+        Bot.dead = true;
+        state = GAME_IN_PROGRESS;
+        NETWORK_GAME_IN_PROCESS = true;
+        I_AM_CLIENT = true;
+        NetworkChatClient.KEEP_LOBBY_GOING = false;
+        this.jFrame.setTitle(Main.frame.getTitle() + " Online game in progress. (Connected as client)");
+    }
+
+    public void startGame() {
+        state = GAME_IN_PROGRESS;
     }
 }

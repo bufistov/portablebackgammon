@@ -4,12 +4,14 @@ import java.net.*;
 
 public class GameNetworkServer implements Runnable {
 
-    CustomCanvas canvas;
+    private CustomCanvas canvas;
+    private static int port = 4444, maxConnections=0;
+
     public GameNetworkServer(CustomCanvas canvas_)
     {
         canvas=canvas_;
     }
-    private static int port=4444, maxConnections=0;
+
     // Listen for incoming connections and handle them
     public void run() {
         int i = 0;
@@ -28,21 +30,18 @@ public class GameNetworkServer implements Runnable {
                 t.start();
 
                 Bot.dead = true;
-                CustomCanvas.state = CustomCanvas.GAME_IN_PROGRESS;
                 CustomCanvas.I_AM_SERVER = true;
                 NetworkChatClient.KEEP_LOBBY_GOING = false;
+                this.canvas.startGame();
             }
         } catch (IOException ioe) {
             System.out.println("IOException on socket listen: " + ioe);
             ioe.printStackTrace();
             System.out.println("THIS INSTANCE WILL NOT ACCEPT CONNECTIONS NOW.");
-
-            //HACKY FIX TO AVOID ISSUES DURING DEV
-            ///port=4445;
-            ///run();
         }
     }
-   /// HAND GENERATED STUFF BELOW HERE:
+
+    /// HAND GENERATED STUFF BELOW HERE:
     public static void log(String s) {System.out.println(s);}
     private void _E(Exception e) {System.out.println("ERROR::"+e.getMessage());}
 }
