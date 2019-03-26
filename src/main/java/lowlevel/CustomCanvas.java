@@ -141,8 +141,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //for glowy buttons
     public static final int GLOW_INCREMENTER=15;
-    boolean glowA, glowB;
-
+    private boolean glowA, glowB;
 
     int doubleX;
     int doubleY;
@@ -178,6 +177,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     boolean showChallengeWindow;
     String personToChallenge;
+
+    // for screens with 2 buttons this is button 1
+    int buttonxA, buttonyA;
+    int buttonwA, buttonhA;
+    //and button 2
+    int buttonxB, buttonyB;
+    int buttonwB, buttonhB;
+
+    private static final int GLOW_INITIAL_VALUE = 125;
+    private int glowCounter = GLOW_INITIAL_VALUE;
 
     /* This class is used basically for calling the right paint methods
      * based on state, these paint due to this class being a subclass of canvas.
@@ -232,23 +241,23 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         paintSwitch(g);
         if (drawMousePointer) {
             if (NETWORK_GAME_IN_PROCESS) {
-                utils.drawImage(g, pointer, pointerX, pointerY + 6, this);//this 6 lines it up
-                Board.mouseHoverX = pointerX;//e.getX();
-                Board.mouseHoverY = pointerY;//e.getY();
+                utils.drawImage(g, pointer, pointerX, pointerY + 6, this); // this 6 lines it up
+                Board.mouseHoverX = pointerX;
+                Board.mouseHoverY = pointerY;
             } else {
                 if (Bot.getFullAutoPlay()) {
-                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this);//this 6 lines it up
-                    Board.mouseHoverX = Bot.x;//e.getX();
-                    Board.mouseHoverY = Bot.y;//e.getY();
+                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this); // this 6 lines it up
+                    Board.mouseHoverX = Bot.x;
+                    Board.mouseHoverY = Bot.y;
                 } else {
                     if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE) {
                         Main.hideMousePointer(false);
                     } else if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK) {
                         Main.hideMousePointer(true);
                         Bot.dead = false;
-                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this);//this 6 lines it up
-                        Board.mouseHoverX = Bot.x;//e.getX();
-                        Board.mouseHoverY = Bot.y;//e.getY();
+                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this); // this 6 lines it up
+                        Board.mouseHoverX = Bot.x;
+                        Board.mouseHoverY = Bot.y;
                     } else {
                         Main.hideMousePointer(false);
                     }
@@ -286,11 +295,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 stateString="SPLASH_SCREEN";
                 paint_SPLASH_SCREEN(g);
                 break;
-            case OPTIONS_SCREEN_LOCAL_OR_NETWORK://///////////////////
+            case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
                 stateString="OPTIONS_SCREEN_LOCAL_OR_NETWORK";
-                paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g," Local Play ","Network Play","Please select");
-                // make buttons glow if hovered over//
                 glowButton(Board.mouseHoverX, Board.mouseHoverY);
+                paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g," Local Play ","Network Play","Please select");
                 break;
             case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN://///////////
                 /*note since 2 states require the same thing, (a question with 2
@@ -903,23 +911,19 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void glowButton(int x, int y) {
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
-                ///log("glow button");
                 glowA = true;
             }
         }
         if (x >= buttonxB && x <= buttonxB + buttonwB) {
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
-                ///log("glow button");
                 glowB = true;
             }
         }
 
         if (glowA || glowB) {
             glowCounter += GLOW_INCREMENTER;
-            if (glowCounter > 255) {
-                if (glowCounter > 355) {
-                    glowCounter = GLOW_INITIAL_VALUE;
-                }
+            if (glowCounter > 355) {
+                glowCounter = GLOW_INITIAL_VALUE;
             }
         }
     }
@@ -1243,39 +1247,21 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         doubleRollCounter = 0;
     }
 
-    // for screens with 2 buttons this is button 1
-    int buttonxA, buttonyA;
-    int buttonwA, buttonhA;
-    //and button 2
-    int buttonxB, buttonyB;
-    int buttonwB, buttonhB;
-
-    public static final int GLOW_INITIAL_VALUE=125;
-    int glowCounter=GLOW_INITIAL_VALUE;
-
     private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
-        ////
         String printme = question; //"Please select";
         int widthOfPrintMe;
-        int xposTmp = 0;
+        int xposTmp;
         int ypos = (getHeight() / 2) - fontblack.getHeight() * 5;
 
         widthOfPrintMe = (fontblack.stringWidth(printme));
         xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
-        ////
-
         ypos += fontblack.getHeight() * 2;
+        printme = buttonAstr;
 
-        printme = buttonAstr;//" Local Play ";
-
-        //---- draw buttons
-        ///////// 'local' button
-
-        widthOfPrintMe = (fontblack.stringWidth(printme));
+        widthOfPrintMe = fontblack.stringWidth(printme);
         xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
 
-        /////
         //make button glow if pointer is over it
         if (glowA) {
             if (glowCounter < 255) {
