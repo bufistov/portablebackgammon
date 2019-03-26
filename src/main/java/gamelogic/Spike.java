@@ -316,7 +316,7 @@ public class Spike
         utils.setColor(g, Color.BLACK);
         utils.drawTriangle(g, x1, y1, x2, y2, x3, y3);
 
-        if (CustomCanvas.showCollisions)
+        if (CustomCanvas.showBoundaryBoxes)
         {
             utils.setColor(g,Color.RED);
             utils.drawRect(g,collision_x, collision_y,TRIANGLE_WIDTH, TRIANGLE_HEIGHT);

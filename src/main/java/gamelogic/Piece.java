@@ -122,7 +122,7 @@ public class Piece {
 
         collision_x=x;
         collision_y=y;
-        if (CustomCanvas.showCollisions)
+        if (CustomCanvas.showBoundaryBoxes)
         {
 
             utils.setColor(g,Color.RED);

@@ -40,8 +40,7 @@ public class Die {
     }
 
     //returns a random int between 1 and 6 to simulate a dice roll
-    public int roll()
-    {   
+    public int roll() {
         showOriginalValue=false;
         value=Utils.getRand(1,6);
         return value;
@@ -59,13 +58,11 @@ public class Die {
     // we DO NOT want the player to see this tho so we flag a boolean in here to stop the dice painting different.
     boolean showOriginalValue;
     int originalValue;
-    public void setValue(int newValue)
-    {
+
+    public void setValue(int newValue) {
         if (showOriginalValue)//if its already true we dont want to update the oriignal val
         {
-        }
-        else
-        {
+        } else {
             showOriginalValue=true;
             originalValue=value;
         }
@@ -93,15 +90,11 @@ public class Die {
     int DOT_DIAMETER=0;
     int HALF_DOT_DIAMETER=0;
     int TINY_GAP=5;
-    public void paint(Graphics g, int x, int y)
-    {
-        if (value<1)
-        {
-            //log("Die not ready yet.");
+
+    public void paint(Graphics g, int x, int y) {
+        if (value<1) {
             return;
-        }
-        else
-        {
+        } else {
             rollString="Roll";
         }
 
@@ -141,40 +134,29 @@ public class Die {
         drawDots(g,x,y,MINI_DIE_WIDTH,MINI_DIE_HEIGHT,MINI_DOT_DIAMETER,MINI_HALF_DOT_DIAMETER);
     }
 
-    private void drawOutline(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER)
-    {
-        //utils.resetTransparenctColour();//optimisation so it doesnt keep makign colour objects unless it has to
-        //utils.setColor(g, die_colour,CustomCanvas.TRANSPARENCY_LEVEL);
+    private void drawOutline(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER) {
         utils.setColor(g, die_colour);
         utils.fillRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
         utils.setColor(g, Color.black);
         utils.drawRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
         
-        if (CustomCanvas.showCollisions)
-        {
-
+        if (CustomCanvas.showBoundaryBoxes) {
             utils.setColor(g,Color.RED);
             utils.drawRect(g,x, y,DIE_WIDTH, DIE_WIDTH);
         }
-
     }
 
-    private void drawDots(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER)
-    {
+    private void drawDots(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER) {
         utils.setColor(g, dot_colour);
-        int dots=-99;
-        if (showOriginalValue)
-        {
+        int dots;
+        if (showOriginalValue) {
             utils.setColor(g, Color.RED);
             dots=originalValue; //rarely we hide the real value form player, see above for why
-        }
-        else
-        {
-            dots=getValue();
+        } else {
+            dots = getValue();
         }
 
-        switch(dots)
-        {
+        switch(dots) {
             case 1:
                 //draw single dot in middle
                 utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
@@ -221,5 +203,4 @@ public class Die {
                 break;
         }
     }
-    
 }
