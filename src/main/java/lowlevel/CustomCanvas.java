@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import gamelogic.*;
 import java.awt.image.BufferStrategy;
-import java.awt.image.ImageObserver;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -58,8 +57,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //this simply means the panel will represent one x-th of the available screen,
     // ergo if PANEL_SIZE_FRACTION is 5, it uses 1/5 of the space avail and the game
     // uses the other 4/5
-    public static int ULTIMATE_WIDTH  =-1; // this is the width of the entire canvas (ie not just board itself but also panel etc)
-    public static int ULTIMATE_HEIGHT =-1; //
 
     private CustomFont fontwhite, fontblack;
     boolean INFO=false;    // 'about box' toggle
@@ -91,10 +88,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     Vector playerPositions;
     boolean buttonPressed;
     //prefs button x,y width and height
-    int prefw=20;
-    int prefh=20;
-    int prefx=ULTIMATE_WIDTH-(Board.BORDER+prefw+TINY_GAP/2);
-    int prefy=Board.BORDER;
+    private static int prefw = 20;
+    private static int prefh = 20;
+    //int prefx = -1;
+    // int prefy = Board.BORDER;
     public static long FIFTY_SECONDS=50000L;
     public static long TEN_SECONDS=10000L;
     static long robotMessageTimePassedLong;
@@ -185,17 +182,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (ANTI_ALIAS) {
             doAntiAliasing();
         }
-        //we refresh these on each paint loop so it always scales no matter what
-        //WIDTH and HEIGHT are used to pass into board so everything scales
-        //nice. the panel to the side represents 1/xth of the avail space.
-        ULTIMATE_WIDTH = getWidth();//whole canvas
-        ULTIMATE_HEIGHT = getHeight();
         // whole game canvas:
         WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
         HEIGHT = getHeight();
         if (ANTI_ALIAS) {
-            paintSwitch(g);//paint with the anti alias Graphics object
+            paintSwitch(g); // paint with the anti alias Graphics object
         }
         if (drawPointer) {
             if (NETWORK_GAME_IN_PROCESS) {
@@ -253,7 +245,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // Calls a different paint method based on the current state
     private void paintSwitch(Graphics g) {
-        ///////the state machine////////
         switch(state) {
             case SPLASH_SCREEN:///////////////////////////////////////
                 stateString="SPLASH_SCREEN";
@@ -568,8 +559,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     ///////// ALL PAINT STATE METHODS //////////////////////
     private void paint_SPLASH_SCREEN(Graphics g) {
-        utils.bg(g,Color.WHITE,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
-        utils.drawImage(g,splashScreenLogo,(ULTIMATE_WIDTH/2),(ULTIMATE_HEIGHT/2),this);
+        utils.bg(g,Color.WHITE,getWidth(),getHeight());
+        utils.drawImage(g,splashScreenLogo,(getWidth()/2),(getHeight()/2),this);
         utils.setColor(g,Color.BLACK);
         if (showCollisions) {
              int ydebug=10;
@@ -585,7 +576,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private void paint_POST_SPLASH_SCREEN(Graphics g) {
-        utils.bg(g, background_colour, ULTIMATE_WIDTH, ULTIMATE_HEIGHT); // paint entire background
+        utils.bg(g, background_colour, getWidth(), getHeight()); // paint entire background
         utils.setColor(g, Color.WHITE);
 
         //paint board and its containing parts
@@ -595,10 +586,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.fillRect(g, WIDTH, Board.BORDER, PANEL_WIDTH, HEIGHT - (Board.BORDER * 2));
 
         //draw the preferences button
-        prefw = 20;
-        prefh = 20;
-        prefx = ULTIMATE_WIDTH - (Board.BORDER + prefw + TINY_GAP / 2);
-        prefy = Board.BORDER;
+        final int prefx = preferencesButtonX();
+        int prefy = preferencesButtonY();
 
         //draw a circle with an 'i' inside.
         utils.setColor(g, Color.blue);
@@ -606,7 +595,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, Color.white);
         utils.drawCircle(g, prefx, prefy, prefw, prefh);
         fontwhite.drawString(g, "i", prefx + 4, prefy + 2, 0);
-        //////////
+
         if (showCollisions) {
             utils.setColor(g, Color.RED);
             utils.drawRect(g, prefx, prefy, prefw, prefh);
@@ -1232,10 +1221,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         String printme = question; //"Please select";
         int widthOfPrintMe;
         int xposTmp = 0;
-        int ypos = (ULTIMATE_HEIGHT / 2) - fontblack.getHeight() * 5;
+        int ypos = (getHeight() / 2) - fontblack.getHeight() * 5;
 
         widthOfPrintMe = (fontblack.stringWidth(printme));
-        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
         ////
 
@@ -1247,7 +1236,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ///////// 'local' button
 
         widthOfPrintMe = (fontblack.stringWidth(printme));
-        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
 
         /////
         //make button glow if pointer is over it
@@ -1284,14 +1273,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         printme = "or";
         ypos += (fontblack.getHeight() * 2);
         widthOfPrintMe = (fontblack.stringWidth(printme));
-        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
         //////
 
         ///////// 'network' button
         printme = buttonBstr;//"Network Play";
         widthOfPrintMe = (fontblack.stringWidth(printme));
-        xposTmp = (ULTIMATE_WIDTH / 2) - ((widthOfPrintMe / 2));
+        xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         utils.setColor(g, Color.BLACK);
         ypos += fontblack.getHeight() * 2;
 
@@ -1321,8 +1310,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
         }
         //draw a little version of the logo in the bottom right
-        utils.drawImage(g, splashScreenLogoSmall, ULTIMATE_WIDTH - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
-            ULTIMATE_HEIGHT - splashScreenLogoSmall.getHeight(this), this);
+        utils.drawImage(g, splashScreenLogoSmall, getWidth() - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
+            getHeight() - splashScreenLogoSmall.getHeight(this), this);
     }
 
  private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
@@ -1369,48 +1358,48 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         String printme="Enter your name:";
         int widthOfPrintMe=(fontblack.stringWidth(printme));
         int xposTmp=0;
-        int ypos =(ULTIMATE_HEIGHT/2)-fontblack.getHeight()*5;
+        int ypos =(getHeight()/2)-fontblack.getHeight()*5;
 
         widthOfPrintMe=(fontblack.stringWidth(printme));
-        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
         fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
         ypos+=fontblack.getHeight()*2;
 
 
         printme="Enter your name:";
-        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
         utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
 
         printme=NetworkChatClient.nick;
         widthOfPrintMe=(fontblack.stringWidth(printme));
-        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
+        xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
         fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
 
         printme="Chat Server Address: "+serverIP;//NetworkChatClient.theURL;
         widthOfPrintMe=(fontblack.stringWidth(printme));
-        xposTmp=(ULTIMATE_WIDTH/2)-((widthOfPrintMe/2));
-        y=ULTIMATE_HEIGHT-(fontblack.getHeight()+25);
+        xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
+        y=getHeight()-(fontblack.getHeight()+25);
         fontblack.drawString(g, printme, xposTmp , y, 0);
     }
 
     private void paint_NETWORKING_LOBBY(Graphics g) {
         TRANSPARENCY_LEVEL=255;
         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        utils.fillRect(g,0,0,ULTIMATE_WIDTH,ULTIMATE_HEIGHT);
+        utils.fillRect(g,0,0,getWidth(),getHeight());
         int SMALLGAP=5;
 
         x=SMALLGAP;
         y=SMALLGAP+fontblack.getHeight()*2;
 
         int BORDER=10;
-        int WIDTH_OF_MESSAGE_TEXT  = ((ULTIMATE_WIDTH-ULTIMATE_WIDTH/6)-BORDER);
-        int HEIGHT_OF_MESSAGE_TEXT = ((ULTIMATE_HEIGHT-ULTIMATE_HEIGHT/8)-(BORDER+y+SMALLGAP))+2;
-        int WIDTH_OF_USERLIST  = ULTIMATE_WIDTH-(WIDTH_OF_MESSAGE_TEXT+BORDER+SMALLGAP);
+        int WIDTH_OF_MESSAGE_TEXT  = ((getWidth()-getWidth()/6)-BORDER);
+        int HEIGHT_OF_MESSAGE_TEXT = ((getHeight()-getHeight()/8)-(BORDER+y+SMALLGAP))+2;
+        int WIDTH_OF_USERLIST  = getWidth()-(WIDTH_OF_MESSAGE_TEXT+BORDER+SMALLGAP);
         int HEIGHT_OF_USERLIST = HEIGHT_OF_MESSAGE_TEXT+1;
         int WIDTH_OF_ENTERTEXT_BOX=WIDTH_OF_MESSAGE_TEXT;
-        int HEIGHT_OF_ENTERTEXT_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
+        int HEIGHT_OF_ENTERTEXT_BOX=getHeight()-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
 
-        int HEIGHT_OF_TOPIC_AND_NEWS_BOX=ULTIMATE_HEIGHT-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
+        int HEIGHT_OF_TOPIC_AND_NEWS_BOX=getHeight()-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
         y=SMALLGAP;
 
         ///////////////////////////////////////////
@@ -1446,7 +1435,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
          e = NetworkChatClient.messageText.elements();
          flip=false;
          while (e.hasMoreElements()) {
-             if (y>(ULTIMATE_HEIGHT-topofChatBox-HEIGHT_OF_ENTERTEXT_BOX)+fontblack.getHeight()) {
+             if (y>(getHeight()-topofChatBox-HEIGHT_OF_ENTERTEXT_BOX)+fontblack.getHeight()) {
                  paraYoffset--;//smooth scrolling
              }
              int ydiff=y;
@@ -1603,7 +1592,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     @Override
     public void mouseClicked(MouseEvent e) {
         if (state == NETWORKING_ENTER_NAME) {
-            if (e.getY() > ULTIMATE_HEIGHT - 50) {
+            if (e.getY() > getHeight() - 50) {
                 NetworkChatClient.theURL = NetworkChatClient.localURL;
                 System.out.println("swapped to local url");
             }
@@ -1781,10 +1770,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         pieceStuckToMouse = null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
     }
 
-    //checks if the prefs button is pressed and deals with it if so
-    private void checkIfPrefsButtonClickedOn(int x,int y) {
-        if (x>=prefx && x<=prefx+prefw)
-        {
+    //checks if the preferences button is pressed and deals with it if so
+    private void checkIfPrefsButtonClickedOn(int x, int y) {
+        int prefx = preferencesButtonX();
+        int prefy = preferencesButtonY();
+        if (x >= prefx && x <= prefx + prefw) {
             if (y >= prefy && y <= prefy + prefh) {
                 log("Prefs button clicked.");
                 INFO = !INFO;
@@ -2881,5 +2871,13 @@ public static int bumblebee[] = {
             }
         }
         return lines;
+    }
+
+    private int preferencesButtonX() {
+        return getWidth() - (Board.BORDER + prefw + TINY_GAP / 2);
+    }
+
+    private int preferencesButtonY() {
+        return Board.BORDER;
     }
 }
