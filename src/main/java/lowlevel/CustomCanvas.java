@@ -318,10 +318,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                  options) We simply re-use this state's paint method and pass in the
                  right strings to make it work*/
                 stateString="OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN";
-                // ie option 1, option 2, question
-                paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(g,"Computer"," Human  ","Play against");
-                // make buttons glow if hovered over//
-                glowButton(Board.mouseHoverX,Board.mouseHoverY);
+                glowButton(Board.mouseHoverX, Board.mouseHoverY);
+                paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,"Computer"," Human  ","Play against");
                 break;
             case GAME_IN_PROGRESS:///////////////////////////////////
                 stateString="POST_SPLASH_SCREEN";
@@ -1337,39 +1335,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //draw a little version of the logo in the bottom right
         utils.drawImage(g, splashScreenLogoSmall, getWidth() - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
             getHeight() - splashScreenLogoSmall.getHeight(this), this);
-    }
-
-    private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
-        //reuse an existing method, they both simply have 2 buttons on them
-        paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,buttonAstr,buttonBstr,question);
-    }
-
-    public String readStringFromWeb(String url) {
-        String full="";
-        String inputLine="";
-        try
-        {
-        URL yahoo = new URL(url);//"http://www.alphasoftware.org/backgammon/news.txt");
-        URLConnection yc = yahoo.openConnection();
-        BufferedReader in = new BufferedReader(
-                                new InputStreamReader(
-                                yc.getInputStream()));
-
-
-        while ((inputLine = in.readLine()) != null)
-        {
-            System.out.println(inputLine);
-            if (inputLine!=null)
-                full+=inputLine;
-        }
-        in.close();
-        }
-        catch(Exception e)
-        {
-            System.out.println("exception in getting news "+e.getMessage());
-        }
-        System.out.println("return news:"+full);
-        return full;
     }
 
     private void paint_NETWORKING_ENTER_NAME(Graphics g) {
