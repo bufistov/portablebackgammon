@@ -1018,7 +1018,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //works out if the top button is pressed (in this state the 'local play' button)
     //and deals with it
-    private void checkAndDealWithTopButtonPressed_localplay(int x,int y) {
+    private void checkAndDealWithTopButtonPressed_localplay(int x, int y) {
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
@@ -1245,7 +1245,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
-        String printme = question; //"Please select";
+        String printme = question;
         int widthOfPrintMe;
         int xposTmp;
         int ypos = (getHeight() / 2) - fontblack.getHeight() * 5;
@@ -1298,13 +1298,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //////
 
         ///////// 'network' button
-        printme = buttonBstr;//"Network Play";
+        printme = buttonBstr; // "Network Play";
         widthOfPrintMe = (fontblack.stringWidth(printme));
         xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         utils.setColor(g, Color.BLACK);
         ypos += fontblack.getHeight() * 2;
 
-        /////
         //make button glow if pointer is over it
         if (glowB) {
             if (glowCounter < 255) {
@@ -1334,10 +1333,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             getHeight() - splashScreenLogoSmall.getHeight(this), this);
     }
 
- private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
-     //reuse an existing method, they both simply have 2 buttons on them
-     paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,buttonAstr,buttonBstr,question);
- }
+    private void paint_OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN(Graphics g, String buttonAstr, String buttonBstr, String question) {
+        //reuse an existing method, they both simply have 2 buttons on them
+        paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,buttonAstr,buttonBstr,question);
+    }
 
  public String readStringFromWeb(String url) {
         String full="";
@@ -1659,7 +1658,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (Board.gameComplete) {
                 board.RESET_ENTIRE_GAME_VARS();
                 RESET_ENTIRE_GAME_VARS();
-                splashCounter=0;
                 state=SPLASH_SCREEN;
             }
         }
@@ -1750,6 +1748,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 //so it doesnt continuing playin on its own
         Board.HUMAN_VS_COMPUTER=false;
         Bot.dead=true;
+        splashCounter = 0;
     }
 
     public static void turnOver() {
