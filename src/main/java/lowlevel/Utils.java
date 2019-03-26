@@ -13,7 +13,7 @@ public class Utils {
     private Color transparent;
 
     public void setColor(Graphics g, Color colour_) {
-        colour=colour_;
+        colour = colour_;
         g.setColor(colour_);
     }
 
@@ -37,7 +37,7 @@ public class Utils {
     }
 
     public void fillRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
-         g.fillRect(x,y, WIDTH, HEIGHT);
+         g.fillRect(x, y, WIDTH, HEIGHT);
     }
 
     public void drawRoundRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
@@ -83,9 +83,9 @@ public class Utils {
         return image;
     }
 
-    public void bg(Graphics g, Color c, int WIDTH, int HEIGHT) {
-        setColor(g,c);
-        fillRect(g,0,0,WIDTH,HEIGHT);
+    public void backGround(Graphics g, Color c, int WIDTH, int HEIGHT) {
+        setColor(g, c);
+        fillRect(g,0,0, WIDTH, HEIGHT);
     }
 
     public void drawImage(Graphics g, Image i, int x, int y, ImageObserver observer) {

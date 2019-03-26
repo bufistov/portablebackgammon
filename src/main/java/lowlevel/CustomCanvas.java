@@ -62,7 +62,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private CustomFont fontwhite, fontblack;
     boolean INFO=false;    // 'about box' toggle
     Utils utils = new Utils();   // Hardware Abstraction Layer
-    private static int state;
+    private int state = 0;
     String stateString;
     int PANEL_WIDTH=0;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
@@ -552,7 +552,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     ///////// ALL PAINT STATE METHODS //////////////////////
     private void paint_SPLASH_SCREEN(Graphics g) {
-        utils.bg(g,Color.WHITE,getWidth(),getHeight());
+        utils.backGround(g, Color.WHITE, getWidth(), getHeight());
         utils.drawImage(g,splashScreenLogo,(getWidth()/2),(getHeight()/2),this);
         utils.setColor(g,Color.BLACK);
         if (showCollisions) {
@@ -569,7 +569,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private void paint_POST_SPLASH_SCREEN(Graphics g) {
-        utils.bg(g, background_colour, getWidth(), getHeight()); // paint entire background
+        utils.backGround(g, background_colour, getWidth(), getHeight()); // paint entire background
         utils.setColor(g, Color.WHITE);
 
         //paint board and its containing parts
@@ -1559,7 +1559,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //paint helpers///////////////
     private void bg(Color col, Graphics g) {
-        utils.bg(g,col,WIDTH,HEIGHT);
+        utils.backGround(g,col,WIDTH,HEIGHT);
     }
 
     // gets called each frame to repaint
