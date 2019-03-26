@@ -51,14 +51,13 @@ public class Bot extends Thread {
     }
 
     private void tick() {
-        if (dead || Board.gameComplete)
-            return;
-        if (FULL_AUTO_PLAY) {
-
-        } else {
-            if (Board.HUMAN_VS_COMPUTER && CustomCanvas.numberOfFirstRollsDone==1) {
-            } else if ( (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.WHITE) ){
+        if (dead || Board.gameComplete || (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE)) {
+            try {
+                Thread.sleep(50);
                 return;
+            } catch (InterruptedException ie) {
+                log("Interrupted while sleeping");
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -144,16 +143,8 @@ public class Bot extends Thread {
 
     @Override
     public void run() {
-        long cycleTime = System.currentTimeMillis();
         while(isRunning) {
             tick();
-            long difference = cycleTime - System.currentTimeMillis();
-            try {
-                // Utils.log(String.format("Sleeping for %d ml seconds, difference: %d", Math.max(0, difference), difference));
-                Thread.sleep(Math.max(0, difference));
-            } catch(InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 

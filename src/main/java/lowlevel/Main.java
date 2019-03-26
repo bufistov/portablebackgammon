@@ -56,8 +56,8 @@ public class Main {
          insetY=insets.top;
          insetX=insets.left;
 
-         windowX=frame.getLocationOnScreen().x;
-         windowY=frame.getLocationOnScreen().y;
+         windowX = frame.getLocationOnScreen().x;
+         windowY = frame.getLocationOnScreen().y;
      }
 
      static boolean isHidden;

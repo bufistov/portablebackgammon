@@ -49,14 +49,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int typeOfPlay=-1;
     public static final int NETWORK_PLAY=1;
     public static final int LOCAL_PLAY=2;
-    int typeOfOpponent=-1;
-    public static final int CPU=1;
-    public static final int HUMAN=2;
 
     // -- constants
-    public static int PANEL_COLOUR=0x000000;
-    public static int BACKGROUND_COLOUR=0x993300;
-    public static int ROLL_BUTTON_COLOUR=0xffcc66;
+    public static int PANEL_COLOUR = 0x000000;
+    public static int BACKGROUND_COLOUR = 0x993300;
+    public static int ROLL_BUTTON_COLOUR = 0xffcc66;
     public static Color panel_colour, background_colour, roll_button_colour;
 
     // -- turn on and off anti aliasing
@@ -123,9 +120,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int rollButtonW;
     int rollButtonH;
 
-    public static int numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
-    int whitesFirstRollVal=-1;//keep their initial roll to compare them
-    int blacksFirstRollVal=-1;
     public static boolean showRollButton=true;//false when not needed
 
     public static int D1lastDieRoll_toSendOverNetwork;
@@ -183,8 +177,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private int glowCounter = 125;
 
     private static boolean paintRobotMessages;
-    private static boolean showPlayerMessage=true;
-    private static long playerMessageSetTimeLong = System.currentTimeMillis();//thjis keeps the version on screen for a few secs at the start
+    private long playerMessageSetTimeLong;//thjis keeps the version on screen for a few secs at the start
     //sets the vars to allow a message to be shown to the player in bottom right for
     //a while
 
@@ -206,7 +199,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     */
     CustomCanvas(JFrame jFrame_) {
         log("CustomCanvas made.");
-        board = new Board();
+        board = new Board(this);
         bot.start();
        
         // j2se specifics
@@ -353,14 +346,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Utils.CANVAS_LOGGING) {
             paintStringsToCanvas(g);
         }
-        if (showPlayerMessage){  //paint messages to players
-             //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
-              //could be a bit over the top for what im doign (todo optimise?)
-            long playerMessageTimePassedLong = System.currentTimeMillis() - playerMessageSetTimeLong;
-            if (playerMessageTimePassedLong < SHOW_ME_LIMIT ) {  //paint messages to players
-                paintMessageToPlayers(g);
-            } else if (state == GAME_IN_PROGRESS)
-                showPlayerMessage = false;
+        //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
+        //could be a bit over the top for what im doign (todo optimise?)
+        long playerMessageTimePassedLong = System.currentTimeMillis() - playerMessageSetTimeLong;
+        if (playerMessageTimePassedLong < SHOW_ME_LIMIT ) {
+            paintMessageToPlayers(g);
         }
         if (Bot.dead == false) {
             if (paintRobotMessages) {
@@ -628,14 +618,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, Color.WHITE);
 
         //paint board and its containing parts
-        board.paint(g, WIDTH, HEIGHT);
+        int boardWidth = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
+        int boardHeight = getHeight();
+        board.paint(g, boardWidth, boardHeight);
         //paint the message panel to the right with players name etc
         utils.setColor(g, panel_colour);
-        utils.fillRect(g, WIDTH, Board.BORDER, PANEL_WIDTH, HEIGHT - (Board.BORDER * 2));
+        utils.fillRect(g, boardWidth, Board.BORDER, PANEL_WIDTH, boardHeight - (Board.BORDER * 2));
 
         //draw the preferences button
         final int prefx = preferencesButtonX();
-        int prefy = preferencesButtonY();
+        final int prefy = preferencesButtonY();
 
         //draw a circle with an 'i' inside.
         utils.setColor(g, Color.blue);
@@ -649,14 +641,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRect(g, prefx, prefy, prefw, prefh);
         }
 
-        //draw panel text:
-        int xpos = WIDTH + TINY_GAP;
+        // draw panel text:
+        int xpos = boardWidth + TINY_GAP;
 
-        //draw the piece container
+        // draw the piece container
         int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (Board.BORDER * 2) + TINY_GAP;
-        int containerSubSize = HEIGHT / 70;
+        int containerSubSize = boardHeight / 70;
         int containerWidth = PANEL_WIDTH / 3;
-        int topOfPieceContainer = HEIGHT - ((containerSubSize * 15) + heightOf3LinesOfText);
+        int topOfPieceContainer = boardHeight - ((containerSubSize * 15) + heightOf3LinesOfText);
 
         if (Board.allBlackPiecesAreHome) {
             utils.setColor(g, Color.GREEN);
@@ -681,7 +673,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             utils.setColor(g, Color.WHITE);
         }
-        //draw white players piece container
+        // draw white players piece container
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, Player.WHITE);
 
@@ -715,15 +707,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int myX = WIDTH + ((PANEL_WIDTH / 4) - (containerWidth / 2));
         int myY = topOfPieceContainer;
         for (int i = 0; i < 15; i++) {
-
             //simply draws the containers green if players have all their pieces in the home section
             //and therefore the piece containers are 'live' and ready for action
-
             myY = myY + containerSubSize;
             if (i < piecesOnContainer) {
                 Color originalColor = utils.getColor();
                 utils.setColor(g, Color.ORANGE);
-
                 utils.fillRect(g, myX, myY, containerWidth, containerSubSize);
                 utils.setColor(g, originalColor);
             }
@@ -764,13 +753,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
 
-        printme = "Pips: " + calculatePips(Player.WHITE);/*board.getBlackPlayer().pips*/
-        ;
+        printme = "Pips: " + calculatePips(Player.WHITE);
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
         printme = "Score: " + board.getBlackPlayer().score;
         fontwhite.drawString(g, printme, xpos, ypos, 0);
-        ypos += fontwhite.getHeight();
+
         //draw white players score at bot
         ypos = HEIGHT - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
         printme = "Brown (" + board.getWhitePlayer().name + ")";
@@ -784,7 +772,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ypos += fontwhite.getHeight();
         printme = "Score: " + board.getWhitePlayer().score;
         fontwhite.drawString(g, printme, xpos, ypos, 0);
-        ypos += fontwhite.getHeight();
 
         int xposTmp = -1;
         ypos = (HEIGHT / 2) - ((fontwhite.getHeight() * 4) / 2);
@@ -816,7 +803,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         //draw the 'Roll' button
         ///////// roll button (on board itself (could be either side)
-        printme = "" + Die.rollString;//either says roll or 'roll to see who goes first' ..
+        printme = "" + Die.rollString; //either says roll or 'roll to see who goes first' ..
         widthOfPrintMe = (fontwhite.stringWidth(printme));
 
         //only show roll button when required
@@ -827,11 +814,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.setColor(g, roll_button_colour);
             utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
 
-            if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK || Bot.getFullAutoPlay() || numberOfFirstRollsDone == 1) {
+            if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK || Bot.getFullAutoPlay()) {
                 if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
                     log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
                 } else {
-                    Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2, ypos + (fontwhite.getHeight()) / 2, "PRESS ROLL BUTTON");
+                    Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2,
+                        ypos + (fontwhite.getHeight()) / 2, "PRESS ROLL BUTTON");
                 }
             }
 
@@ -967,12 +955,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
                 buttonPressed = true;
-                typeOfOpponent = CPU;//REMOVE ME???? TODOOOO
                 Board.HUMAN_VS_COMPUTER = true;
-                Bot.dead = false;//give him life
+                Bot.dead = false;
                 log("CPU OPPONENT PRIMED.");
-                state = GAME_IN_PROGRESS;
-
+                startGame();
                 if (typeOfPlay == LOCAL_PLAY) {
                     log("Selected LOCAL play against CPU");
                 } else {
@@ -990,12 +976,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
                 buttonPressed = true;
-                typeOfOpponent = HUMAN;
-                state = GAME_IN_PROGRESS;
-
+                startGame();
                 Board.HUMAN_VS_COMPUTER = false;
                 log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
-
                 if (typeOfPlay == LOCAL_PLAY) {
                     log("Selected LOCAL play against HUMAN");
                 } else {
@@ -1041,25 +1024,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 log("Roll Dice button clicked.");
                 Board.die1HasBeenUsed = false;
                 Board.die2HasBeenUsed = false;
-                showDice = true;//show the die now theyve clicked roll.
+                showDice = true; // show the die now theyve clicked roll.
                 sfxDiceRoll.playSound();
-                ////////IF OPENING DICE ROLLS
-                //if numberOfFirstRollsDone is less than 2
-                //we know its the very start of the game, each player
-                //gets to roll one die - highest roll indicates who
-                //takes the first go.
-                if (numberOfFirstRollsDone <= 1) {
-                    log("OPENING ROLL (numberOfFirstRollsDone:" + numberOfFirstRollsDone + ")");
-                    //ie the one each you get to see how starts.
-                    dealWithOpeningRolls();
-                    //kick start the bot
-                } else {
-                    //////////////////////////////
-                    //ORDINARY ROLLS/////////////
-                    log("ORDINARY ROLL");
-                    dealWithOrdinaryRolls();
-                }
-                buttonPressed = true;//just to print out to us it was pressed.
+                dealWithOrdinaryRolls();
+                buttonPressed = true; // just to print out to us it was pressed.
             }
         }
     }
@@ -1070,150 +1038,40 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Board.whoseTurnIsIt == Player.WHITE) {
             log("white will roll both die now.");
             // note we pass in null in here which tells it to roll both die for us directly
-            playerRolls(Player.WHITE, null, false);
-
+            playerRolls(Player.WHITE);
         } else if (Board.whoseTurnIsIt == Player.BLACK) {
             log("black will roll both die now.");
             // note we pass in null in here which tells it to roll both die for us directly
-            playerRolls(Player.BLACK, null, false);
-
+            playerRolls(Player.BLACK);
         } else {
             Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
         }
     }
 
-     //deals with the implementation details of the opening rolls, that is each player
-     //gets one roll to decide who goes first, then the winner takes both of these values
-     //as their opening move.
-    private void dealWithOpeningRolls() {
-        log("----------- dealWithOpeningRolls -----------");
-        numberOfFirstRollsDone++;
-        log("first roll. " + numberOfFirstRollsDone);
-
-        // WHITE rolls first to see who starts
-        if (numberOfFirstRollsDone == 1) {
-            playerRolls(Player.WHITE, board.die1, true);
-        } else if (numberOfFirstRollsDone == 2) {
-            playerRolls(Player.BLACK, board.die2, true);
-
-            //check who was higher and therefore goes first
-            if (blacksFirstRollVal > whitesFirstRollVal) {
-                playerWonRollOff(Player.BLACK);
-            } else if (whitesFirstRollVal > blacksFirstRollVal) {
-                playerWonRollOff(Player.WHITE);
-            } else if (blacksFirstRollVal == whitesFirstRollVal) {
-                log("INITIAL ROLLS:BOTH PLAYERS ROLLED THE SAME! RE-ROLL.");
-                tellPlayers("Both players rolled the same! Re-roll.");
-                numberOfFirstRollsDone = 0;
-                blacksFirstRollVal = -1;
-                whitesFirstRollVal = -1;
-                sfxDoubleRolled.playSound();
-                //this leaves it in a state where it simply allows this cycle to
-                //repeat until the die rolls are different.
-            }
-        }
-    }
-
-    //does some basic stuff regarding a player winning a roll off
-    //and makes sure that board.whoseTurnIsIt is updated with the right value
-    private void playerWonRollOff(int player) {
-        if (player == Player.BLACK) {
-            log("BLACK won the roll off: " + blacksFirstRollVal + " to " + whitesFirstRollVal);
-            tellPlayers("Black won the roll off: " + blacksFirstRollVal + " to " + whitesFirstRollVal);
-            board.whoseTurnIsIt = Player.BLACK;
-            //theyve rolled now time to move their pieces
-        } else if (player == Player.WHITE) {
-            log("WHITE won the roll off: " + whitesFirstRollVal + " to " + blacksFirstRollVal);
-            tellPlayers("White won the roll off: " + whitesFirstRollVal + " to " + blacksFirstRollVal);
-            board.whoseTurnIsIt = Player.WHITE;
-            //theyve rolled now time to move their pieces
-        } else {
-            Utils._E("playerWonRollOff received an invalid player colour " + player);
-        }
-        if (CustomCanvas.numberOfFirstRollsDone > 1)//ie if game started.
-        {
-            //hide roll button while they move their pieces.
-            showRollButton = false;
-            log("hiding show roll button");
-        }
-    }
-
-     //forces doubles on ordinary rolls, PURELY for checking the doubles implementation is bug free
-     //this should never be true unless debugging.
-
      // deals with a player rolling a dice, accepts an int representing either
      // BLACK or WHITE, die is the die which the player should roll.
-     //openingRolls is passed in as true if the rolls are opening ones.
      // note that:
      // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
-     //accessing the dice objects directly, since we really want them to roll simulatenously so to speak
-    private void playerRolls(int player, Die die,boolean openingRolls) {
-        if (player == Player.WHITE) {
-            if (openingRolls) {   // an opening roll.
-                int val = die.roll();
-                System.out.println("updateDieRollRemotely");
-                if (I_AM_CLIENT) {
-                    D1lastDieRoll_toSendOverNetwork = val;
-                    GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
-                }
-                if (I_AM_SERVER) {
-                    val = Integer.parseInt(doComms.D1remoteDieRoll);
-                    die.setValue(val);
-                }
-                log("White rolled:" + val);
-                whitesFirstRollVal = val;
-                tellPlayers("White's opening roll " + whitesFirstRollVal);
-            } else {
-                //ordinary roll.
-                int val = board.die1.roll();
-                D1lastDieRoll_toSendOverNetwork = val;
-                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
-                int val2 = board.die2.roll();
-                D2lastDieRoll_toSendOverNetwork = val2;
-                GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true;//tells it to send a click over network
-                log("####################################White rolled:" + val + ", " + val2);
-                tellPlayers("White rolled:" + val + "-" + val2);
+     // accessing the dice objects directly, since we really want them to roll simulatenously so to speak
+    private void playerRolls(int player) {
+        String playerStr = player == Player.WHITE ? "White" : "Black";
+        int val = board.die1.roll();
+        D1lastDieRoll_toSendOverNetwork = val;
+        GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true; // tells it to send a click over network
+        int val2 = board.die2.roll();
+        D2lastDieRoll_toSendOverNetwork = val2;
+        GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true; // tells it to send a click over network
+        log(String.format("####################################%s rolled:%d, %d", playerStr, val, val2));
+        tellPlayers(String.format("%s rolled:%d-%d", playerStr, val, val2));
 
-                if (val == val2) {
-                    log("White Double!");
-                    tellPlayers("White rolled:" + val + "-" + val2 + " (Double)");
-                    someoneRolledADouble = true;
-                    doubleRollCounter = 0;
-                    sfxDoubleRolled.playSound();
-                }
-                showRollButton = false;//dont show it now theyve just rolled.
-            }
-        } else if (player == Player.BLACK) {
-            if (openingRolls) {   //its an opening roll.
-                int val = die.roll();
-                D1lastDieRoll_toSendOverNetwork = val;
-                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
-                log("Black rolled:" + val);
-                blacksFirstRollVal = val;
-                tellPlayers("Black's opening roll " + blacksFirstRollVal);
-            } else {
-                //ordinary roll.
-                int val = board.die1.roll();
-                D1lastDieRoll_toSendOverNetwork = val;
-                GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true;//tells it to send a click over network
-                int val2 = board.die2.roll();
-                D2lastDieRoll_toSendOverNetwork = val2;
-                GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true;//tells it to send a click over network
-                log("#####################################################Black rolled:" + val + ", " + val2);
-                tellPlayers("Black rolled:" + val + "-" + val2);
-
-                if (val == val2) {
-                    log("Black Double!");
-                    tellPlayers("Black rolled:" + val + "-" + val2 + " (Double)");
-                    someoneRolledADouble = true;
-                    doubleRollCounter = 0;
-                    sfxDoubleRolled.playSound();
-                }
-                showRollButton = false;//dont show it now theyve just rolled.
-            }
-        } else {
-            Utils._E("playerRolls() received an invalid player colour.");
+        if (val == val2) {
+            log(String.format("%s Double!", playerStr));
+            tellPlayers(String.format("%s rolled:%d-%d (Double)", playerStr, val, val2));
+            someoneRolledADouble = true;
+            doubleRollCounter = 0;
+            sfxDoubleRolled.playSound();
         }
+        showRollButton = false; // dont show it now theyve just rolled.
         board.calculatePotentialNumberOfMoves = true;
     }
 
@@ -1290,16 +1148,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.setColor(g, Color.red);
             utils.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
         }
-
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
-
-        ///////
         printme = "or";
         ypos += (fontblack.getHeight() * 2);
         widthOfPrintMe = (fontblack.stringWidth(printme));
         xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
-        //////
 
         ///////// 'network' button
         printme = buttonBstr; // "Network Play";
@@ -1655,18 +1509,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
                 //once a piece is stuck to the pointer, we place it on a spike
                 //IFF that spike is one of its valid moves.
-                if (CustomCanvas.numberOfFirstRollsDone > 1)//ie if game started.
-                {
-                    checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
-                    checkIfPieceContainerClickedOn(x, y);
-                    checkIfDoubleClickedOn(x, y);
-                    checkIfResignClickedOn(x, y);
-                    //if both dice used move to next turn
-                    if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
-                        log("GO TO NEW TURN AA");
-                        turnOver();
 
-                    }
+                checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
+                checkIfPieceContainerClickedOn(x, y);
+                checkIfDoubleClickedOn(x, y);
+                checkIfResignClickedOn(x, y);
+                //if both dice used move to next turn
+                if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
+                    log("GO TO NEW TURN AA");
+                    turnOver();
                 }
                 return;
         }
@@ -1676,9 +1527,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Board.whoseTurnIsIt=Player.WHITE;
         someoneRolledADouble=false;
         doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
-        numberOfFirstRollsDone=0;//when this hits 2 we know they have both rolled their initial roll
-        whitesFirstRollVal=-1;//keep their initial roll to compare them
-        blacksFirstRollVal=-1;
         showRollButton=true;//false when not needed
         resetVarsTurn();
         theBarWHITE = new Vector(4);//the bar holds pieces that get killed
@@ -1695,7 +1543,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         message2Players = VERSION;
         board = null;
-        Die.initialRollText = "Roll to see who goes first (white roll)";
         Board.gameComplete = false;
         whiteResigned = false;
         blackResigned = false;
@@ -1706,7 +1553,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         splashCounter = 0;
     }
 
-    public static void turnOver() {
+    public void turnOver() {
         log("---- THIS TURN IS OVER ----");
         if (Board.whoseTurnIsIt == Player.WHITE) {
             Board.whoseTurnIsIt = Player.BLACK;
@@ -2550,10 +2397,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    public static void tellPlayers(String s) {
-        showPlayerMessage=true;
-        playerMessageSetTimeLong=System.currentTimeMillis();
-        message2Players=s;
+    public void tellPlayers(String s) {
+        playerMessageSetTimeLong = System.currentTimeMillis();
+        message2Players = s;
     }
 
     public static void robotExplain(String s) {
@@ -2791,7 +2637,7 @@ public static int bumblebee[] = {
     public void onHumanPlayerConnectedToServer() {
         log("Human player connected to server");
         Bot.dead = true;
-        state = GAME_IN_PROGRESS;
+        startGame();
         NETWORK_GAME_IN_PROCESS = true;
         I_AM_CLIENT = true;
         NetworkChatClient.KEEP_LOBBY_GOING = false;
@@ -2799,6 +2645,14 @@ public static int bumblebee[] = {
     }
 
     public void startGame() {
+        int val = Utils.getRand(0, 999_999);
+        String playerStr = "White";
+        board.whoseTurnIsIt = Player.WHITE;
+        if (val >= 500_000) {
+            board.whoseTurnIsIt = Player.BLACK;
+            playerStr = "Black";
+        }
+        tellPlayers(String.format("%s won the roll off", playerStr));
         state = GAME_IN_PROGRESS;
     }
 }

@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.util.Enumeration;
 
 public class Board {
+
     //Colour constants
     public static int BOARD_COLOUR = 0x000000;
     public static int BAR_COLOUR = CustomCanvas.BACKGROUND_COLOUR;
@@ -22,7 +23,10 @@ public class Board {
 
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
-    public Board() {
+
+    private CustomCanvas canvas;
+    public Board(CustomCanvas canvas) {
+        this.canvas = canvas;
         log("Board made");
         // make spikes, players, pieces etc
         makeAllGameVars();
@@ -64,7 +68,7 @@ public class Board {
     }
     
     public void paint(Graphics g, int WIDTH, int HEIGHT) {
-        methodNOW="";
+        methodNOW = "";
         utils.setColor(g, Color.BLACK);
         BORDER = WIDTH/64;
         BAR = BORDER*2;
@@ -77,9 +81,6 @@ public class Board {
         utils.fillRect(g,BORDER,BORDER,widthMinusBorder,HEIGHT-BORDER*2);
         utils.setColor(g, Color.BLACK);
         utils.drawRect(g,BORDER,BORDER,widthMinusBorder,HEIGHT-BORDER*2);
-        //draw piece containers
-        ////utils.drawRect(g,BORDER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
-        ////utils.drawRect(g,WIDTH-BORDER-PIECE_CONTAINER,BORDER,PIECE_CONTAINER,HEIGHT-BORDER*2);
         //bar between 2 halves
         utils.setColor(g,bar_colour);
         utils.fillRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
@@ -99,113 +100,78 @@ public class Board {
         paintDice(g,WIDTH,HEIGHT);
 
         //draw the potential moves for whoevers go it is
-        if (CustomCanvas.numberOfFirstRollsDone>1) { //ie if game started.
-            if (gameComplete) {
-                log("gameComplete");
+        if (gameComplete) {
+            log("gameComplete");
+        } else {
+            if (!CustomCanvas.pieceOnMouse) {
+                //SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
+                // if we have bits on the bar we need to deal with:
+               if (whoseTurnIsIt==Player.WHITE && CustomCanvas.theBarWHITE.size()>0) {
+                  drawPotentialMovesFromBar(g);
+               } else if (whoseTurnIsIt==Player.BLACK && CustomCanvas.theBarBLACK.size()>0) {
+                  drawPotentialMovesFromBar(g);
+               } else {
+                    // ORDINARY MOVE
+                    //if no piece is stuck to mouse then just show up the potential
+                    //moves as the mouse is hovered over each spike
+                    drawPotentialMoves(g);
+               }
+            } else {/////////////////////IF THERE IS A PIECE ON MOUSE
+                //simply keep these updatign as theyre still options
+               if (whoseTurnIsIt==Player.WHITE && CustomCanvas.theBarWHITE.size()>0) {
+                  drawPotentialMovesFromBar(g);
+               } else
+               if (whoseTurnIsIt==Player.BLACK && CustomCanvas.theBarBLACK.size()>0) {
+                  drawPotentialMovesFromBar(g);
+               } else {
+                    //if there is a piece stuck on the mouse then pulsate the copied
+                    //versions of the potential moves from before it was stuck on,
+                    //this simply allows the player to move the piece around and still
+                    //see the potential moves for the piece they are "holding" currently
+                     keepPotentialSpikesPulsing();
+               }
             }
-            else
+            if ((!die1HasBeenUsed || !die2HasBeenUsed))//EXPERMENTAL IE WONT BOTHER IF DICE ARE USED
             {
-                if (!CustomCanvas.pieceOnMouse)////// IF THERE IS NO PIECE ON MOUSE //////////////////
-                {
-                    //SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
-                    // if we have bits on the bar we need to deal with:
-                   if (whoseTurnIsIt==Player.WHITE && CustomCanvas.theBarWHITE.size()>0)
-                   {
-                      drawPotentialMovesFromBar(g);
-                   } else
-                   if (whoseTurnIsIt==Player.BLACK && CustomCanvas.theBarBLACK.size()>0)
-                   {
-                      drawPotentialMovesFromBar(g);
-                   }
-                   else
-                   {
-                        // ORDINARY MOVE
-                        //if no piece is stuck to mouse then just show up the potential
-                        //moves as the mouse is hovered over each spike
-                        drawPotentialMoves(g);
-                   }
-                }
-                else /////////////////////IF THERE IS A PIECE ON MOUSE
-                {
-                    //simply keep these updatign as theyre still options
-                   if (whoseTurnIsIt==Player.WHITE && CustomCanvas.theBarWHITE.size()>0)
-                   {
-                      drawPotentialMovesFromBar(g);
-                   } else
-                   if (whoseTurnIsIt==Player.BLACK && CustomCanvas.theBarBLACK.size()>0)
-                   {
-                      drawPotentialMovesFromBar(g);
-                   }
-                   else
-                   {
-                        //if there is a piece stuck on the mouse then pulsate the copied
-                        //versions of the potential moves from before it was stuck on,
-                        //this simply allows the player to move the piece around and still
-                        //see the potential moves for the piece they are "holding" currently
-                         keepPotentialSpikesPulsing();
-                   }
-                     
-                }
+                calculatePotentialMoves(false);
             }
-            
         }
-        if (gameComplete)
-            {
-                log("gameComplete!");
-            }
-            else
-            {
-             ///////////////////////calculate potential moves goes here
-            //////////REMOVED THIS AS AN EXPERMIENT 26TH JAN 127AM
-                if (/*calculatePotentialNumberOfMoves && */(!die1HasBeenUsed || !die2HasBeenUsed))//EXPERMENTAL IE WONT BOTHER IF DICE ARE USED
-                {
-                    calculatePotentialMoves(false);
-                }
-            }
 
         //CHECK IF ITS GAME OVER?
-        if (CustomCanvas.whitePiecesSafelyInContainer.size()==15)
-        {
+        if (CustomCanvas.whitePiecesSafelyInContainer.size()==15) {
             gameComplete=true;
             gameCompleteString="White has won the game!";
             CustomCanvas.showRollButton=false;
         }
-        if (CustomCanvas.blackPiecesSafelyInContainer.size()==15)
-        {
+        if (CustomCanvas.blackPiecesSafelyInContainer.size()==15) {
             gameComplete=true;
             gameCompleteString="Black has won the game!";
             CustomCanvas.showRollButton=false;
         }
 
-        if (gameComplete || CustomCanvas.whiteResigned || CustomCanvas.blackResigned)
-        {
-            if (playGameOverSound)
-            {
+        if (gameComplete || CustomCanvas.whiteResigned || CustomCanvas.blackResigned) {
+            if (playGameOverSound) {
                 CustomCanvas.sfxGameOver.playSound();
                 log("PLAYING GAME OVER SOUND*************************");
                 playGameOverSound=false;
             }
-            CustomCanvas.tellPlayers(gameCompleteString);
+            canvas.tellPlayers(gameCompleteString);
         }
     }
 
-    private void paintDice(Graphics g, int WIDTH,int HEIGHT)
-    {
+    private void paintDice(Graphics g, int WIDTH,int HEIGHT) {
         if (CustomCanvas.showDice) {
-            int diex=-1;
-            int diey=-1;
-            diex=(BORDER+((WIDTH/4)*3))+Die.DIE_WIDTH;
-            diey=((BORDER+(HEIGHT/2))-Die.DIE_HEIGHT);
+            int diex = (BORDER+((WIDTH/4)*3))+Die.DIE_WIDTH;
+            int diey = ((BORDER+(HEIGHT/2))-Die.DIE_HEIGHT);
             if (!die1HasBeenUsed) {
                 die1.paint(g, diex, diey);
             } else {
-
                 //if this die cannot be seen, then set its value to zero so its no longer taken into account
                 //in logic to look for potential moves etc.
                 die1.disable();
             }
 
-            diex+=Die.DIE_WIDTH+CustomCanvas.TINY_GAP;//gap between dice
+            diex += Die.DIE_WIDTH + CustomCanvas.TINY_GAP;//gap between dice
             if (!die2HasBeenUsed) {
                 die2.paint(g, diex, diey);
             } else {
@@ -275,7 +241,7 @@ public class Board {
             log("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!1");
             die1HasBeenUsed=true;
             die2HasBeenUsed=true;
-            CustomCanvas.turnOver();
+            canvas.turnOver();
         }
     }
 
@@ -1549,155 +1515,143 @@ thereAreOptions=false;
     public boolean thereAreOptions=false;
     public SpikePair SPtheMoveToMake;//stores the move they will make
     public void calculatePotentialMoves(boolean FORCE) {
-               //  boolean theyWantToPlaceAPiece=false;
-                 //if SPtheMoveToMake isnt null they have already chosen the spikes to pick up from and drop off at
-                 if (FORCE || (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse) && !thereAreOptions )//&& SPtheMoveToMake==null))//&& !CustomCanvas.showRollButton)// && !die1HasBeenUsed  && !die2HasBeenUsed)
-                 {
-                 log("_______________________________________________RECALCULATE MOVES " + FORCE + " die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
-                     
+        //  boolean theyWantToPlaceAPiece=false;
+        //if SPtheMoveToMake isnt null they have already chosen the spikes to pick up from and drop off at
+        if (FORCE || (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse) && !thereAreOptions)//&& SPtheMoveToMake==null))//&& !CustomCanvas.showRollButton)// && !die1HasBeenUsed  && !die2HasBeenUsed)
+        {
+            log("_______________________________________________RECALCULATE MOVES " + FORCE + " die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
 
-                    theyWantToPickUpAPiece();//<- fills up spikePairs
 
-                    Enumeration e = spikePairs.elements();
-                    
-                    while (e.hasMoreElements())
-                    {
-                        SpikePair sp = (SpikePair) e.nextElement();
-                        //log("we can pick up from spike:"+sp.pickMyPiece.spikeName+" and drop off at spike:"+sp.dropPiecesOnMe.spikeName);
-                        thereAreOptions=true;
-                    }
-                    boolean onlyOptionsAreWithNoExactDieRoll=true;
-                    // if this is true by the time we get to "no options!" we know we need to let them take a special move and allow the
-                    //die roll to wotkeven tho its to big
+            theyWantToPickUpAPiece();//<- fills up spikePairs
 
-                    log("spikePairs size:" + spikePairs.size());
+            Enumeration e = spikePairs.elements();
 
-                    if (thereAreOptions)
-                    {
-                        listBotsOptions=true;//CustomCanvas.DEBUG_CONSOLE;
-                        if (listBotsOptions)
-                        {
-                            botOptions="";
-                            Enumeration ee = spikePairs.elements();
-                            while (ee.hasMoreElements())
-                            {
+            while (e.hasMoreElements()) {
+                SpikePair sp = (SpikePair) e.nextElement();
+                //log("we can pick up from spike:"+sp.pickMyPiece.spikeName+" and drop off at spike:"+sp.dropPiecesOnMe.spikeName);
+                thereAreOptions = true;
+            }
+            boolean onlyOptionsAreWithNoExactDieRoll = true;
+            // if this is true by the time we get to "no options!" we know we need to let them take a special move and allow the
+            //die roll to wotkeven tho its to big
 
-                                SpikePair sp=(SpikePair)ee.nextElement();
+            log("spikePairs size:" + spikePairs.size());
 
-                                if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR) &&
-                                    sp.pickMyPiece.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)
-                                        )
-                                {
-                                    log("super special spike found ");
+            if (thereAreOptions) {
+                listBotsOptions = true;//CustomCanvas.DEBUG_CONSOLE;
+                if (listBotsOptions) {
+                    botOptions = "";
+                    Enumeration ee = spikePairs.elements();
+                    while (ee.hasMoreElements()) {
+
+                        SpikePair sp = (SpikePair) ee.nextElement();
+
+                        if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR) &&
+                            sp.pickMyPiece.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)
+                        ) {
+                            log("super special spike found ");
                                     /*this is when the die roll is too big to be exact but theyre putting pieces on container
                                      and it should be allowed.*/
-                                }
-
-                                if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR))//ie its a fake spike, since its a piece container option
-                                {
-                                    botOptions+="->"+sp.pickMyPiece.spikeName+"->Container";
-                                }
-                                else
-                                {
-                                    botOptions+="->"+sp.pickMyPiece.spikeName+"->"+sp.dropPiecesOnMe.spikeName+" ";
-                                }
-                            }
                         }
-                        ///FORCE LAST OOPTION SPtheMoveToMake=(SpikePair)spikePairs.elementAt(spikePairs.size()-1);
-                        //PICK ONE AT RANDOM
-                        SPtheMoveToMake=(SpikePair)spikePairs.elementAt(Utils.getRand(0,spikePairs.size()-1));
 
-                        if (SPtheMoveToMake.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR))//ie its a fake spike, since its a piece container option
+                        if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR))//ie its a fake spike, since its a piece container option
                         {
-                            //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
-                            log("SPECIAL CASE randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at CONTAINER");
-                            CustomCanvas.tellRobot(true, "->"+SPtheMoveToMake.pickMyPiece.spikeName+"->Container");
-                            Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
-                            Piece firstPiece=((Piece)takeMyPiece.pieces.firstElement());
-                            setBotDestination(firstPiece.collision_x+firstPiece.PIECE_DIAMETER/2,firstPiece.collision_y+firstPiece.PIECE_DIAMETER/2,"TAKE A PIECE TO CONTAINER");
-
+                            botOptions += "->" + sp.pickMyPiece.spikeName + "->Container";
                         } else {
-                            //NORMAL CONDITION
-                             log("-randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at spike:" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
-                            CustomCanvas.tellRobot(true, "->"+SPtheMoveToMake.pickMyPiece.spikeName+"->"+SPtheMoveToMake.dropPiecesOnMe.spikeName);
-                            Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
-                            Piece firstPiece=((Piece)takeMyPiece.pieces.firstElement());
-                            int goToX=firstPiece.collision_x+firstPiece.PIECE_DIAMETER/2;
-                            int goToY=firstPiece.collision_y+firstPiece.PIECE_DIAMETER/2;
-
-                            setBotDestination(goToX,goToY,"RANDOMLY CHOOSE A PIECE");
-                            log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
-                        }
-                    } else {
-                       /////////////// SPtheMoveToMake=null;
-                        //////////thereAreOptions=false; //<-EXERIMENTED REMOVIN THITS JAN 26 131
-                        log("NO OPTIONS!");
-
-                        // OK NO POTENTIAL MOVES TO BE MADE HERE, NOW WHAT?
-                        if (!die1HasBeenUsed)//if this is die 1 were dealing with
-                        {
-                            //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
-                            //so what we do is sneaky, reduce die value number (hiding it from players of course)
-                            //which makes optiosn become available in this case.
-                            if (whoseTurnIsIt==Player.WHITE && checkAbleToGetIntoPieceContainerWHITE)
-                            {
-                                
-                                log("WHITE LOWERING THEVALUE OF DIE 1");
-                                die1.setValue(die1.getValue()-1);
-                            } else
-                            if (whoseTurnIsIt==Player.BLACK && checkAbleToGetIntoPieceContainerBLACK)
-                            {
-
-                                log("BLACK LOWERING THEVALUE OF DIE 1");
-                                die1.setValue(die1.getValue()-1);
-                            } else {
-                                //ORDINARY CASE
-                                //use this die up so it can move onto next one
-                                die1HasBeenUsed=true;
-                                log("DISABLED DIE 1x");
-
-                                CustomCanvas.tellPlayers("No option with Die 1 ("+die1.getValue()+")");
-                                CustomCanvas.sfxNoMove.playSound();
-                            }
-                        } else if (!die2HasBeenUsed) {
-                            //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
-                            //so what we do is sneaky, reduce die value number (hiding it from players of course)
-                            //which makes optiosn become available in this case.
-                            if (whoseTurnIsIt==Player.WHITE && checkAbleToGetIntoPieceContainerWHITE) {
-
-                                log("WHITE LOWERING THEVALUE OF DIE 2");
-                                die2.setValue(die2.getValue()-1);
-                            } else if (whoseTurnIsIt==Player.BLACK && checkAbleToGetIntoPieceContainerBLACK) {
-                                log("BLACK LOWERING THEVALUE OF DIE 2");
-                                die2.setValue(die2.getValue()-1);
-                            } else {
-                                //use this die up so it can move onto next go
-                                die2HasBeenUsed=true;
-                                log("DISABLED DIE 2x");
-                                CustomCanvas.tellPlayers("No options available with Die 2 ("+die2.getValue()+")");
-                                CustomCanvas.sfxNoMove.playSound();
-                                //it should move onto next players go NOW...
-                                if (CustomCanvas.someoneRolledADouble) {
-                                    //even cancel a double go if theres no options for die2
-                                    CustomCanvas.someoneRolledADouble=false;
-                                    CustomCanvas.doubleRollCounter=3;
-                                    log("NO OPTIONS SO CANCELLED DOUBLE TURN!");
-
-                                }
-                            }
+                            botOptions += "->" + sp.pickMyPiece.spikeName + "->" + sp.dropPiecesOnMe.spikeName + " ";
                         }
                     }
-                 } else if (CustomCanvas.pieceOnMouse ) {
-                     theyWantToPlaceAPiece();
-                     thereAreOptions=false;
-                 }
-                  if (die1HasBeenUsed && die2HasBeenUsed) {
-                 /////////EXPERMIENTAL BUT SOMETIMES IT DOESNT KNOW THE TURN IS OVER
-                    //SO DICE DONT REAPPEAR
-                    log("TURN OVER A.");
-                     CustomCanvas.turnOver();
                 }
-}
+                ///FORCE LAST OOPTION SPtheMoveToMake=(SpikePair)spikePairs.elementAt(spikePairs.size()-1);
+                //PICK ONE AT RANDOM
+                SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
+
+                if (SPtheMoveToMake.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR))//ie its a fake spike, since its a piece container option
+                {
+                    //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
+                    log("SPECIAL CASE randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at CONTAINER");
+                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.spikeName + "->Container");
+                    Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
+                    Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
+                    setBotDestination(firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2, firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2, "TAKE A PIECE TO CONTAINER");
+
+                } else {
+                    //NORMAL CONDITION
+                    log("-randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at spike:" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
+                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.spikeName + "->" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
+                    Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
+                    Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
+                    int goToX = firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2;
+                    int goToY = firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2;
+
+                    setBotDestination(goToX, goToY, "RANDOMLY CHOOSE A PIECE");
+                    log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
+                }
+            } else {
+                /////////////// SPtheMoveToMake=null;
+                //////////thereAreOptions=false; //<-EXERIMENTED REMOVIN THITS JAN 26 131
+                log("NO OPTIONS!");
+
+                // OK NO POTENTIAL MOVES TO BE MADE HERE, NOW WHAT?
+                if (!die1HasBeenUsed)//if this is die 1 were dealing with
+                {
+                    //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
+                    //so what we do is sneaky, reduce die value number (hiding it from players of course)
+                    //which makes optiosn become available in this case.
+                    if (whoseTurnIsIt == Player.WHITE && checkAbleToGetIntoPieceContainerWHITE) {
+
+                        log("WHITE LOWERING THEVALUE OF DIE 1");
+                        die1.setValue(die1.getValue() - 1);
+                    } else if (whoseTurnIsIt == Player.BLACK && checkAbleToGetIntoPieceContainerBLACK) {
+
+                        log("BLACK LOWERING THEVALUE OF DIE 1");
+                        die1.setValue(die1.getValue() - 1);
+                    } else {
+                        //ORDINARY CASE
+                        //use this die up so it can move onto next one
+                        die1HasBeenUsed = true;
+                        log("DISABLED DIE 1x");
+                        canvas.tellPlayers("No option with Die 1 (" + die1.getValue() + ")");
+                        CustomCanvas.sfxNoMove.playSound();
+                    }
+                } else if (!die2HasBeenUsed) {
+                    //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
+                    //so what we do is sneaky, reduce die value number (hiding it from players of course)
+                    //which makes optiosn become available in this case.
+                    if (whoseTurnIsIt == Player.WHITE && checkAbleToGetIntoPieceContainerWHITE) {
+
+                        log("WHITE LOWERING THEVALUE OF DIE 2");
+                        die2.setValue(die2.getValue() - 1);
+                    } else if (whoseTurnIsIt == Player.BLACK && checkAbleToGetIntoPieceContainerBLACK) {
+                        log("BLACK LOWERING THEVALUE OF DIE 2");
+                        die2.setValue(die2.getValue() - 1);
+                    } else {
+                        //use this die up so it can move onto next go
+                        die2HasBeenUsed = true;
+                        log("DISABLED DIE 2x");
+                        canvas.tellPlayers("No options available with Die 2 (" + die2.getValue() + ")");
+                        CustomCanvas.sfxNoMove.playSound();
+                        //it should move onto next players go NOW...
+                        if (CustomCanvas.someoneRolledADouble) {
+                            //even cancel a double go if theres no options for die2
+                            CustomCanvas.someoneRolledADouble = false;
+                            CustomCanvas.doubleRollCounter = 3;
+                            log("NO OPTIONS SO CANCELLED DOUBLE TURN!");
+                        }
+                    }
+                }
+            }
+        } else if (CustomCanvas.pieceOnMouse) {
+            theyWantToPlaceAPiece();
+            thereAreOptions = false;
+        }
+        if (die1HasBeenUsed && die2HasBeenUsed) {
+            /////////EXPERMIENTAL BUT SOMETIMES IT DOESNT KNOW THE TURN IS OVER
+            //SO DICE DONT REAPPEAR
+            log("TURN OVER A.");
+            canvas.turnOver();
+        }
+    }
 
     Vector spikePairs;
     private void theyWantToPickUpAPiece() {

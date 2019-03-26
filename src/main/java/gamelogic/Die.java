@@ -12,37 +12,31 @@ import lowlevel.*;
  * @author Gaz
  */
 public class Die {
-
      //Colour constants
     public static int DIE_COLOUR=0xFFFFFF;
     public static int DOT_COLOUR=0x000000;
     public static Color die_colour, dot_colour;
 
     Utils utils = new Utils();
-    int value=-1; //1 to 6
-    public Die()
-    {
+    private int value = -1; //1 to 6
+    public Die() {
         log("Die made");
-        
         makeColourObjects(false);
     }
 
-    public static void makeColourObjects(boolean forceRecreation)
-    {
-        if (die_colour==null || forceRecreation)
-        {
+    public static void makeColourObjects(boolean forceRecreation) {
+        if (die_colour==null || forceRecreation) {
             die_colour= new Color(DIE_COLOUR);
         }
-        if (dot_colour==null || forceRecreation)
-        {
+        if (dot_colour==null || forceRecreation) {
             dot_colour= new Color(DOT_COLOUR);
         }
     }
 
     //returns a random int between 1 and 6 to simulate a dice roll
     public int roll() {
-        showOriginalValue=false;
-        value=Utils.getRand(1,6);
+        showOriginalValue = false;
+        value = Utils.getRand(1,6);
         return value;
     }
 
@@ -68,7 +62,7 @@ public class Die {
         }
         
         log("WARNING, SETVALUE ON DICE CALLED");
-        value=newValue;
+        value = newValue;
     }
 
     //disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
@@ -84,32 +78,21 @@ public class Die {
 
     public static int DIE_WIDTH=0;
     public static int DIE_HEIGHT=0;
-
-    public static String initialRollText="Roll to see who goes first (white roll)";
-    public static String rollString=initialRollText;
+    public static String rollString = "Roll";
     int DOT_DIAMETER=0;
     int HALF_DOT_DIAMETER=0;
     int TINY_GAP=5;
 
     public void paint(Graphics g, int x, int y) {
-        if (value<1) {
-            return;
-        } else {
-            rollString="Roll";
+        if (value >= 1) {
+            //die size based on piece diameter
+            DIE_WIDTH = Piece.PIECE_DIAMETER;
+            DIE_HEIGHT = Piece.PIECE_DIAMETER;
+            DOT_DIAMETER = Piece.PIECE_DIAMETER / 5;
+            HALF_DOT_DIAMETER = DOT_DIAMETER / 2;
+            drawOutline(g, x, y, DIE_WIDTH, DIE_HEIGHT, DOT_DIAMETER, HALF_DOT_DIAMETER);
+            drawDots(g, x, y, DIE_WIDTH, DIE_HEIGHT, DOT_DIAMETER, HALF_DOT_DIAMETER);
         }
-
-        //die size based on piece diameter
-        DIE_WIDTH  = Piece.PIECE_DIAMETER;
-        DIE_HEIGHT = Piece.PIECE_DIAMETER;
-        DOT_DIAMETER=Piece.PIECE_DIAMETER/5;
-        HALF_DOT_DIAMETER=DOT_DIAMETER/2;
-
-        //draw outline of the die
-        drawOutline(g,x,y,DIE_WIDTH,DIE_HEIGHT,DOT_DIAMETER,HALF_DOT_DIAMETER);
-       
-        //draw dots//
-        drawDots(g,x,y,DIE_WIDTH,DIE_HEIGHT,DOT_DIAMETER,HALF_DOT_DIAMETER);
-        
     }
 
     public static int MINI_DIE_WIDTH;

@@ -21,21 +21,17 @@ public class Piece {
     public static Color white_piece_inner_color, black_piece_inner_color;
     public static Color white_piece_color, black_piece_color;
 
-    boolean showCollisions;
     public static int PIECE_DIAMETER=0;
     
     // these variables (along with PIECE_DIAMETER) are used to work out if the player has clicked on the piece
     int collision_x;
     int collision_y;
 
-
     public Player father;
     int colour;
     Utils utils = new Utils();
 
-
-    public Piece(Player father_)
-    {
+    public Piece(Player father_) {
         father=father_;
         if (father==null)
         {
