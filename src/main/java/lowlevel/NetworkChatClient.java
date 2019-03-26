@@ -55,11 +55,6 @@ public class NetworkChatClient implements Runnable {
         IP = "127.0.0.1";
         init();
         start();
-       
-        news = readStringFromWeb("http://www.alphasoftware.org/backgammon/news.txt");
-        if (news!=null) {
-            messageText.add("Latest News: "+news+" (This server is located @ "+CustomCanvas.serverIP+")");
-        }
         ss = new GameNetworkServer(customCanvas);
         Thread t = new Thread(ss);
         t.start();

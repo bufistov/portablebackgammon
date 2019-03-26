@@ -63,8 +63,7 @@ public class CustomFont {
         return length * charWidth;
     }
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return charWidth;
     }
 

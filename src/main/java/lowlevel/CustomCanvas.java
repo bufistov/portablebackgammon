@@ -22,7 +22,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
 
-
     public static boolean I_AM_CLIENT;
     public static boolean I_AM_SERVER;
 
@@ -96,18 +95,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     Vector playerPositions;
     boolean buttonPressed;
     //prefs button x,y width and height
-    private static int prefw = 20;
-    private static int prefh = 20;
-    //int prefx = -1;
-    // int prefy = Board.BORDER;
-    public static long FIFTY_SECONDS=50000L;
-    public static long TEN_SECONDS=10000L;
-    static long robotMessageTimePassedLong;
-    static long playerMessageTimePassedLong;
+    private static final int prefw = 20;
+    private static final int prefh = 20;
+    public static long FIFTY_SECONDS = 50000L;
+    public static long TEN_SECONDS = 10000L;
     static long robotMessageSetTimeLong;
-    public static int TRANSPARENCY_LEVEL=100;
+    private static int TRANSPARENCY_LEVEL = 100;
 
-    Board board;
+    private Board board;
     private int y;
     private int x;
     private int splashCounter;
@@ -186,6 +181,25 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int buttonwB, buttonhB;
 
     private int glowCounter = 125;
+
+    private static boolean paintRobotMessages;
+    private static boolean showPlayerMessage=true;
+    private static long playerMessageSetTimeLong = System.currentTimeMillis();//thjis keeps the version on screen for a few secs at the start
+    //sets the vars to allow a message to be shown to the player in bottom right for
+    //a while
+
+    private static final long SHOW_ME_LIMIT = 3000; // how long  show player message 1.5 sec
+    static String message2Players=""+VERSION;
+
+    int messageWidth, messageHeight;
+    int messagex,messagey;
+
+    //when the user clicks on a piece and it sticks to the mouse we hold it in
+    //pieceStuckToMouse, this variable below is the spike that holds pieceStuckToMouse
+    //we use it so we can add/remove the pieceStuckToMouse from this spike if its
+    //placed onto a new one.
+    private Spike originalSpikeForPieceSelected;
+    public static boolean barPieceStuckOnMouse;
 
     /* This class is used basically for calling the right paint methods
      * based on state, these paint due to this class being a subclass of canvas.
@@ -332,42 +346,34 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //draws any of the extras:
     //debug info, about box, messages to players etc
     private void drawExtras(Graphics g) {
-        if (PAINT_STATE) // purely for debugging, the state is painted in the corner
-        {
+        if (PAINT_STATE) {
             paintState(g);
         }
-        if (INFO) //draws the about box
-        {
+        if (INFO) {
             paintAboutBox(g);
         }
-        if (Utils.CANVAS_LOGGING) // again for debugging, paints sys outs on canvas
-        {
+        if (Utils.CANVAS_LOGGING) {
             paintStringsToCanvas(g);
         }
-        if(showPlayerMessage)//showMeFor++<SHOW_ME_LIMIT)  //paint messages to players
-        {
+        if (showPlayerMessage){  //paint messages to players
              //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
               //could be a bit over the top for what im doign (todo optimise?)
-            playerMessageTimePassedLong=System.currentTimeMillis()-playerMessageSetTimeLong;
-            if(playerMessageTimePassedLong<SHOW_ME_LIMIT ) {  //paint messages to players
+            long playerMessageTimePassedLong = System.currentTimeMillis() - playerMessageSetTimeLong;
+            if (playerMessageTimePassedLong < SHOW_ME_LIMIT ) {  //paint messages to players
                 paintMessageToPlayers(g);
-            } else if (state==GAME_IN_PROGRESS)
+            } else if (state == GAME_IN_PROGRESS)
                 showPlayerMessage = false;
         }
         if (Bot.dead == false) {
             if (paintRobotMessages) {
                   //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
                   //could be a bit over the top for what im doign (todo optimise?)
-                robotMessageTimePassedLong=System.currentTimeMillis()-robotMessageSetTimeLong;
-                // log("robotMessageTimePassedLong:"+robotMessageTimePassedLong);
-
-                 if (robotMessageTimePassedLong>FIFTY_SECONDS)//so we dont have a mad long getting bigger and bigger
-                 {
-                     robotMessageTimePassedLong=TEN_SECONDS;//so it doesnt bring message back
-                     robotMessageSetTimeLong=System.currentTimeMillis()-TEN_SECONDS;
-                 }
-                if(/*showMeForROBOT++*/robotMessageTimePassedLong<SHOW_ME_LIMIT )  //paint messages to players
-                {
+                long robotMessageTimePassedLong = System.currentTimeMillis()-robotMessageSetTimeLong;
+                if (robotMessageTimePassedLong > FIFTY_SECONDS) {//so we dont have a mad long getting bigger and bigger
+                    robotMessageTimePassedLong = TEN_SECONDS;//so it doesnt bring message back
+                    robotMessageSetTimeLong = System.currentTimeMillis() - TEN_SECONDS;
+                }
+                if (robotMessageTimePassedLong < SHOW_ME_LIMIT) {
                     paintRobotMessage(g);
                 }
             }
@@ -1338,7 +1344,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,buttonAstr,buttonBstr,question);
     }
 
- public String readStringFromWeb(String url) {
+    public String readStringFromWeb(String url) {
         String full="";
         String inputLine="";
         try
@@ -1366,20 +1372,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         return full;
     }
 
-    public static String serverIP = null;
     private void paint_NETWORKING_ENTER_NAME(Graphics g) {
-        if (serverIP==null) {
-         log("GRABBING SERVER IP");
-         serverIP=readStringFromWeb("http://www.alphasoftware.org/backgammon/serverip.txt");
-          log(" SERVER IP:"+serverIP);
-        }
-
         String printme="Enter your name:";
-        int widthOfPrintMe=(fontblack.stringWidth(printme));
         int xposTmp=0;
         int ypos =(getHeight()/2)-fontblack.getHeight()*5;
 
-        widthOfPrintMe=(fontblack.stringWidth(printme));
+        int widthOfPrintMe = fontblack.stringWidth(printme);
         xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
         fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
         ypos+=fontblack.getHeight()*2;
@@ -1393,12 +1391,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         widthOfPrintMe=(fontblack.stringWidth(printme));
         xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
         fontblack.drawString(g, printme, xposTmp , ypos+1, 0);
-
-        printme="Chat Server Address: "+serverIP;//NetworkChatClient.theURL;
-        widthOfPrintMe=(fontblack.stringWidth(printme));
-        xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
-        y=getHeight()-(fontblack.getHeight()+25);
-        fontblack.drawString(g, printme, xposTmp , y, 0);
     }
 
     private void paint_NETWORKING_LOBBY(Graphics g) {
@@ -1732,22 +1724,20 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         blackPiecesSafelyInContainer=new Vector(15);
 
         originalSpikeForPieceSelected=null;
-        barPieceStuckOnMouse=false;
+        barPieceStuckOnMouse = false;
         pieceOnMouse = false;//is true when a piece is stuck to mouse
         pieceStuckToMouse=null;//this is simply a copy of whatever piece (if any) is stuck to mouse
-        //tells them essentials
-        showMeFor=0;
 
-        message2Players=""+VERSION;
-        board=null;
-        Die.initialRollText="Roll to see who goes first (white roll)";
-        Board.gameComplete=false;
-                whiteResigned=false;
-                blackResigned=false;
+        message2Players = VERSION;
+        board = null;
+        Die.initialRollText = "Roll to see who goes first (white roll)";
+        Board.gameComplete = false;
+        whiteResigned = false;
+        blackResigned = false;
 
-                //so it doesnt continuing playin on its own
-        Board.HUMAN_VS_COMPUTER=false;
-        Bot.dead=true;
+        //so it doesnt continuing playin on its own
+        Board.HUMAN_VS_COMPUTER = false;
+        Bot.dead = true;
         splashCounter = 0;
     }
 
@@ -1891,7 +1881,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-
     //indicates if this mouse click has been on a spike
     private void checkIfSpikeClickedOn(int x, int y) {
         // grab the spikes, loop thru them checking to
@@ -1957,8 +1946,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                 }
                             }
                             log("PLACED ON SPIKE");
-
-
                             //add it to the spike clicked on
                             sp.addPiece(pieceStuckToMouse);
                             //and make sure nothing is stuck to mouse by finalising move like this
@@ -1981,7 +1968,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                 } else {
                                     log("DIE2 USED GETTING OFF BAR " + Board.die2.getValue());
                                     Board.die2HasBeenUsed = true;
-
                                 }
                                 log("CORRECT DIE USED UP.");
                             }
@@ -1991,7 +1977,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                 log("doubleRollCounter incremented!");
                                 doubleRollCounter++;//increment this here to keep a track fi thi was a dbl
                             }
-
                         } else {
                             //log("NO WE CANT DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
                         }
@@ -2157,13 +2142,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
             log("die1HasBeenUsed B.");
             log("die2HasBeenUsed B.");
-
         } else {
             Utils._E("ERROR CANT TELL WHICH DICE TO SET AS UNUSED. dieToSetUnused:" + dieToSetUnused);
         }
         //and make sure nothing is stuck to mouse by finalising move like this
         unstickPieceFromMouse();
-
         if (someoneRolledADouble) {
             // this logic was hard to understand when mixed so i duplicated it here due to the subtle diffs
             switch (dieToSetUnused) {
@@ -2216,18 +2199,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     Utils._E("placePieceRemoveOldOneAndSetDieToUsed error in die number");
                     break;
             }
-
         }
     }
 
-
-
-    //when the user clicks on a piece and it sticks to the mouse we hold it in
-    //pieceStuckToMouse, this variable below is the spike that holds pieceStuckToMouse
-    //we use it so we can add/remove the pieceStuckToMouse from this spike if its
-    //placed onto a new one.
-    Spike originalSpikeForPieceSelected;
-    public static boolean barPieceStuckOnMouse;
     //indicates if this mouse click has been on a piece
     private void checkIfPieceClickedOn(int x,int y) {
         if (pieceOnMouse) {
@@ -2455,71 +2429,110 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     boolean firstThemeSet=true;//so we dont tell players when the theme is set upon loading but we do othertimes
     //sets all colours in one go
     public void setTheme(int theme_) {
-     theme=theme_;
-     log("theme:"+theme);
-     if (theme>MAX_THEMES) {
-         theme=DEFAULT;
-     }
+        theme = theme_;
+        log("theme:" + theme);
+        if (theme > MAX_THEMES) {
+            theme = DEFAULT;
+        }
 
-     switch(theme) {
-         case DEFAULT:  log("THEME SET TO DEFAULT");
-                        themeName="default";
-                        if (!firstThemeSet)
-                            tellPlayers("Theme set to "+themeName);
-                        themecolours=defaultms;
-                        break;
-         case METALIC:  log("THEME SET TO METALIC");
-                        themeName="metalic";
-                        if (!firstThemeSet)
-                            tellPlayers("Theme set to "+themeName);
-                        themecolours=metalic;     break;
-         case CLASSIC:  log("THEME SET TO CLASSIC");themeName="classic";
-                        if (!firstThemeSet)
-                            tellPlayers("Theme set to "+themeName);
-                        themecolours=classic;     break;
-         case FUNNYMAN: log("THEME SET TO FUNNYMAN");themeName="funnyman";
-                        if (!firstThemeSet)
-                            tellPlayers("Theme set to "+themeName);
-                        themecolours=funnyman;   break;
-         case BUMBLEBEE:
-             log("THEME SET TO BUMBLEBEE");themeName="bumblebee";
-                        if (!firstThemeSet)
-                            tellPlayers("Theme set to "+themeName);
-                        themecolours=bumblebee; break;
-         default: Utils._E("theme is out of range!");
-     }
-     firstThemeSet=false;
-     //assigns each colour from the one specified
-     for (int i=0; i<themecolours.length; i++) {
-         switch(i) {
-             case 0: BACKGROUND_COLOUR              =themecolours[i]; break;
-             case 1: PANEL_COLOUR                   =themecolours[i]; break;
-             case 2: ROLL_BUTTON_COLOUR             =themecolours[i]; break;
-             case 3: Board.BOARD_COLOUR             =themecolours[i]; break;
-             case 4: Board.BAR_COLOUR               =themecolours[i]; break;
-             case 5: Spike.BLACK_SPIKE_COLOUR       =themecolours[i]; break;
-             case 6: Spike.WHITE_SPIKE_COLOUR       =themecolours[i]; break;
-             case 7: Piece.WHITE_PIECE_COLOUR       =themecolours[i]; break;
-             case 8: Piece.BLACK_PIECE_COLOUR       =themecolours[i]; break;
-             case 9: Piece.WHITE_PIECE_INNER_COLOUR =themecolours[i]; break;
-             case 10: Piece.BLACK_PIECE_INNER_COLOUR=themecolours[i]; break;
-             case 11: Die.DIE_COLOUR                =themecolours[i]; break;
-             case 12: Die.DOT_COLOUR                =themecolours[i]; break;
-             default: Utils._E("theme state error, should not exceed 12!");
-         }
-     }
-     //force recreation of colour objects
-     //we pass true into makeColourObjects to force them to remake themselves
-     //with the new colour values and thus repaint with new theme
-     CustomCanvas.makeColourObjects(true);
-     Board.makeColourObjects(true);
-     Spike.makeColourObjects(true);
-     Piece.makeColourObjects(true);
-     Die.makeColourObjects(true);
-     log("Theme is loaded now and working.");
- }
+        switch (theme) {
+            case DEFAULT:
+                log("THEME SET TO DEFAULT");
+                themeName = "default";
+                if (!firstThemeSet)
+                    tellPlayers("Theme set to " + themeName);
+                themecolours = defaultms;
+                break;
+            case METALIC:
+                log("THEME SET TO METALIC");
+                themeName = "metalic";
+                if (!firstThemeSet)
+                    tellPlayers("Theme set to " + themeName);
+                themecolours = metalic;
+                break;
+            case CLASSIC:
+                log("THEME SET TO CLASSIC");
+                themeName = "classic";
+                if (!firstThemeSet)
+                    tellPlayers("Theme set to " + themeName);
+                themecolours = classic;
+                break;
+            case FUNNYMAN:
+                log("THEME SET TO FUNNYMAN");
+                themeName = "funnyman";
+                if (!firstThemeSet)
+                    tellPlayers("Theme set to " + themeName);
+                themecolours = funnyman;
+                break;
+            case BUMBLEBEE:
+                log("THEME SET TO BUMBLEBEE");
+                themeName = "bumblebee";
+                if (!firstThemeSet)
+                    tellPlayers("Theme set to " + themeName);
+                themecolours = bumblebee;
+                break;
+            default:
+                Utils._E("theme is out of range!");
+        }
+        firstThemeSet = false;
+        //assigns each colour from the one specified
+        for (int i = 0; i < themecolours.length; i++) {
+            switch (i) {
+                case 0:
+                    BACKGROUND_COLOUR = themecolours[i];
+                    break;
+                case 1:
+                    PANEL_COLOUR = themecolours[i];
+                    break;
+                case 2:
+                    ROLL_BUTTON_COLOUR = themecolours[i];
+                    break;
+                case 3:
+                    Board.BOARD_COLOUR = themecolours[i];
+                    break;
+                case 4:
+                    Board.BAR_COLOUR = themecolours[i];
+                    break;
+                case 5:
+                    Spike.BLACK_SPIKE_COLOUR = themecolours[i];
+                    break;
+                case 6:
+                    Spike.WHITE_SPIKE_COLOUR = themecolours[i];
+                    break;
+                case 7:
+                    Piece.WHITE_PIECE_COLOUR = themecolours[i];
+                    break;
+                case 8:
+                    Piece.BLACK_PIECE_COLOUR = themecolours[i];
+                    break;
+                case 9:
+                    Piece.WHITE_PIECE_INNER_COLOUR = themecolours[i];
+                    break;
+                case 10:
+                    Piece.BLACK_PIECE_INNER_COLOUR = themecolours[i];
+                    break;
+                case 11:
+                    Die.DIE_COLOUR = themecolours[i];
+                    break;
+                case 12:
+                    Die.DOT_COLOUR = themecolours[i];
+                    break;
+                default:
+                    Utils._E("theme state error, should not exceed 12!");
+            }
+        }
+        //force recreation of colour objects
+        //we pass true into makeColourObjects to force them to remake themselves
+        //with the new colour values and thus repaint with new theme
+        CustomCanvas.makeColourObjects(true);
+        Board.makeColourObjects(true);
+        Spike.makeColourObjects(true);
+        Piece.makeColourObjects(true);
+        Die.makeColourObjects(true);
+        log("Theme is loaded now and working.");
+    }
 
- // make colour objects
+    // make colour objects
     public static void makeColourObjects(boolean forceRecreation) {
         if (panel_colour == null || forceRecreation) {
             panel_colour = new Color(PANEL_COLOUR);
@@ -2571,71 +2584,56 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
              fontwhite.drawString(g, printthis, x, y, 0);y+=fontwhite.getHeight();
         }
     }
-    static boolean showPlayerMessage=true;
-    static long playerMessageSetTimeLong=System.currentTimeMillis();//thjis keeps the version on screen for a few secs at the start
- //sets the vars to allow a message to be shown to the player in bottom right for
- //a while
+
     public static void tellPlayers(String s) {
         showPlayerMessage=true;
         playerMessageSetTimeLong=System.currentTimeMillis();
-        showMeFor=0;
         message2Players=s;
     }
-    static int showMeForROBOT;
+
     public static void robotExplain(String s) {
-         showMeForROBOT=0;
-         robotMessageSetTimeLong=System.currentTimeMillis();
-         robotMoveDesc=s;
+         robotMessageSetTimeLong = System.currentTimeMillis();
+         robotMoveDesc = s;
     }
- //tells them essentials
- static int showMeFor=0;
- public static final long SHOW_ME_LIMIT=3000;//how long  show player message 1.5 sec
- static String message2Players=""+VERSION;
 
- int messageWidth, messageHeight;
- int messagex,messagey;
- //paint the message to the players
- public void paintMessageToPlayers(Graphics g) {
-     //utils.setColor(g, Color.BLACK);
-     utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-     if (Board.gameComplete) {
-         messageWidth=fontwhite.stringWidth(message2Players+"  ");
-     messagex=(WIDTH/2)-messageWidth/2;
-     messageHeight=fontwhite.getHeight();
-     messagey=(HEIGHT/2)-messageHeight/2;
-     
-          utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         utils.setColor(g, Color.WHITE);
-         utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         //draw message in middle of screen
-        fontwhite.drawString(g, message2Players, messagex+7, messagey+1, 0);
-     } else {
-         messageWidth=fontwhite.stringWidth(message2Players+"  ");
-         messagex=10;
-        messagey=HEIGHT-(fontwhite.getHeight()+TINY_GAP);
-         messageHeight=fontwhite.getHeight();
-         utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         utils.setColor(g, Color.WHITE);
-         utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-         //draw message in bottom left.
-         fontwhite.drawString(g, message2Players, messagex+7, messagey+1, 0);
-     }
- }
+    public void paintMessageToPlayers(Graphics g) {
+        utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
+        if (Board.gameComplete) {
+            messageWidth = fontwhite.stringWidth(message2Players + "  ");
+            messagex = (WIDTH / 2) - messageWidth / 2;
+            messageHeight = fontwhite.getHeight();
+            messagey = (HEIGHT / 2) - messageHeight / 2;
 
- public static boolean paintRobotMessages;
- //paint the robot message
- public void paintRobotMessage(Graphics g) {
-     utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-     messageWidth=fontwhite.stringWidth(robotMoveDesc+"  ");
-     messagex=WIDTH-(messageWidth+10);
-     messagey=10;//(fontwhite.getHeight()+TINY_GAP);
-     messageHeight=fontwhite.getHeight();
+            utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            utils.setColor(g, Color.WHITE);
+            utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            //draw message in middle of screen
+            fontwhite.drawString(g, message2Players, messagex + 7, messagey + 1, 0);
+        } else {
+            messageWidth = fontwhite.stringWidth(message2Players + "  ");
+            messagex = 10;
+            messagey = HEIGHT - (fontwhite.getHeight() + TINY_GAP);
+            messageHeight = fontwhite.getHeight();
+            utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            utils.setColor(g, Color.WHITE);
+            utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            //draw message in bottom left.
+            fontwhite.drawString(g, message2Players, messagex + 7, messagey + 1, 0);
+        }
+    }
 
-     utils.fillRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-     utils.setColor(g, Color.RED);
-     utils.drawRoundRect(g,messagex,messagey,messageWidth,messageHeight);
-     fontwhite.drawString(g, robotMoveDesc, messagex+7, messagey+1, 0);
- }
+    public void paintRobotMessage(Graphics g) {
+        utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
+        messageWidth = fontwhite.stringWidth(robotMoveDesc + "  ");
+        messagex = WIDTH - (messageWidth + 10);
+        messagey = 10;//(fontwhite.getHeight()+TINY_GAP);
+        messageHeight = fontwhite.getHeight();
+
+        utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+        utils.setColor(g, Color.RED);
+        utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+        fontwhite.drawString(g, robotMoveDesc, messagex + 7, messagey + 1, 0);
+    }
 
  /////////////////////ADJUST COLOURS HERE ////////////////////////////
   //themes: specify colours for colour themes
