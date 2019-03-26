@@ -140,7 +140,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //ie, we want them to have 4 rolls if thats the case and not 2
 
     //for glowy buttons
-    public static final int GLOW_INCREMENTER=15;
+    public static final int GLOW_INCREMENTER = 15;
     private boolean glowA, glowB;
 
     int doubleX;
@@ -185,8 +185,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int buttonxB, buttonyB;
     int buttonwB, buttonhB;
 
-    private static final int GLOW_INITIAL_VALUE = 125;
-    private int glowCounter = GLOW_INITIAL_VALUE;
+    private int glowCounter = 125;
 
     /* This class is used basically for calling the right paint methods
      * based on state, these paint due to this class being a subclass of canvas.
@@ -922,9 +921,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         if (glowA || glowB) {
             glowCounter += GLOW_INCREMENTER;
-            if (glowCounter > 355) {
-                glowCounter = GLOW_INITIAL_VALUE;
-            }
+            glowCounter = Math.min(glowCounter, 355);
         }
     }
 
