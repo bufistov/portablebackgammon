@@ -34,17 +34,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public static int TINY_GAP = 5; // when we need a tiny gap
     
-    int typeOfPlay=-1;
-    public static final int NETWORK_PLAY=1;
-    public static final int LOCAL_PLAY=2;
+    private int typeOfPlay = -1;
+    private static final int NETWORK_PLAY=1;
+    private static final int LOCAL_PLAY=2;
 
     // -- constants
-    public static int PANEL_COLOUR = 0x000000;
+    private static int PANEL_COLOUR = 0x000000;
     public static int BACKGROUND_COLOUR = 0x993300;
-    public static int ROLL_BUTTON_COLOUR = 0xffcc66;
-    public static Color panel_colour, background_colour, roll_button_colour;
+    private static int ROLL_BUTTON_COLOUR = 0xffcc66;
+    private static Color panel_colour, background_colour, roll_button_colour;
 
-    // -- turn on and off anti aliasing
     private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
     //this simply means the panel will represent one x-th of the available screen,
     // ergo if PANEL_SIZE_FRACTION is 5, it uses 1/5 of the space avail and the game
@@ -2222,9 +2221,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int FUNNYMAN  = 3;
     public static final int BUMBLEBEE = 4;
     public static final int MAX_THEMES = 4; // this should always equals the last one
-    int theme=DEFAULT;
-    String themeName;
-    boolean firstThemeSet=true;//so we dont tell players when the theme is set upon loading but we do othertimes
+    private int theme = DEFAULT;
+    private String themeName;
+    private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
     //sets all colours in one go
     public void setTheme(int theme_) {
         theme = theme_;
@@ -2432,90 +2431,91 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, robotMoveDesc, messagex + 7, messagey + 1, 0);
     }
 
- /////////////////////ADJUST COLOURS HERE ////////////////////////////
-  //themes: specify colours for colour themes
- public static int themecolours[];//this gets assigned in constructor
- // DEFAULT VALUES (ms xp backgammon colours)
- public static int defaultms[] = {
-                BACKGROUND_COLOUR,
-                PANEL_COLOUR,
-                ROLL_BUTTON_COLOUR,
-                Board.BOARD_COLOUR,
-                Board.BAR_COLOUR,
-                Spike.BLACK_SPIKE_COLOUR,
-                Spike.WHITE_SPIKE_COLOUR,
-                Piece.WHITE_PIECE_COLOUR,
-                Piece.BLACK_PIECE_COLOUR,
-                Piece.WHITE_PIECE_INNER_COLOUR,
-                Piece.BLACK_PIECE_INNER_COLOUR,
-                Die.DIE_COLOUR,
-                Die.DOT_COLOUR
-                };
+    /////////////////////ADJUST COLOURS HERE ////////////////////////////
+    //themes: specify colours for colour themes
+    private static int themecolours[]; // this gets assigned in constructor
 
- public static int metalic[] = {
-                /*BACKGROUND_COLOUR*/               0xffffff,
-                /*PANEL_COLOUR*/                    0x828284,
-                /*ROLL_BUTTON_COLOUR*/              0xffffff,
-                /*Board.BOARD_COLOUR*/              0x9b9b9b,
-                /*Board.BAR_COLOUR*/                0x8b898c,
-                /*Spike.BLACK_SPIKE_COLOUR*/        0xc7c8cd,
-                /*Spike.WHITE_SPIKE_COLOUR*/        0xa3a4a8,
-                /*Piece.WHITE_PIECE_COLOUR*/        0xedf0f5,
-                /*Piece.BLACK_PIECE_COLOUR*/        0x1a1a22,
-                /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Die.DIE_COLOUR*/                  0x807875,
-                /*Die.DOT_COLOUR*/                  0xe5e0da
-                };
+    // DEFAULT VALUES (ms xp backgammon colours)
+    public static int defaultms[] = {
+        BACKGROUND_COLOUR,
+        PANEL_COLOUR,
+        ROLL_BUTTON_COLOUR,
+        Board.BOARD_COLOUR,
+        Board.BAR_COLOUR,
+        Spike.BLACK_SPIKE_COLOUR,
+        Spike.WHITE_SPIKE_COLOUR,
+        Piece.WHITE_PIECE_COLOUR,
+        Piece.BLACK_PIECE_COLOUR,
+        Piece.WHITE_PIECE_INNER_COLOUR,
+        Piece.BLACK_PIECE_INNER_COLOUR,
+        Die.DIE_COLOUR,
+        Die.DOT_COLOUR
+    };
 
-public static int classic[] = {
-                /*BACKGROUND_COLOUR*/               0x2c632a,
-                /*PANEL_COLOUR*/                    0x002001,
-                /*ROLL_BUTTON_COLOUR*/              0xfe1e1c,
-                /*Board.BOARD_COLOUR*/              0xf4ebca,
-                /*Board.BAR_COLOUR*/                0x245223,
-                /*Spike.BLACK_SPIKE_COLOUR*/        0x99643c,
-                /*Spike.WHITE_SPIKE_COLOUR*/        0xed974c,
-                /*Piece.WHITE_PIECE_COLOUR*/        0xfefbf2,
-                /*Piece.BLACK_PIECE_COLOUR*/        0x363b3f,
-                /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Die.DIE_COLOUR*/                  0xfe1e1c,
-                /*Die.DOT_COLOUR*/                  0xfffdfe
-                };
+    public static int metalic[] = {
+        /*BACKGROUND_COLOUR*/               0xffffff,
+        /*PANEL_COLOUR*/                    0x828284,
+        /*ROLL_BUTTON_COLOUR*/              0xffffff,
+        /*Board.BOARD_COLOUR*/              0x9b9b9b,
+        /*Board.BAR_COLOUR*/                0x8b898c,
+        /*Spike.BLACK_SPIKE_COLOUR*/        0xc7c8cd,
+        /*Spike.WHITE_SPIKE_COLOUR*/        0xa3a4a8,
+        /*Piece.WHITE_PIECE_COLOUR*/        0xedf0f5,
+        /*Piece.BLACK_PIECE_COLOUR*/        0x1a1a22,
+        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Die.DIE_COLOUR*/                  0x807875,
+        /*Die.DOT_COLOUR*/                  0xe5e0da
+    };
+
+    public static int classic[] = {
+        /*BACKGROUND_COLOUR*/               0x2c632a,
+        /*PANEL_COLOUR*/                    0x002001,
+        /*ROLL_BUTTON_COLOUR*/              0xfe1e1c,
+        /*Board.BOARD_COLOUR*/              0xf4ebca,
+        /*Board.BAR_COLOUR*/                0x245223,
+        /*Spike.BLACK_SPIKE_COLOUR*/        0x99643c,
+        /*Spike.WHITE_SPIKE_COLOUR*/        0xed974c,
+        /*Piece.WHITE_PIECE_COLOUR*/        0xfefbf2,
+        /*Piece.BLACK_PIECE_COLOUR*/        0x363b3f,
+        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Die.DIE_COLOUR*/                  0xfe1e1c,
+        /*Die.DOT_COLOUR*/                  0xfffdfe
+    };
 
 
-public static int funnyman[] = {
-                /*BACKGROUND_COLOUR*/               0x661913,
-                /*PANEL_COLOUR*/                    0x210d0c,
-                /*ROLL_BUTTON_COLOUR*/              0xffffff,
-                /*Board.BOARD_COLOUR*/              0x9d581d,
-                /*Board.BAR_COLOUR*/                0x490f0e,
-                /*Spike.BLACK_SPIKE_COLOUR*/        0x290d0a,
-                /*Spike.WHITE_SPIKE_COLOUR*/        0x6e1213,
-                /*Piece.WHITE_PIECE_COLOUR*/        0x4e3113,
-                /*Piece.BLACK_PIECE_COLOUR*/        0x841b25,
-                /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Die.DIE_COLOUR*/                  0xffffff,
-                /*Die.DOT_COLOUR*/                  0x791216
-                };
+    public static int funnyman[] = {
+        /*BACKGROUND_COLOUR*/               0x661913,
+        /*PANEL_COLOUR*/                    0x210d0c,
+        /*ROLL_BUTTON_COLOUR*/              0xffffff,
+        /*Board.BOARD_COLOUR*/              0x9d581d,
+        /*Board.BAR_COLOUR*/                0x490f0e,
+        /*Spike.BLACK_SPIKE_COLOUR*/        0x290d0a,
+        /*Spike.WHITE_SPIKE_COLOUR*/        0x6e1213,
+        /*Piece.WHITE_PIECE_COLOUR*/        0x4e3113,
+        /*Piece.BLACK_PIECE_COLOUR*/        0x841b25,
+        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Die.DIE_COLOUR*/                  0xffffff,
+        /*Die.DOT_COLOUR*/                  0x791216
+    };
 
-public static int bumblebee[] = {
-                /*BACKGROUND_COLOUR*/               0x202427,
-                /*PANEL_COLOUR*/                    0x3a3a3a,
-                /*ROLL_BUTTON_COLOUR*/              0xe4ff00,
-                /*Board.BOARD_COLOUR*/              0x50555b,
-                /*Board.BAR_COLOUR*/                0x545454,
-                /*Spike.BLACK_SPIKE_COLOUR*/        0x030504,
-                /*Spike.WHITE_SPIKE_COLOUR*/        0xe4ff00,
-                /*Piece.WHITE_PIECE_COLOUR*/        0xb1995d,
-                /*Piece.BLACK_PIECE_COLOUR*/        0x404443,
-                /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
-                /*Die.DIE_COLOUR*/                  0x000000,
-                /*Die.DOT_COLOUR*/                  0xe4ff00
-                };
+    public static int bumblebee[] = {
+        /*BACKGROUND_COLOUR*/               0x202427,
+        /*PANEL_COLOUR*/                    0x3a3a3a,
+        /*ROLL_BUTTON_COLOUR*/              0xe4ff00,
+        /*Board.BOARD_COLOUR*/              0x50555b,
+        /*Board.BAR_COLOUR*/                0x545454,
+        /*Spike.BLACK_SPIKE_COLOUR*/        0x030504,
+        /*Spike.WHITE_SPIKE_COLOUR*/        0xe4ff00,
+        /*Piece.WHITE_PIECE_COLOUR*/        0xb1995d,
+        /*Piece.BLACK_PIECE_COLOUR*/        0x404443,
+        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
+        /*Die.DIE_COLOUR*/                  0x000000,
+        /*Die.DOT_COLOUR*/                  0xe4ff00
+    };
 
     ///ROBOT STUFF
     public static void tellRobot(boolean b, String s) {
@@ -2524,7 +2524,7 @@ public static int bumblebee[] = {
         }
     }
 
-    public int drawMeWrapped(Graphics g,int x, int y, String wrapMe, CustomFont font, boolean backdrop,
+    private int drawMeWrapped(Graphics g,int x, int y, String wrapMe, CustomFont font, boolean backdrop,
                              boolean outline, boolean justifyleft, int width, boolean justifyRight) {
         if (wrapMe == null) {
             log("drawMeWrapped received a null string");
@@ -2543,9 +2543,9 @@ public static int bumblebee[] = {
                 } else {
                     Xtmp=(WIDTH/2)-(font.stringWidth(printme)/2);
                 }
-                //this is a bit of a hack but a legacy form the custom font days
-                 //check if the end of the text is reached and control users ability to scroll with bools.
-                //so we dont let them keep scrolling
+                // this is a bit of a hack but a legacy form the custom font days
+                // check if the end of the text is reached and control users ability to scroll with bools.
+                // so we dont let them keep scrolling
                 boolean allowScrollingDOWN = printme.indexOf(SPECIAL_END_SYMBOL) == -1;
                 if (!allowScrollingDOWN) {
                     log("DONT ALLOW ASCROLL SINCE SPECIAL END SYMBOL DETECTED allowScrollingDOWN:" + allowScrollingDOWN);
@@ -2556,18 +2556,16 @@ public static int bumblebee[] = {
             }
             stringHeight+=(font.getHeight());//-5);
         }
-        y=stringHeight;
+        y = stringHeight;
         return y;
     }
 
-    public static Vector separateTextNEW(String string, int width, int height, CustomFont font) {
+    private static Vector separateTextNEW(String string, int width, int height, CustomFont font) {
         Vector lines = new Vector();
-        String theText = string;
         String aline = "";
-        StringTokenizer st = new StringTokenizer(theText, " ");
+        StringTokenizer st = new StringTokenizer(string, " ");
         String s;
-        boolean fitsVertically = true;
-        while (st.hasMoreElements() && fitsVertically) {
+        while (st.hasMoreElements()) {
             s = st.nextToken(); // if its not null s failed to get used last time
             s = s.trim();
             if (s.equals("[p]") || s.equals("[br]") || s.equals("[br2]") || s.equals("[br][br]")) {
@@ -2620,7 +2618,7 @@ public static int bumblebee[] = {
         return Board.BORDER;
     }
 
-    public void onHumanPlayerConnectedToServer() {
+    void onHumanPlayerConnectedToServer() {
         log("Human player connected to server");
         Bot.dead = true;
         startGame();
@@ -2630,7 +2628,7 @@ public static int bumblebee[] = {
         this.jFrame.setTitle(Main.frame.getTitle() + " Online game in progress. (Connected as client)");
     }
 
-    public void startGame() {
+    void startGame() {
         int val = Utils.getRand(0, 999_999);
         String playerStr = "White";
         board.whoseTurnIsIt = Player.WHITE;
