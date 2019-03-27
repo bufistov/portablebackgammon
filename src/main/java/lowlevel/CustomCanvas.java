@@ -38,8 +38,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int TINY_GAP = 5; // when we need a tiny gap
     
     private int typeOfPlay = -1;
-    private static final int NETWORK_PLAY=1;
-    private static final int LOCAL_PLAY=2;
+    private static final int NETWORK_PLAY = 1;
+    private static final int LOCAL_PLAY = 2;
 
     // -- constants
     private static int PANEL_COLOUR = 0x000000;
@@ -53,8 +53,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // uses the other 4/5
 
     private CustomFont fontwhite, fontblack;
-    boolean INFO=false;    // 'about box' toggle
-    Utils utils = new Utils();   // Hardware Abstraction Layer
+    private boolean INFO = false;    // 'about box' toggle
+    private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
     String stateString;
     int PANEL_WIDTH=0;
@@ -373,8 +373,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void paintAboutBox(Graphics g) {
         infoCounter++;
         if (infoCounter > maxSplashCounter) {
-            infoCounter=0;
-            INFO=false;
+            infoCounter = 0;
+            INFO = false;
         }
 
         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
