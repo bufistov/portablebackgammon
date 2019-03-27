@@ -32,11 +32,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // Debug
     public static boolean showBoundaryBoxes = false;
-    private boolean PAINT_STATE = false;
+    private static boolean PAINT_STATE = false;
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
 
     public static int TINY_GAP = 5; // when we need a tiny gap
-    
     private int typeOfPlay = -1;
     private static final int NETWORK_PLAY = 1;
     private static final int LOCAL_PLAY = 2;
@@ -296,41 +295,31 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // Calls a different paint method based on the current state
     private void paintSwitch(Graphics g) {
         switch(state) {
-            case SPLASH_SCREEN:///////////////////////////////////////
-                stateString="SPLASH_SCREEN";
+            case SPLASH_SCREEN:
                 paint_SPLASH_SCREEN(g);
                 break;
             case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
-                stateString="OPTIONS_SCREEN_LOCAL_OR_NETWORK";
                 glowButton(Board.mouseHoverX, Board.mouseHoverY);
                 paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g," Local Play ","Network Play","Please select");
                 break;
-            case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN://///////////
-                /*note since 2 states require the same thing, (a question with 2
-                 options) We simply re-use this state's paint method and pass in the
-                 right strings to make it work*/
-                stateString="OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN";
+            case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
                 glowButton(Board.mouseHoverX, Board.mouseHoverY);
                 paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(g,"Computer"," Human  ","Play against");
                 break;
-            case GAME_IN_PROGRESS:///////////////////////////////////
-                stateString="POST_SPLASH_SCREEN";
+            case GAME_IN_PROGRESS:
                 paint_POST_SPLASH_SCREEN(g);
                 break;
-            case NETWORKING_ENTER_NAME:///////////////////////////////
-                stateString="NETWORKING_ENTER_NAME";
+            case NETWORKING_ENTER_NAME:
                 paint_NETWORKING_ENTER_NAME(g);
                 break;
             case NETWORKING_LOBBY:
-                stateString="NETWORKING_LOBBY";
                 paint_NETWORKING_LOBBY(g);
                 break;
             default://///////////////////////////////////////////////
                 Utils._E("Warning state in paint unrecognised!");
                 break;
         }
-        ////////////////////////////////
-        drawExtras(g); //draw extra hud stuff
+        drawExtras(g);
     }
 
     //draws any of the extras:
@@ -563,7 +552,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //paints the state - for debugging.
     private void paintState(Graphics g) {
-        fontblack.drawString(g,stateString,20,20,0);
+        fontblack.drawString(g, state.name(),20,20,0);
     }
 
     int infoCounter=0;
