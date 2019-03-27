@@ -4,10 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import gamelogic.*;
 import java.awt.image.BufferStrategy;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -16,31 +12,33 @@ import javax.swing.JFrame;
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
     private final int maxSplashCounter = 50;
-    private final boolean drawMousePointer = true;
-    private static String SERVER_IP_ADDRESS = "localhost";
-    private static String SPECIAL_END_SYMBOL = "::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
+    private static final boolean drawMousePointer = true;
+    private static final String SERVER_IP_ADDRESS = "localhost";
+    private static final String SPECIAL_END_SYMBOL = "::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
 
-    public static boolean I_AM_CLIENT;
+    private static boolean I_AM_CLIENT;
     public static boolean I_AM_SERVER;
 
-    public static final String VERSION="v0.0.1";
-    public static final boolean RELEASE_BUILD=false;
-    public static boolean SOUND_ON=true;
-    public static boolean showBoundaryBoxes = false; // debug
-    boolean PAINT_STATE = false;                  //debug
-    public static final String DEBUG_HEADER="Midokura Backgammon game (DEBUG MODE):";
+    public static final String VERSION = "v0.0.1";
+    private static final boolean RELEASE_BUILD = false;
+    public static boolean SOUND_ON = true;
+
+    // Debug
+    public static boolean showBoundaryBoxes = false;
+    private boolean PAINT_STATE = false;
+    private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
 
     public static int TINY_GAP = 5; // when we need a tiny gap
         
     // possible states:
-    public static final int SPLASH_SCREEN=0;
-    public static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK=1; // local or network?
-    public static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN=2; //play human or cpu?
-    private final int GAME_IN_PROGRESS=4;
-    public static final int NETWORKING_ENTER_NAME=5;
-    public static final int NETWORKING_LOBBY=6;
+    private static final int SPLASH_SCREEN = 0;
+    private static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK = 1; // local or network?
+    private static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN = 2; // play human or cpu?
+    private final int GAME_IN_PROGRESS = 4;
+    public static final int NETWORKING_ENTER_NAME = 5;
+    public static final int NETWORKING_LOBBY = 6;
     // intro menu
     //splash->
     //      'local play' or-> 'player against a computer or human?'
@@ -371,7 +369,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //paints the about box
     private void paintAboutBox(Graphics g) {
         infoCounter++;
         if (infoCounter > maxSplashCounter) {
@@ -2177,15 +2174,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("SOUND_ON:" + SOUND_ON);
         }
 
-        if (DEBUG_CONSOLE && e.getKeyChar() == 'x' || e.getKeyChar() == 'X') {//QUIT
+        if (DEBUG_CONSOLE && e.getKeyChar() == 'x' || e.getKeyChar() == 'X') {
             sfxError.playSound();
         }
 
         if (!RELEASE_BUILD && e.getKeyChar() == 'c' || e.getKeyChar() == 'C') {
             showBoundaryBoxes = !showBoundaryBoxes;
         }
-        if (!RELEASE_BUILD && e.getKeyChar() == 'l' || e.getKeyChar() == 'L')//DEBUG
-        {
+        if (!RELEASE_BUILD && e.getKeyChar() == 'l' || e.getKeyChar() == 'L') {
             Utils.CANVAS_LOGGING = !Utils.CANVAS_LOGGING;
         }
 
