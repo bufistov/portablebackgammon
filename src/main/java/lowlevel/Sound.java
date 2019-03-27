@@ -69,8 +69,7 @@ public class Sound {
           }
     }
 
-    public void playSound()
-    {
+    public void playSound() {
         if (CustomCanvas.SOUND_ON) {
             clip.setFramePosition(0);
             clip.start();

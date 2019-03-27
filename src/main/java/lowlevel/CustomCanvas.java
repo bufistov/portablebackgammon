@@ -906,7 +906,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // this deals with touching the 'virtual' buttons
     // a mouse event is passed in to grab the x,y values from
-    private boolean touchedButton(int x,int y) {
+    private boolean touchedButton(int x, int y) {
         buttonPressed = false;
         switch (state) {
             ///////////////////////////////////////////
@@ -977,14 +977,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
      //works out if the bottom button is pressed (in this state the 'network play' button)
      //and deals with it
-    private void checkAndDealWithBotButtonPressed_networkplay(int x,int y) {
+    private void checkAndDealWithBotButtonPressed_networkplay(int x, int y) {
         //check if bottom button is pressed (NETWORK)
         if (x >= buttonxB && x <= buttonxB + buttonwB) {
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
                 typeOfPlay = NETWORK_PLAY;
                 buttonPressed = true;
-
                 state = NETWORKING_ENTER_NAME;
             }
         }
