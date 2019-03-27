@@ -137,9 +137,8 @@ public class Board {
                      keepPotentialSpikesPulsing();
                }
             }
-            if ((!die1HasBeenUsed || !die2HasBeenUsed))//EXPERMENTAL IE WONT BOTHER IF DICE ARE USED
-            {
-                calculatePotentialMoves(false);
+            if (!die1HasBeenUsed || !die2HasBeenUsed) {
+                calculatePotentialMoves();
             }
         }
 
@@ -994,7 +993,7 @@ thereAreOptions=false;
     //takes in spike the player is currently hovering over with mouse
     //and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
     //is able to be moved to.
-   boolean checkAbleToGetIntoPieceContainerWHITE;
+    boolean checkAbleToGetIntoPieceContainerWHITE;
     boolean checkAbleToGetIntoPieceContainerBLACK;
     public static int whichDieGetsUsToPieceContainer=-1;
     //whichDieIsThis is passed in which indicates which die roll will be used in this potential move
@@ -1016,8 +1015,7 @@ thereAreOptions=false;
 
             //check if the spike reachable by die1's roll is available to
             //move a piece to, ie, EMPTY or occupied by this players pieces already
-            Spike reachableFromDie=null;
-            String notAnOptionReason="";//if its not an option this contains why
+            Spike reachableFromDie;
 
             ///---
             //we need to work out if we are going clockwise around the board or
@@ -1129,10 +1127,6 @@ thereAreOptions=false;
                     //log("RETURN TRUE SINCE ITS EMPTY - ignoreEmptySpikes"+ignoreEmptySpikes);
                     yesThatsValid=true;//spike is empty
                     return yesThatsValid;
-                }
-                else
-                {
-                    notAnOptionReason="[Spike is not empty] OR WE IGNORE EMPTIES";
                 }
                 ////
                 ////DOES SPIKE BELONG TO US ALREADY?
@@ -1520,18 +1514,13 @@ thereAreOptions=false;
     Vector botDestinations;
     public boolean thereAreOptions=false;
     public SpikePair SPtheMoveToMake;//stores the move they will make
-    public void calculatePotentialMoves(boolean FORCE) {
-        //  boolean theyWantToPlaceAPiece=false;
+
+    public void calculatePotentialMoves() {
         //if SPtheMoveToMake isnt null they have already chosen the spikes to pick up from and drop off at
-        if (FORCE || (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse) && !thereAreOptions)//&& SPtheMoveToMake==null))//&& !CustomCanvas.showRollButton)// && !die1HasBeenUsed  && !die2HasBeenUsed)
-        {
-            log("_______________________________________________RECALCULATE MOVES " + FORCE + " die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
-
-
-            theyWantToPickUpAPiece();//<- fills up spikePairs
-
+        if ((!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse) && !thereAreOptions) {
+            log("_______________________RECALCULATE MOVES die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
+            theyWantToPickUpAPiece(); //<- fills up spikePairs
             Enumeration e = spikePairs.elements();
-
             while (e.hasMoreElements()) {
                 SpikePair sp = (SpikePair) e.nextElement();
                 //log("we can pick up from spike:"+sp.pickMyPiece.spikeName+" and drop off at spike:"+sp.dropPiecesOnMe.spikeName);
@@ -1544,7 +1533,7 @@ thereAreOptions=false;
             log("spikePairs size:" + spikePairs.size());
 
             if (thereAreOptions) {
-                listBotsOptions = true;//CustomCanvas.DEBUG_CONSOLE;
+                listBotsOptions = true;
                 if (listBotsOptions) {
                     botOptions = "";
                     Enumeration ee = spikePairs.elements();
@@ -1625,7 +1614,6 @@ thereAreOptions=false;
                     //so what we do is sneaky, reduce die value number (hiding it from players of course)
                     //which makes optiosn become available in this case.
                     if (whoseTurnIsIt == Player.WHITE && checkAbleToGetIntoPieceContainerWHITE) {
-
                         log("WHITE LOWERING THEVALUE OF DIE 2");
                         die2.setValue(die2.getValue() - 1);
                     } else if (whoseTurnIsIt == Player.BLACK && checkAbleToGetIntoPieceContainerBLACK) {
@@ -1671,21 +1659,16 @@ thereAreOptions=false;
             {
                 log("using DIE1 value ");
                 diceRoll=die1.getValue();
-            }
-            else if (!die2HasBeenUsed)
-            {
+            } else if (!die2HasBeenUsed) {
                 log("using DIE2 value");
                 diceRoll=die2.getValue();
             }
-
-            //variables we need
             int potentialSpike=0;
             boolean clockwise=false;// blacks pieces move anticlockwise, white clockwise
             boolean checkAbleToGetIntoPieceContainer=false;//this gets set according to whose go it is
-            if (whoseTurnIsIt==Player.WHITE)
-            {
-                clockwise=true;
-                checkAbleToGetIntoPieceContainerWHITE=allWhitePiecesAreHome;
+            if (whoseTurnIsIt==Player.WHITE) {
+                 clockwise=true;
+                 checkAbleToGetIntoPieceContainerWHITE=allWhitePiecesAreHome;
                  checkAbleToGetIntoPieceContainer=checkAbleToGetIntoPieceContainerWHITE;
                  log("x checkAbleToGetIntoPieceContainerWHITE:" + checkAbleToGetIntoPieceContainerWHITE);
             } else if (whoseTurnIsIt==Player.BLACK) {
