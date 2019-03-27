@@ -9,6 +9,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JFrame;
 
+import static gamelogic.GuiState.*;
+
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
     private final int maxSplashCounter = 50;
@@ -31,18 +33,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
 
     public static int TINY_GAP = 5; // when we need a tiny gap
-        
-    // possible states:
-    private static final int SPLASH_SCREEN = 0;
-    private static final int OPTIONS_SCREEN_LOCAL_OR_NETWORK = 1; // local or network?
-    private static final int OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN = 2; // play human or cpu?
-    private final int GAME_IN_PROGRESS = 4;
-    public static final int NETWORKING_ENTER_NAME = 5;
-    public static final int NETWORKING_LOBBY = 6;
-    // intro menu
-    //splash->
-    //      'local play' or-> 'player against a computer or human?'
-    //      'network play'?-> 'enter username of opponent'
     
     int typeOfPlay=-1;
     public static final int NETWORK_PLAY=1;
@@ -63,7 +53,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private CustomFont fontwhite, fontblack;
     boolean INFO=false;    // 'about box' toggle
     Utils utils = new Utils();   // Hardware Abstraction Layer
-    private int state = 0;
+    private GuiState state = GuiState.SPLASH_SCREEN;
     String stateString;
     int PANEL_WIDTH=0;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
