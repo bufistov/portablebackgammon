@@ -28,7 +28,7 @@ public class Board {
     private Sound sfxGameOver, sfxNoMove;
 
     private CustomCanvas canvas;
-    public Board(CustomCanvas canvas) {
+    public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
         log("Board made");
 

@@ -55,7 +55,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean INFO = false;    // 'about box' toggle
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
-    String stateString;
     int PANEL_WIDTH=0;
     public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
 
@@ -193,9 +192,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private String themeName;
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
 
-    CustomCanvas(JFrame jFrame_) {
+    CustomCanvas(JFrame jFrame_, GameConfig config) {
         log("CustomCanvas made.");
-        board = new Board(this);
+        board = new Board(this, config);
         bot.start();
        
         // j2se specifics

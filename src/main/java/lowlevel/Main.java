@@ -3,6 +3,9 @@
  * and open the template in the editor.
  */
 package lowlevel;
+import gamelogic.GameConfig;
+import org.aeonbits.owner.ConfigFactory;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -28,7 +31,10 @@ public class Main {
          log("Main called, Backgammon starting.");
          frame = new JFrame();
          log("insetY:" + insetY + ", insetX" + insetX);
-         canvas = new CustomCanvas(frame); // create our canvas object that has custom rendering in it.
+
+         ConfigFactory.setProperty("configFileName", "backgammon.config");
+         GameConfig config = ConfigFactory.create(GameConfig.class);
+         canvas = new CustomCanvas(frame, config); // create our canvas object that has custom rendering in it.
          frame.getContentPane().add(canvas);
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
          frame.setSize(810, 500);

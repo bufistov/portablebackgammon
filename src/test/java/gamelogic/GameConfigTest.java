@@ -15,7 +15,7 @@ public class GameConfigTest {
     @DisplayName("Default values are loaded from classpath props")
     public void test1() {
         ConfigFactory.setProperty(
-            "configFileName", "backgammon.config");
+            "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
         assertEquals(24, config.boardSize());
     }
