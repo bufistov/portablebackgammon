@@ -2149,7 +2149,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             System.exit(0);
         }
         if (e.getKeyChar() == 'f' || e.getKeyChar() == 'F') {//QUIT
-            Bot.setFullAutoPlay(Bot.getFullAutoPlay());
+            Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
             Board.HUMAN_VS_COMPUTER = !Board.HUMAN_VS_COMPUTER;
             Bot.dead = !Bot.getFullAutoPlay();
             log("Bot.dead:" + Bot.dead);
