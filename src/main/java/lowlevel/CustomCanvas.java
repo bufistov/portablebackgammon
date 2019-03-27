@@ -69,9 +69,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     BufferStrategy bufferStrategy;
 
     public static boolean NETWORK_GAME_IN_PROCESS;
-    public static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled,
-        sfxError,sfxNoMove,sfxPutPieceInContainer, sfxGameOver, sfxKilled;
-    public static Sound sfxdouble, sfxResign;
+    static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled, sfxError, sfxPutPieceInContainer, sfxKilled;
+    private static Sound sfxdouble, sfxResign;
 
     // Garbage
     static String robotMoveDesc = "Bot loaded.";
@@ -215,16 +214,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         loadImages();
 
         log("Loading Sounds");
-        sfxmouseClick = new Sound("/mouseclick.wav");
-        sfxDiceRoll   = new Sound("/diceroll.wav");
-        sfxDoubleRolled = new Sound("/whoosh.wav");
-        sfxError=new Sound("/error.wav");
-        sfxNoMove=new Sound("/nomove.wav");
-        sfxPutPieceInContainer=new Sound("/pieceputaway.wav");
-        sfxGameOver=new Sound("/gameover.wav");
-        sfxKilled=new Sound("/killed.wav");
-        sfxdouble=new Sound("/double.wav");
-        sfxResign=new Sound("/resign.wav");
+        sfxmouseClick = new Sound("/mouseclick.wav", SOUND_ON);
+        sfxDiceRoll   = new Sound("/diceroll.wav", SOUND_ON);
+        sfxDoubleRolled = new Sound("/whoosh.wav", SOUND_ON);
+        sfxError = new Sound("/error.wav", SOUND_ON);
+        sfxPutPieceInContainer = new Sound("/pieceputaway.wav", SOUND_ON);
+        sfxKilled = new Sound("/killed.wav", SOUND_ON);
+        sfxdouble = new Sound("/double.wav", SOUND_ON);
+        sfxResign = new Sound("/resign.wav", SOUND_ON);
         log("Sounds loaded.");
         requestFocus();  // get focus for keys
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {

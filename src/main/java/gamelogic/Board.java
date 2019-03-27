@@ -24,10 +24,16 @@ public class Board {
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
 
+    private static final boolean SOUND_ON = true;
+    private Sound sfxGameOver, sfxNoMove;
+
     private CustomCanvas canvas;
     public Board(CustomCanvas canvas) {
         this.canvas = canvas;
         log("Board made");
+
+        sfxGameOver = new Sound("/gameover.wav", SOUND_ON);
+        sfxNoMove = new Sound("/nomove.wav", SOUND_ON);
         // make spikes, players, pieces etc
         makeAllGameVars();
         makeColourObjects(false);
@@ -151,7 +157,7 @@ public class Board {
 
         if (gameComplete || CustomCanvas.whiteResigned || CustomCanvas.blackResigned) {
             if (playGameOverSound) {
-                CustomCanvas.sfxGameOver.playSound();
+                sfxGameOver.playSound();
                 log("PLAYING GAME OVER SOUND*************************");
                 playGameOverSound=false;
             }
@@ -1612,7 +1618,7 @@ thereAreOptions=false;
                         die1HasBeenUsed = true;
                         log("DISABLED DIE 1x");
                         canvas.tellPlayers("No option with Die 1 (" + die1.getValue() + ")");
-                        CustomCanvas.sfxNoMove.playSound();
+                        sfxNoMove.playSound();
                     }
                 } else if (!die2HasBeenUsed) {
                     //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
@@ -1630,7 +1636,7 @@ thereAreOptions=false;
                         die2HasBeenUsed = true;
                         log("DISABLED DIE 2x");
                         canvas.tellPlayers("No options available with Die 2 (" + die2.getValue() + ")");
-                        CustomCanvas.sfxNoMove.playSound();
+                        sfxNoMove.playSound();
                         //it should move onto next players go NOW...
                         if (CustomCanvas.someoneRolledADouble) {
                             //even cancel a double go if theres no options for die2
