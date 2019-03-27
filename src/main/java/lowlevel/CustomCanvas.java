@@ -11,6 +11,9 @@ import javax.swing.JFrame;
 
 import static gamelogic.GuiState.*;
 
+/** This class is used basically for calling the right paint methods
+ *  based on state, these paint due to this class being a subclass of canvas.
+ */
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
     private final int maxSplashCounter = 50;
@@ -42,7 +45,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static int PANEL_COLOUR = 0x000000;
     public static int BACKGROUND_COLOUR = 0x993300;
     private static int ROLL_BUTTON_COLOUR = 0xffcc66;
-    private static Color panel_colour, background_colour, roll_button_colour;
+    private Color panel_colour, background_colour, roll_button_colour;
 
     private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
     //this simply means the panel will represent one x-th of the available screen,
@@ -181,9 +184,17 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Spike originalSpikeForPieceSelected;
     public static boolean barPieceStuckOnMouse;
 
-    /* This class is used basically for calling the right paint methods
-     * based on state, these paint due to this class being a subclass of canvas.
-    */
+    //////////////////THEMES CODE/////////////////
+    public static final int DEFAULT   = 0;
+    public static final int METALIC   = 1;
+    public static final int CLASSIC   = 2;
+    public static final int FUNNYMAN  = 3;
+    public static final int BUMBLEBEE = 4;
+    public static final int MAX_THEMES = 4; // this should always equals the last one
+    private int theme = DEFAULT;
+    private String themeName;
+    private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
+
     CustomCanvas(JFrame jFrame_) {
         log("CustomCanvas made.");
         board = new Board(this);
@@ -194,12 +205,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         addMouseListener(this);
         addMouseMotionListener( this );
         addKeyListener( this );
+
         // set icon in corner
         jFrame.setIconImage(utils.loadImage("/icon.gif"));
         jFrame.setResizable(false);
-        // WindowResizeMonitor.register(jFrame, this);
+
         setTheme(theme);
-        makeColourObjects(false);
+        makeColourObjects();
         loadCustomFonts();
         loadImages();
 
@@ -2214,18 +2226,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public void keyTyped(KeyEvent e) {
     }
 
-    //////////////////THEMES CODE/////////////////
-    public static final int DEFAULT   = 0;
-    public static final int METALIC   = 1;
-    public static final int CLASSIC   = 2;
-    public static final int FUNNYMAN  = 3;
-    public static final int BUMBLEBEE = 4;
-    public static final int MAX_THEMES = 4; // this should always equals the last one
-    private int theme = DEFAULT;
-    private String themeName;
-    private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
-    //sets all colours in one go
-    public void setTheme(int theme_) {
+    private void setTheme(int theme_) {
         theme = theme_;
         log("theme:" + theme);
         if (theme > MAX_THEMES) {
@@ -2321,7 +2322,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //force recreation of colour objects
         //we pass true into makeColourObjects to force them to remake themselves
         //with the new colour values and thus repaint with new theme
-        CustomCanvas.makeColourObjects(true);
+        makeColourObjects();
         Board.makeColourObjects(true);
         Spike.makeColourObjects(true);
         Piece.makeColourObjects(true);
@@ -2329,17 +2330,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         log("Theme is loaded now and working.");
     }
 
-    // make colour objects
-    public static void makeColourObjects(boolean forceRecreation) {
-        if (panel_colour == null || forceRecreation) {
-            panel_colour = new Color(PANEL_COLOUR);
-        }
-        if (background_colour == null || forceRecreation) {
-            background_colour = new Color(BACKGROUND_COLOUR);
-        }
-        if (roll_button_colour == null || forceRecreation) {
-            roll_button_colour = new Color(ROLL_BUTTON_COLOUR);
-        }
+    private void makeColourObjects() {
+        panel_colour = new Color(PANEL_COLOUR);
+        background_colour = new Color(BACKGROUND_COLOUR);
+        roll_button_colour = new Color(ROLL_BUTTON_COLOUR);
     }
 
     // prepare the customfont
