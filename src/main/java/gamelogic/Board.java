@@ -24,16 +24,16 @@ public class Board {
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
 
-    private boolean soundOn;
     private Sound sfxGameOver, sfxNoMove;
 
     private CustomCanvas canvas;
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
-        this.soundOn = config.soundOn();
+        sfxGameOver = new Sound("/gameover.wav", true);
+        sfxNoMove = new Sound("/nomove.wav");
         log("Board made");
+        loadSounds(config.soundOn());
 
-        loadSounds(soundOn);
         // make spikes, players, pieces etc
         makeAllGameVars();
         makeColourObjects(false);
@@ -49,8 +49,8 @@ public class Board {
     }
 
     public void loadSounds(boolean soundOn) {
-        sfxGameOver = new Sound("/gameover.wav", soundOn);
-        sfxNoMove = new Sound("/nomove.wav", soundOn);
+        sfxGameOver.loadSound(soundOn);
+        sfxNoMove.loadSound(soundOn);
     }
 
     public static void makeColourObjects(boolean forceRecreation) {
@@ -160,11 +160,7 @@ public class Board {
         }
 
         if (gameComplete || CustomCanvas.whiteResigned || CustomCanvas.blackResigned) {
-            if (playGameOverSound) {
-                sfxGameOver.playSound();
-                log("PLAYING GAME OVER SOUND*************************");
-                playGameOverSound=false;
-            }
+            sfxGameOver.playSound();
             canvas.tellPlayers(gameCompleteString);
         }
     }
@@ -401,47 +397,45 @@ public class Board {
 
     //called after game over when we return to the main meu to make sure all
     //vars are cleaned up properly
-    public void RESET_ENTIRE_GAME_VARS()
-    {
-        playGameOverSound=true;
-        gameComplete=false;
-        gameCompleteString="ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
-        HUMAN_VS_COMPUTER=false;
-        spikesAllowedToMoveToFromBar=new Vector(6);
-        pickingPieceUpFromBar=false;
-        allowPieceToStickToMouse=false;
-          allWhitePiecesAreHome=false;
-    allBlackPiecesAreHome=false;
-    calculatePotentialNumberOfMoves=true; // at the start of using a new dice we work out if the player has potential moves
-    potentialNumberOfMoves=0;
-    noMovesAvailable=false; // this gets set to true when no moves at all are available.
-    pulsateWhiteContainer=false;
-    pulsateBlackContainer=false;
-    movePhase=0;
-    die1HasBeenUsed=false;
-    die2HasBeenUsed=false;
+    public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
+        loadSounds(soundOn);
+        gameComplete = false;
+        gameCompleteString = "ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
+        HUMAN_VS_COMPUTER = false;
+        spikesAllowedToMoveToFromBar = new Vector(6);
+        pickingPieceUpFromBar = false;
+        allowPieceToStickToMouse = false;
+        allWhitePiecesAreHome = false;
+        allBlackPiecesAreHome = false;
+        calculatePotentialNumberOfMoves = true; // at the start of using a new dice we work out if the player has potential moves
+        potentialNumberOfMoves = 0;
+        noMovesAvailable = false; // this gets set to true when no moves at all are available.
+        pulsateWhiteContainer = false;
+        pulsateBlackContainer = false;
+        movePhase = 0;
+        die1HasBeenUsed = false;
+        die2HasBeenUsed = false;
 
-       highlightPieceContainerAsOption=false;
+        highlightPieceContainerAsOption = false;
 
-    checkAbleToGetIntoPieceContainerWHITE=false;
-     checkAbleToGetIntoPieceContainerBLACK=false;
-    whichDieGetsUsToPieceContainer=-1;
+        checkAbleToGetIntoPieceContainerWHITE = false;
+        checkAbleToGetIntoPieceContainerBLACK = false;
+        whichDieGetsUsToPieceContainer = -1;
 
-      listBotsOptions=false;
-    botOptions="<<NONE YET>>";
-     botDestinations= new Vector(6);
-thereAreOptions=false;
-    SPtheMoveToMake=null;//stores the move they will make
+        listBotsOptions = false;
+        botOptions = "<<NONE YET>>";
+        botDestinations = new Vector(6);
+        thereAreOptions = false;
+        SPtheMoveToMake = null;//stores the move they will make
 
-     ROBOT_DESTINATION_MESSAGE="";
-     spikesWeCanMovePiecesToo=null;
-  moveAPieceToMe=null;
- canWeMoveAPieceToThisSpike=null;
+        ROBOT_DESTINATION_MESSAGE = "";
+        spikesWeCanMovePiecesToo = null;
+        moveAPieceToMe = null;
+        canWeMoveAPieceToThisSpike = null;
     }
 
-    public static boolean playGameOverSound=true;
-     public static boolean gameComplete=false;
-   public static String gameCompleteString="ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
+    public static boolean gameComplete=false;
+    public static String gameCompleteString="ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
 
     public static boolean HUMAN_VS_COMPUTER=false;//human is white, computer is black
 

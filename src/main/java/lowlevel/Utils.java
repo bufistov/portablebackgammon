@@ -106,7 +106,7 @@ public class Utils {
     }
 
     public static void _E(String s) {
-        CustomCanvas.sfxError.playSound();
+        CustomCanvas.playErrorSound();
         log(ERROR_STRING+s);
     }
 

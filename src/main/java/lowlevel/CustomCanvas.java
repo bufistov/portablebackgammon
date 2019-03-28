@@ -68,8 +68,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     BufferStrategy bufferStrategy;
 
     public static boolean NETWORK_GAME_IN_PROCESS;
-    static Sound sfxmouseClick, sfxDiceRoll, sfxDoubleRolled, sfxError, sfxPutPieceInContainer, sfxKilled;
-    private static Sound sfxdouble, sfxResign;
+    private static Sound sfxError = new Sound("/error.wav");
+    private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled;
+    private Sound sfxdouble, sfxResign;
 
     // Garbage
     static String robotMoveDesc = "Bot loaded.";
@@ -194,7 +195,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     CustomCanvas(JFrame jFrame_, GameConfig config) {
         log("CustomCanvas made.");
+        sfxDiceRoll = new Sound("/diceroll.wav");
+        sfxDoubleRolled = new Sound("/whoosh.wav");
+        sfxPutPieceInContainer = new Sound("/pieceputaway.wav");
+        sfxKilled = new Sound("/killed.wav");
+        sfxdouble = new Sound("/double.wav");
+        sfxResign = new Sound("/resign.wav");
+
         this.soundOn = config.soundOn();
+        loadSounds(this.soundOn);
         board = new Board(this, config);
         bot.start();
        
@@ -208,7 +217,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         jFrame.setIconImage(utils.loadImage("/icon.gif"));
         jFrame.setResizable(false);
 
-        loadSounds();
         setTheme(theme);
         makeColourObjects();
         loadCustomFonts();
@@ -259,17 +267,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         doubleBuffering(2); // pass 2 in to start dbl buffering
     }
 
-    private void loadSounds() {
-        sfxmouseClick = new Sound("/mouseclick.wav", soundOn);
-        sfxDiceRoll = new Sound("/diceroll.wav", soundOn);
-        sfxDoubleRolled = new Sound("/whoosh.wav", soundOn);
-        sfxError = new Sound("/error.wav", soundOn);
-        sfxPutPieceInContainer = new Sound("/pieceputaway.wav", soundOn);
-        sfxKilled = new Sound("/killed.wav", soundOn);
-        sfxdouble = new Sound("/double.wav", soundOn);
-        sfxResign = new Sound("/resign.wav", soundOn);
+    private void loadSounds(boolean soundOn) {
+        sfxDiceRoll.loadSound(soundOn);
+        sfxDoubleRolled.loadSound(soundOn);
+        sfxError.loadSound(soundOn);
+        sfxPutPieceInContainer.loadSound(soundOn);
+        sfxKilled.loadSound(soundOn);
+        sfxdouble.loadSound(soundOn);
+        sfxResign.loadSound(soundOn);
         if (soundOn) {
-            log("Sounds loaded.");
+            log("Sounds loaded");
         } else {
             log("Sounds are disabled");
         }
@@ -1457,7 +1464,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         splashCounter = maxSplashCounter + 1; // turn off splash if its on
         if (buttonPressed == LEFT_MOUSE_BUTTON) {
             if (Board.gameComplete) {
-                board.RESET_ENTIRE_GAME_VARS();
+                board.RESET_ENTIRE_GAME_VARS(soundOn);
                 RESET_ENTIRE_GAME_VARS();
                 state=SPLASH_SCREEN;
             }
@@ -2165,7 +2172,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             //PAUSE
             soundOn = !soundOn;
             log("soundOn:" + soundOn);
-            loadSounds();
+            loadSounds(soundOn);
             board.loadSounds(soundOn);
         }
 
@@ -2626,5 +2633,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         tellPlayers(String.format("%s won the roll off", playerStr));
         state = GAME_IN_PROGRESS;
+    }
+
+    static void playErrorSound() {
+        sfxError.playSound();
     }
 }
