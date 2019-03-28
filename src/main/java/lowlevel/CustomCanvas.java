@@ -194,6 +194,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private int theme = DEFAULT;
     private String themeName;
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
+    public static boolean showDice;
 
     CustomCanvas(JFrame jFrame_, GameConfig config) {
         log("CustomCanvas made.");
@@ -891,10 +892,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //returns the current pip count doe the player passed in.
+    // returns the current pip count doe the player passed in.
     private int calculatePips(int player) {
         int pips = 0;
-
         /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
          * counting the number of pieces of that colour on the spike, then multiply that by the amount of spikes it is away from the
          * end of the board (INCLUDING the one to get onto the pice container), add these all up . as an example the starting pip count is 167 because:
@@ -904,23 +904,17 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
          * 6 pieces on spike 18 (5 steps from the end) *6 =30
          * total is 167
          */
-        Enumeration e = board.spikes.elements();
         if (player == Player.WHITE) {
             //works for white logic is simple
             for (int i = 0; i < 24; i++) {
                 Spike spike = (Spike) board.spikes.elementAt(i);
-                if (spike.getAmountOfPieces(player) > 0) {
-                    pips += (i + 1) * spike.getAmountOfPieces(player);
-                }
+                pips += (i + 1) * spike.getAmountOfPieces(Player.WHITE);
             }
         } else {
-            //logic for black takes some thinking about!
             int j = 0;
             for (int i = 23; i >= 0; i--) {
                 Spike spike = (Spike) board.spikes.elementAt(i);
-                if (spike.getAmountOfPieces(player) > 0) {
-                    pips += (j + 1) * spike.getAmountOfPieces(player);
-                }
+                pips += (j + 1) * spike.getAmountOfPieces(Player.BLACK);
                 j++;
             }
         }
@@ -1114,12 +1108,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Board.copy_of_reachableFromBothDice=null;
     }
 
-    public static boolean showDice;
     //this needs to be called when swapping turns form one player to another
     //to ensure things behave correctly.
     public static void resetVarsTurn() {
         log("resetVarsTurn");
-
         //so it doesnt think dice have been used anymore
         Board.die1HasBeenUsed = false;
         Board.die2HasBeenUsed = false;
@@ -1480,19 +1472,19 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //so our mouse doesnt influence anything
         if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
         } else {
-            log("mouseClicked "+e.getX()+","+e.getY());
-            int buttonPressed=-1;
-            if (e.getButton()==e.BUTTON1) {
+            log("mouseClicked " + e.getX() + "," + e.getY());
+            int buttonPressed = -1;
+            if (e.getButton() == e.BUTTON1) {
                 buttonPressed = LEFT_MOUSE_BUTTON;
             }
             if (e.getButton() == e.BUTTON3) {
-                buttonPressed=RIGHT_MOUSE_BUTTON;
+                buttonPressed = RIGHT_MOUSE_BUTTON;
             }
             mouseClickedX(e.getX(), e.getY(), buttonPressed);
         }
     }
 
-    public void mouseClickedX(int x, int y, int buttonPressed) {
+    void mouseClickedX(int x, int y, int buttonPressed) {
         splashCounter = maxSplashCounter + 1; // turn off splash if its on
         if (buttonPressed == LEFT_MOUSE_BUTTON) {
             if (gameComplete) {
@@ -1514,61 +1506,59 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         switch(state) {
             case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
                 touchedButton(x, y);
-                return;
+                break;
             case OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN:
                 touchedButton(x, y);
-                return;
+                break;
             case GAME_IN_PROGRESS:
                 touchedButton(x, y);
-
                 if (showRollButton) {
                     log("respond to no clicks as the roll button is up");
                     //only thign that will respond is the about window
                     //brings up the about window.
                     checkIfPrefsButtonClickedOn(x, y);
-                    return;
-                }
-                //Making a move//////////
-                //to move a piece the player simply once clicks
-                //on a piece they wish to move - then if it has valid moves -
-                //it attaches to the mouse pointer and can be placed either
-                //on one of the valid potential spikes- or returned to where it
-                //was initially by right clicking (and no move has been used)
-                checkIfPieceClickedOn(x, y); //detects what piece (if any was clicked on)
+                } else {
+                    //Making a move//////////
+                    //to move a piece the player simply once clicks
+                    //on a piece they wish to move - then if it has valid moves -
+                    //it attaches to the mouse pointer and can be placed either
+                    //on one of the valid potential spikes- or returned to where it
+                    //was initially by right clicking (and no move has been used)
+                    checkIfPieceClickedOn(x, y); //detects what piece (if any was clicked on)
 
-                //once a piece is stuck to the pointer, we place it on a spike
-                //IFF that spike is one of its valid moves.
+                    //once a piece is stuck to the pointer, we place it on a spike
+                    //IFF that spike is one of its valid moves.
 
-                checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
-                checkIfPieceContainerClickedOn(x, y);
-                checkIfDoubleClickedOn(x, y);
-                checkIfResignClickedOn(x, y);
-                //if both dice used move to next turn
-                if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
-                    log("GO TO NEW TURN AA");
-                    turnOver();
+                    checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
+                    checkIfPieceContainerClickedOn(x, y);
+                    checkIfDoubleClickedOn(x, y);
+                    checkIfResignClickedOn(x, y);
+                    //if both dice used move to next turn
+                    if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
+                        log("GO TO NEW TURN AA");
+                        turnOver();
+                    }
                 }
-                return;
+                break;
         }
     }
 
     private void RESET_ENTIRE_GAME_VARS() {
-        Board.whoseTurnIsIt=Player.WHITE;
-        someoneRolledADouble=false;
-        doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
-        showRollButton=true;//false when not needed
+        someoneRolledADouble = false;
+        doubleRollCounter = 0;//this tracks how many rolls a player has had after rolling a double,
+        showRollButton = true;//false when not needed
         resetVarsTurn();
         theBarWHITE = new Vector(4);//the bar holds pieces that get killed
         theBarBLACK = new Vector(4);//the bar holds pieces that get killed
 
         //these store the pieces that have been sent to the container, when all are in that player wins.
-        whitePiecesSafelyInContainer=new Vector(15);
-        blackPiecesSafelyInContainer=new Vector(15);
+        whitePiecesSafelyInContainer = new Vector(15);
+        blackPiecesSafelyInContainer = new Vector(15);
 
-        originalSpikeForPieceSelected=null;
+        originalSpikeForPieceSelected = null;
         barPieceStuckOnMouse = false;
-        pieceOnMouse = false;//is true when a piece is stuck to mouse
-        pieceStuckToMouse=null;//this is simply a copy of whatever piece (if any) is stuck to mouse
+        pieceOnMouse = false; // is true when a piece is stuck to mouse
+        pieceStuckToMouse = null; // this is simply a copy of whatever piece (if any) is stuck to mouse
 
         message2Players = VERSION;
         gameComplete = false;
@@ -1745,7 +1735,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + Board.spikesAllowedToMoveToFromBar.size());
                     Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
                     while (e.hasMoreElements()) {
-
                         Spike sp = (Spike) e.nextElement();
                         log("checkign spike:" + sp.getSpikeNumber());
                         if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
@@ -1754,7 +1743,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                             if (Board.whoseTurnIsIt == Player.WHITE) {
                                 log("WHITE PIECE REMOVED FROM BAR");
                                 theBarWHITE.remove(pieceStuckToMouse);
-                                //IF this spike contains an enemy piece Kill it
+                                // IF this spike contains an enemy piece Kill it
                                 if (sp.getAmountOfPieces(Player.BLACK) == 1) {
                                     log("WHITE KILLED A BLACK WHILE GETTING OFF BAR");
                                     Piece piece = (Piece) sp.pieces.firstElement();
@@ -1904,7 +1893,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             } else {
                 //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
                 if (Board.whoseTurnIsIt == Player.WHITE && board.copy_of_reachableFromDie2.getAmountOfPieces(Player.BLACK) > 0) {
-
                     log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
