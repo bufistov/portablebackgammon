@@ -41,6 +41,10 @@ public class Sound {
     }
 
     public void loadSound(boolean soundOn) {
+        if (clip != null) {
+            clip.close();
+            clip = null;
+        }
         if (soundOn) {
             try {
                 InputStream stream = this.getClass().getResourceAsStream(fileName);
@@ -55,9 +59,6 @@ public class Sound {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (clip != null) {
-            clip.close();
-            clip = null;
         }
     }
 }
