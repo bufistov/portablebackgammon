@@ -118,18 +118,18 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //ie, we want them to have 4 rolls if thats the case and not 2
 
     //for glowy buttons
-    public static final int GLOW_INCREMENTER = 15;
+    private static final int GLOW_INCREMENTER = 15;
     private boolean glowA, glowB;
 
-    int doubleX;
-    int doubleY;
-    int doubleWidth;
-    int doubleHeight;
+    private int doubleX;
+    private int doubleY;
+    private int doubleWidth;
+    private int doubleHeight;
 
-    int resignX;
-    int resignY;
-    int resignWidth;
-    int resignHeight;
+    private int resignX;
+    private int resignY;
+    private int resignWidth;
+    private int resignHeight;
 
     private boolean whiteResigned;
     private boolean blackResigned;
@@ -1570,7 +1570,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         pieceStuckToMouse=null;//this is simply a copy of whatever piece (if any) is stuck to mouse
 
         message2Players = VERSION;
-        board = null;
         gameComplete = false;
         whiteResigned = false;
         blackResigned = false;
