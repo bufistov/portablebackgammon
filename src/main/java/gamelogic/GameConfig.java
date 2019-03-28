@@ -9,4 +9,6 @@ public interface GameConfig extends Config {
     int boardSize();
 
     int totalCheckers();
+
+    boolean soundOn();
 }

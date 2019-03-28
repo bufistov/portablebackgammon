@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class GameConfigTest {
 
@@ -18,6 +19,7 @@ public class GameConfigTest {
             "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
         assertEquals(24, config.boardSize());
+        assertFalse(config.soundOn());
     }
 
     @Test

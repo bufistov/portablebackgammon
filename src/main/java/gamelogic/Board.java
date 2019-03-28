@@ -24,16 +24,16 @@ public class Board {
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
 
-    private static final boolean SOUND_ON = true;
+    private boolean soundOn;
     private Sound sfxGameOver, sfxNoMove;
 
     private CustomCanvas canvas;
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
+        this.soundOn = config.soundOn();
         log("Board made");
 
-        sfxGameOver = new Sound("/gameover.wav", SOUND_ON);
-        sfxNoMove = new Sound("/nomove.wav", SOUND_ON);
+        loadSounds(soundOn);
         // make spikes, players, pieces etc
         makeAllGameVars();
         makeColourObjects(false);
@@ -46,6 +46,11 @@ public class Board {
 
         // set up the board for a new game
         initialiseBoard(BOARD_NEW_GAME);
+    }
+
+    public void loadSounds(boolean soundOn) {
+        sfxGameOver = new Sound("/gameover.wav", soundOn);
+        sfxNoMove = new Sound("/nomove.wav", soundOn);
     }
 
     public static void makeColourObjects(boolean forceRecreation) {
