@@ -51,7 +51,7 @@ public class Bot extends Thread {
     }
 
     private void tick() {
-        if (dead || Board.gameComplete || (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE)) {
+        if (dead || canvas.gameComplete() || (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE)) {
             try {
                 Thread.sleep(50);
                 return;

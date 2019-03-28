@@ -24,12 +24,12 @@ public class Board {
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
 
-    private Sound sfxGameOver, sfxNoMove;
+    private Sound sfxNoMove;
 
     private CustomCanvas canvas;
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
-        sfxGameOver = new Sound("/gameover.wav", true);
+
         sfxNoMove = new Sound("/nomove.wav");
         log("Board made");
         loadSounds(config.soundOn());
@@ -49,7 +49,6 @@ public class Board {
     }
 
     public void loadSounds(boolean soundOn) {
-        sfxGameOver.loadSound(soundOn);
         sfxNoMove.loadSound(soundOn);
     }
 
@@ -111,9 +110,7 @@ public class Board {
         paintDice(g,WIDTH,HEIGHT);
 
         //draw the potential moves for whoevers go it is
-        if (gameComplete) {
-            log("gameComplete");
-        } else {
+        if (!canvas.gameComplete()) {
             if (!CustomCanvas.pieceOnMouse) {
                 //SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
                 // if we have bits on the bar we need to deal with:
@@ -145,23 +142,6 @@ public class Board {
             if (!die1HasBeenUsed || !die2HasBeenUsed) {
                 calculatePotentialMoves();
             }
-        }
-
-        //CHECK IF ITS GAME OVER?
-        if (CustomCanvas.whitePiecesSafelyInContainer.size()==15) {
-            gameComplete=true;
-            gameCompleteString="White has won the game!";
-            CustomCanvas.showRollButton=false;
-        }
-        if (CustomCanvas.blackPiecesSafelyInContainer.size()==15) {
-            gameComplete=true;
-            gameCompleteString="Black has won the game!";
-            CustomCanvas.showRollButton=false;
-        }
-
-        if (gameComplete || CustomCanvas.whiteResigned || CustomCanvas.blackResigned) {
-            sfxGameOver.playSound();
-            canvas.tellPlayers(gameCompleteString);
         }
     }
 
@@ -399,8 +379,6 @@ public class Board {
     //vars are cleaned up properly
     public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
         loadSounds(soundOn);
-        gameComplete = false;
-        gameCompleteString = "ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
         HUMAN_VS_COMPUTER = false;
         spikesAllowedToMoveToFromBar = new Vector(6);
         pickingPieceUpFromBar = false;
@@ -433,9 +411,6 @@ public class Board {
         moveAPieceToMe = null;
         canWeMoveAPieceToThisSpike = null;
     }
-
-    public static boolean gameComplete=false;
-    public static String gameCompleteString="ERROR - NO ONE HAS WON THE GAME YOU SHOULD NOT TO SEE THIS";
 
     public static boolean HUMAN_VS_COMPUTER=false;//human is white, computer is black
 

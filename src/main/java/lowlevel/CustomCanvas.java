@@ -29,6 +29,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final String VERSION = "v0.0.1";
     private static final boolean RELEASE_BUILD = false;
     private boolean soundOn;
+    private boolean gameComplete;
 
     // Debug
     public static boolean showBoundaryBoxes = false;
@@ -69,7 +70,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public static boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
-    private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled;
+    private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled, sfxGameOver;
     private Sound sfxdouble, sfxResign;
 
     // Garbage
@@ -124,13 +125,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int doubleY;
     int doubleWidth;
     int doubleHeight;
+
     int resignX;
     int resignY;
     int resignWidth;
     int resignHeight;
 
-    public static boolean whiteResigned;
-    public static boolean blackResigned;
+    private boolean whiteResigned;
+    private boolean blackResigned;
 
     public static Vector theBarWHITE = new Vector(4);//the bar holds pieces that get killed
     public static Vector theBarBLACK = new Vector(4);//the bar holds pieces that get killed
@@ -201,8 +203,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         sfxKilled = new Sound("/killed.wav");
         sfxdouble = new Sound("/double.wav");
         sfxResign = new Sound("/resign.wav");
+        sfxGameOver = new Sound("/gameover.wav", true);
 
         this.soundOn = config.soundOn();
+        this.gameComplete = false;
         loadSounds(this.soundOn);
         board = new Board(this, config);
         bot.start();
@@ -275,6 +279,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         sfxKilled.loadSound(soundOn);
         sfxdouble.loadSound(soundOn);
         sfxResign.loadSound(soundOn);
+        sfxGameOver.loadSound(soundOn);
+
         if (soundOn) {
             log("Sounds loaded");
         } else {
@@ -619,6 +625,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int boardWidth = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         int boardHeight = getHeight();
         board.paint(g, boardWidth, boardHeight);
+
+        checkIfGameIsOver();
+
         //paint the message panel to the right with players name etc
         utils.setColor(g, panel_colour);
         utils.fillRect(g, boardWidth, Board.BORDER, PANEL_WIDTH, boardHeight - (Board.BORDER * 2));
@@ -689,6 +698,28 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
         }
         drawHUDtext(xpos);
+    }
+
+    private void checkIfGameIsOver() {
+        String gameCompleteString = "White has won the game!";
+        if (whitePiecesSafelyInContainer.size() == 15 || blackPiecesSafelyInContainer.size() == 15) {
+            gameComplete = true;
+            showRollButton=false;
+        }
+        if (blackPiecesSafelyInContainer.size() == 15) {
+            gameCompleteString = "Black has won the game!";
+        }
+
+        if (whiteResigned || blackResigned) {
+            String looser = whiteResigned ? "White" : "Black";
+            String winner = whiteResigned ? "Black" : "White";
+            gameCompleteString = String.format("%s has resigned. %s has won!", looser, winner);
+        }
+
+        if (gameComplete || whiteResigned || blackResigned) {
+            sfxGameOver.playSound();
+            tellPlayers(gameCompleteString);
+        }
     }
 
     //draws the little holder where the pieces go
@@ -1463,10 +1494,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public void mouseClickedX(int x, int y, int buttonPressed) {
         splashCounter = maxSplashCounter + 1; // turn off splash if its on
         if (buttonPressed == LEFT_MOUSE_BUTTON) {
-            if (Board.gameComplete) {
+            if (gameComplete) {
                 board.RESET_ENTIRE_GAME_VARS(soundOn);
                 RESET_ENTIRE_GAME_VARS();
-                state=SPLASH_SCREEN;
+                state = SPLASH_SCREEN;
             }
         }
         if (buttonPressed == RIGHT_MOUSE_BUTTON) {
@@ -1476,7 +1507,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 board.calculatePotentialNumberOfMoves = true;
                 board.thereAreOptions = false;
             }
-            return; //do nothing else with right click
+            return; // do nothing else with right click
         }
 
         switch(state) {
@@ -1502,7 +1533,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 //it attaches to the mouse pointer and can be placed either
                 //on one of the valid potential spikes- or returned to where it
                 //was initially by right clicking (and no move has been used)
-                checkIfPieceClickedOn(x, y);//detects what piece (if any was clicked on)
+                checkIfPieceClickedOn(x, y); //detects what piece (if any was clicked on)
 
                 //once a piece is stuck to the pointer, we place it on a spike
                 //IFF that spike is one of its valid moves.
@@ -1540,7 +1571,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         message2Players = VERSION;
         board = null;
-        Board.gameComplete = false;
+        gameComplete = false;
         whiteResigned = false;
         blackResigned = false;
 
@@ -1548,6 +1579,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Board.HUMAN_VS_COMPUTER = false;
         Bot.dead = true;
         splashCounter = 0;
+        loadSounds(soundOn);
     }
 
     public void turnOver() {
@@ -1623,17 +1655,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int myWidth = resignWidth;
         int myHeight = resignHeight;
         if (x >= myX && x < (myX+myWidth)) {
-            if (y>myY && y<(myY+myHeight)) {
+            if (y > myY && y < (myY+myHeight)) {
                 log("RESIGN CLICKED ON!");
                 sfxResign.playSound();
-                if (Board.whoseTurnIsIt==Player.WHITE) {
-                    Board.gameComplete = true;
+                gameComplete = true;
+                if (Board.whoseTurnIsIt == Player.WHITE) {
                     whiteResigned = true;
-                    Board.gameCompleteString="White has resigned. Black has won!";
                 } else {
-                    Board.gameComplete=true;
-                    blackResigned=true;
-                    Board.gameCompleteString="Black has resigned. White has won!";
+                    blackResigned = true;
                 }
             }
         }
@@ -2389,7 +2418,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public void paintMessageToPlayers(Graphics g) {
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
-        if (Board.gameComplete) {
+        if (gameComplete) {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
             messagex = (WIDTH / 2) - messageWidth / 2;
             messageHeight = fontwhite.getHeight();
@@ -2637,5 +2666,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     static void playErrorSound() {
         sfxError.playSound();
+    }
+
+    public boolean gameComplete() {
+        return this.gameComplete;
     }
 }
