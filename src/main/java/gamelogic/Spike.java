@@ -1,23 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gamelogic;
 import java.awt.Color;
 import lowlevel.*;
 import java.awt.Graphics;
 import java.util.Enumeration;
 import java.util.Vector;
-/**
- *
- * @author Gaz
- */
-public class Spike
-{
+
+public class Spike {
+
     //Colour constants
     public static int BLACK_SPIKE_COLOUR=0x993802;
     public static int WHITE_SPIKE_COLOUR=0xffcc7e;
-    public static Color black_spike_colour, white_spike_colour;
+    private static Color black_spike_colour, white_spike_colour;
     // -- pieces within the spike
     public  Vector pieces=new Vector();
     int position; // 1 to 24

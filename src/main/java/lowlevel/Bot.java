@@ -5,6 +5,9 @@ import java.awt.Robot;
 import java.awt.event.InputEvent;
 
 
+/** A robotic player who can move mouse etc, for demo and test automation and cpu player
+ *
+ */
 public class Bot extends Thread {
 
     Robot robot;

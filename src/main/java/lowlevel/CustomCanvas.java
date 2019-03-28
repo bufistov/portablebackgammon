@@ -56,8 +56,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean INFO = false;    // 'about box' toggle
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
-    int PANEL_WIDTH=0;
-    public Bot bot = new Bot(this); // make a robotic player who can move mouse etc, for demo and test automation and cpu player
+    private int PANEL_WIDTH = 0;
+    private Bot bot;
 
     /////j2se specific vars
     JFrame jFrame;
@@ -138,8 +138,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static Vector theBarBLACK = new Vector(4);//the bar holds pieces that get killed
 
     //these store the pieces that have been sent to the container, when all are in that player wins.
-    public static Vector whitePiecesSafelyInContainer=new Vector(15);
-    public static Vector blackPiecesSafelyInContainer=new Vector(15);
+    public static Vector whitePiecesSafelyInContainer = new Vector(15);
+    public static Vector blackPiecesSafelyInContainer = new Vector(15);
 
     private static boolean DEBUG_CONSOLE = false;
     private boolean PAUSED;
@@ -209,6 +209,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         this.gameComplete = false;
         loadSounds(this.soundOn);
         board = new Board(this, config);
+        bot = new Bot(this);
         bot.start();
        
         // j2se specifics
@@ -1718,15 +1719,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //indicates if this mouse click has been on a spike
     private void checkIfSpikeClickedOn(int x, int y) {
         // grab the spikes, loop thru them checking to
         // see if the user clicked on that spike
-        if (board == null) {
-            log("game not ready. (splash still up)");
-            return;
-        }
-
         Enumeration spikes_e = board.spikes.elements();
         while (spikes_e.hasMoreElements()) {
             Spike spike = (Spike) spikes_e.nextElement();

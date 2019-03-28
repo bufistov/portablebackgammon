@@ -1,22 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package gamelogic;
 
 /**
- *
- * @author Gaz
+ * spike one is the source spike and spike 2 is the destination spike.
+ * purely for the bot play
  */
-public class SpikePair {
+class SpikePair {
 
-    public SpikePair(Spike pickMyPiece_,Spike dropPiecesOnMe_)
-    {
+    SpikePair(Spike pickMyPiece_,Spike dropPiecesOnMe_) {
         pickMyPiece=pickMyPiece_;
         dropPiecesOnMe=dropPiecesOnMe_;
     }
-    //purely for the bot play
-    public Spike pickMyPiece;
-    public Spike dropPiecesOnMe;
+    Spike pickMyPiece;
+    Spike dropPiecesOnMe;
 }
