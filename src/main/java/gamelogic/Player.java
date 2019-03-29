@@ -6,6 +6,7 @@ public class Player {
     public String name;
     public int score;
     int colour;
+
     Player(int colour_, String name_) {
         colour = colour_;
         name = name_;
@@ -14,13 +15,13 @@ public class Player {
     public static final int WHITE = 0;
     public static final int BLACK = 1;
     
-    public int getColour()
+    int getColour()
     {
         return colour;
     }
 
-    public String printColour() {
-        if (getColour()==WHITE)
+    String printColour() {
+        if (getColour() == WHITE)
             return "WHITE";
         else if(getColour()==BLACK)
             return "BLACK";

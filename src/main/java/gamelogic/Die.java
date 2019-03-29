@@ -66,9 +66,8 @@ public class Die {
     }
 
     //disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
-    public void disable()
-    {
-        value=0;
+    public void disable() {
+        value = 0;
     }
     
     private void log(String s)

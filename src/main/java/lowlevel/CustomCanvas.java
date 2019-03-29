@@ -706,7 +706,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         String gameCompleteString = "White has won the game!";
         if (whitePiecesSafelyInContainer.size() == 15 || blackPiecesSafelyInContainer.size() == 15) {
             gameComplete = true;
-            showRollButton=false;
+            showRollButton = false;
         }
         if (blackPiecesSafelyInContainer.size() == 15) {
             gameCompleteString = "Black has won the game!";
@@ -1583,7 +1583,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("WHITES TURN");
             tellPlayers("White's turn to roll.");
         }
-        resetVarsTurn(); // so a turn can start a fresh.
+        resetVarsTurn();
     }
 
     //this method will "unstick" a piece from the mouse by flagging the piece itself
@@ -1709,9 +1709,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
+    // see if the user clicked on some spike
     private void checkIfSpikeClickedOn(int x, int y) {
-        // grab the spikes, loop thru them checking to
-        // see if the user clicked on that spike
         Enumeration spikes_e = board.spikes.elements();
         while (spikes_e.hasMoreElements()) {
             Spike spike = (Spike) spikes_e.nextElement();
@@ -1730,7 +1729,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                  * from the initial spike and add it to the new one, as shown below:
                  */
 
-                // find out if this is a valid spiek to go to from bar
+                // find out if this is a valid spike to go to from bar
                 if (barPieceStuckOnMouse) {
                     log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + Board.spikesAllowedToMoveToFromBar.size());
                     Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
@@ -1804,21 +1803,21 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     }
                 }
 
-                //DIE1 MOVE
+                // DIE1 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie1 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie1.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1)");
                     placePieceRemoveOldOneAndSetDieToUsed(1, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
-                //DIE2 MOVE
+                // DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie2 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie2.getSpikeNumber()) {
                     log("clicked on valid potential spike (die2)");
                     placePieceRemoveOldOneAndSetDieToUsed(2, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
-                //DIE1 + DIE2 MOVE
+                // DIE1 + DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromBothDice != null && spike.getSpikeNumber() == board.copy_of_reachableFromBothDice.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1+die2)");
                     placePieceRemoveOldOneAndSetDieToUsed(3, false);
@@ -2044,12 +2043,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     pieceOnMouse = true;
                     barPieceStuckOnMouse = true;
                     pieceStuckToMouse = p;
+                    return;
                 }
             }
         }
 
-        //grab the spikes, loop thru them checking every single
-        //piece to see if the user clicked on that piece
+        // see if the user clicked on that piece
         Enumeration spikes_e = board.spikes.elements();
         while(spikes_e.hasMoreElements()) {
             Spike spike = (Spike) spikes_e.nextElement();
@@ -2060,7 +2059,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     // only allow picking up of OUR OWN pieces
                     // AND check if we already have a piece or not.
                     //this was a bug so hopefully fixed.
-                    if (board.allowPieceToStickToMouse && piece.getColour()==Board.whoseTurnIsIt && !pieceOnMouse) {
+                    if (board.allowPieceToStickToMouse && piece.getColour() == Board.whoseTurnIsIt) {
                     //And it has potential moves (i.e. not pointless to pick up)
                         log("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
                         //if this piece has options then we allow it to stick to
@@ -2335,7 +2334,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //we pass true into makeColourObjects to force them to remake themselves
         //with the new colour values and thus repaint with new theme
         makeColourObjects();
-        Board.makeColourObjects(true);
+        board.makeColourObjects();
         Spike.makeColourObjects(true);
         Piece.makeColourObjects(true);
         Die.makeColourObjects(true);

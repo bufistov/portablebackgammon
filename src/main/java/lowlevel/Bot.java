@@ -70,7 +70,7 @@ public class Bot extends Thread {
             long difference = System.currentTimeMillis() - clickedTime;
             if (difference > DELAY_BETWEEN_CLICKS_MILLIS && !STOPCLICKING) {
                 READY2CLICK=true;
-                log("DEST REACHED. destX:"+destX+" destY:"+destY);
+                log("DEST REACHED. destX:" + destX + " destY:" + destY);
             }
 
             if (READY2CLICK) {

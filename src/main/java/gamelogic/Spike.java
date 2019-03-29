@@ -145,18 +145,12 @@ public class Spike {
             if (pieces.size() > 9) {
                 overlapOnPieces=(Piece.PIECE_DIAMETER / 2)+pieces.size()/3;
             }
-            /*if (pieces.size()>11)
-            {
-                overlapOnPieces=(Piece.PIECE_DIAMETER/2)+pieces.size();
-            }*/
             // we need a different y value for top and bottom spikes
             // so that on top spikes the pieces move down
             // and on bottom spikes the pieces move up
-            if(getType()==STALECTITE)
-            {
+            if(getType()==STALECTITE) {
                piecey=yPosForPieces+=(Piece.PIECE_DIAMETER-overlapOnPieces);
-            } 
-            else if(getType()==STALECMITE) {
+            } else if(getType()==STALECMITE) {
                 piecey=yPosForPieces-=(Piece.PIECE_DIAMETER-overlapOnPieces);
             } else {
                 Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
@@ -194,7 +188,7 @@ public class Spike {
         }
         if (flash) {
             //so it indicates when its a potential move for player
-            utils.setColor(g,flashColor);
+            utils.setColor(g, flashColor);
             flash = false;
         }
         utils.fillTriangle(g, x1, y1, x2, y2, x3, y3);
@@ -433,7 +427,7 @@ public class Spike {
 
     public static void makeColourObjects(boolean forceRecreation) {
         if (black_spike_colour==null || forceRecreation) {
-            black_spike_colour=new Color(BLACK_SPIKE_COLOUR);
+            black_spike_colour = new Color(BLACK_SPIKE_COLOUR);
         }
         if (white_spike_colour==null || forceRecreation) {
             white_spike_colour=new Color(WHITE_SPIKE_COLOUR);
@@ -441,8 +435,8 @@ public class Spike {
     }
 
     public boolean userClickedOnThis(int mouseX, int mouseY) {
-        return (mouseX >= collision_x && mouseX <= collision_x+TRIANGLE_WIDTH) &&
-            (mouseY>=collision_y && mouseY<=collision_y+TRIANGLE_HEIGHT);
+        return (mouseX >= collision_x && mouseX <= collision_x + TRIANGLE_WIDTH) &&
+            (mouseY >= collision_y && mouseY <= collision_y + TRIANGLE_HEIGHT);
     }
 
     /*
