@@ -1,39 +1,49 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package gamelogic;
 import java.awt.Color;
 import java.awt.Graphics;
 import lowlevel.*;
-/**
- *
- * @author Gaz
- */
-public class Die {
-     //Colour constants
-    public static int DIE_COLOUR=0xFFFFFF;
-    public static int DOT_COLOUR=0x000000;
-    public static Color die_colour, dot_colour;
 
-    Utils utils = new Utils();
-    public int value = -1; //1 to 6
+public class Die {
+    public static int DIE_COLOUR = 0xFFFFFF;
+    public static int DOT_COLOUR = 0x000000;
+    public static String rollString = "Roll";
+
+    private static Color die_colour, dot_colour;
+
+    private static int dieWidth = Piece.PIECE_DIAMETER;
+    private static int dieHeight = Piece.PIECE_DIAMETER;
+
+    private int dotDiameter = Piece.PIECE_DIAMETER / 5;
+    private final int TINY_GAP = 5;
+
+    private Utils utils = new Utils();
+    public int value = -1; // 1 to 6
+
+    //Update, this does get called when the player is putting their pieces away and they roll a value too high leaving them with
+    //no options, in this special case we lower the value of the die to allow the algorithm to handle that there is options
+    // we DO NOT want the player to see this tho so we flag a boolean in here to stop the dice painting different.
+    private boolean showOriginalValue;
+    private int originalValue;
+
     public Die() {
         log("Die made");
-        makeColourObjects(false);
+        makeColourObjects();
     }
 
-    public static void makeColourObjects(boolean forceRecreation) {
-        if (die_colour==null || forceRecreation) {
-            die_colour= new Color(DIE_COLOUR);
-        }
-        if (dot_colour==null || forceRecreation) {
-            dot_colour= new Color(DOT_COLOUR);
-        }
+    public static void makeColourObjects() {
+        die_colour = new Color(DIE_COLOUR);
+        dot_colour = new Color(DOT_COLOUR);
     }
 
-    //returns a random int between 1 and 6 to simulate a dice roll
+    public static int getWidth() {
+        return dieWidth;
+    }
+
+    public static int getHeight() {
+        return dieHeight;
+    }
+
+    // returns a random int between 1 and 6 to simulate a dice roll
     public int roll() {
         showOriginalValue = false;
         value = Utils.getRand(1,6);
@@ -41,101 +51,81 @@ public class Die {
     }
 
     //returns the current value (ie what the die is showing now)
-    public int getValue()
-    {
+    public int getValue() {
         return value;
     }
 
-    //this is never called apart from for debubbing where we want to trick the dice for a test
-    //Update, this does get called when the player is putting their pieces away and they roll a value too high leaving them with
-    //no options, in this special case we lower the value of the die to allow the algorithm to handle that there is options
-    // we DO NOT want the player to see this tho so we flag a boolean in here to stop the dice painting different.
-    boolean showOriginalValue;
-    int originalValue;
-
-    public void setValue(int newValue) {
-        if (showOriginalValue)//if its already true we dont want to update the oriignal val
-        {
-        } else {
-            showOriginalValue=true;
-            originalValue=value;
+    /**
+     * Currently this is a hack, that reduces value of a dies to make a perfect
+     * match with home spike. The original value is saved to draw correct value on canvas.
+     * @param newValue smaller value to make a perfect match
+     */
+    void setValue(int newValue) {
+        if (!showOriginalValue) {//if its already true we dont want to update the oriignal val
+            showOriginalValue = true;
+            originalValue = value;
         }
-        
         log("WARNING, SETVALUE ON DICE CALLED");
         value = newValue;
+        if (value < 0) {
+            throw new RuntimeException("Value of die should not be negative, got: " + value);
+        }
     }
 
     // disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
-    public void disable() {
+    void disable() {
         value = 0;
     }
-    
-    private void log(String s)
-    {
-        Utils.log("Die{}:" + s);
+
+    int miniDieWidth() {
+        return Piece.PIECE_DIAMETER-6;
     }
 
-    public static int DIE_WIDTH=0;
-    public static int DIE_HEIGHT=0;
-    public static String rollString = "Roll";
-    int DOT_DIAMETER=0;
-    int HALF_DOT_DIAMETER=0;
-    int TINY_GAP=5;
+    int miniDieHeight() {
+        return Piece.PIECE_DIAMETER-6;
+    }
 
-    public void paint(Graphics g, int x, int y) {
+    void paint(Graphics g, int x, int y) {
         if (value >= 1) {
             //die size based on piece diameter
-            DIE_WIDTH = Piece.PIECE_DIAMETER;
-            DIE_HEIGHT = Piece.PIECE_DIAMETER;
-            DOT_DIAMETER = Piece.PIECE_DIAMETER / 5;
-            HALF_DOT_DIAMETER = DOT_DIAMETER / 2;
-            drawOutline(g, x, y, DIE_WIDTH, DIE_HEIGHT, DOT_DIAMETER, HALF_DOT_DIAMETER);
-            drawDots(g, x, y, DIE_WIDTH, DIE_HEIGHT, DOT_DIAMETER, HALF_DOT_DIAMETER);
+            dieWidth = Piece.PIECE_DIAMETER;
+            dieHeight = Piece.PIECE_DIAMETER;
+            dotDiameter = Piece.PIECE_DIAMETER / 5;
+            int halfDotDiameter = dotDiameter / 2;
+            drawOutline(g, x, y, dieWidth, dieHeight);
+            drawDots(g, x, y, dieWidth, dieHeight, dotDiameter, halfDotDiameter);
         }
     }
 
-    public static int MINI_DIE_WIDTH;
-    public static int MINI_DIE_HEIGHT;
-    public static int MINI_DOT_DIAMETER;
-    public static int MINI_HALF_DOT_DIAMETER;
-    ////////int MINI_DIE_DIVIDE_BY=2; // to make die smaller we divide by this
-    //draws a minni version of the die anywhere you specifiy, the purpose is so that a small die
-    //can be drawn when potential moves are so they know which die theyre going to use up
-    public void drawMiniDie(Graphics g, int x, int y)
-    {
-        //die size based on piece diameter
-        MINI_DIE_WIDTH  = Piece.PIECE_DIAMETER-6;
-        MINI_DIE_HEIGHT = Piece.PIECE_DIAMETER-6;
-        MINI_DOT_DIAMETER=(Piece.PIECE_DIAMETER-6)/5;
-        MINI_HALF_DOT_DIAMETER=DOT_DIAMETER/2;
-
-        //draw outline of the die
-        drawOutline(g,x,y,MINI_DIE_WIDTH,MINI_DIE_HEIGHT,MINI_DOT_DIAMETER,MINI_HALF_DOT_DIAMETER);
-
-        //draw dots//
-        drawDots(g,x,y,MINI_DIE_WIDTH,MINI_DIE_HEIGHT,MINI_DOT_DIAMETER,MINI_HALF_DOT_DIAMETER);
+    // to make die smaller we divide by this
+    // draws a minni version of the die anywhere you specifiy, the purpose is so that a small die
+    // can be drawn when potential moves are so they know which die theyre going to use up
+    void drawMiniDie(Graphics g, int x, int y) {
+        int miniDotDiameter = miniDieWidth() / 5;
+        int miniHalfDotDiameter = dotDiameter / 2;
+        drawOutline(g,x,y,miniDieWidth(), miniDieHeight());
+        drawDots(g, x, y, miniDieWidth(), miniDieHeight(), miniDotDiameter,miniHalfDotDiameter);
     }
 
-    private void drawOutline(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER) {
+    private void drawOutline(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT) {
         utils.setColor(g, die_colour);
-        utils.fillRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
+        utils.fillRoundRect(g, x, y, DIE_WIDTH, DIE_HEIGHT);
         utils.setColor(g, Color.black);
-        utils.drawRoundRect(g, x, y, DIE_WIDTH, DIE_WIDTH);
+        utils.drawRoundRect(g, x, y, DIE_WIDTH, DIE_HEIGHT);
         
         if (CustomCanvas.showBoundaryBoxes) {
             utils.setColor(g,Color.RED);
-            utils.drawRect(g,x, y,DIE_WIDTH, DIE_WIDTH);
+            utils.drawRect(g,x, y,DIE_WIDTH, DIE_HEIGHT);
         }
     }
 
-    private void drawDots(Graphics g, int x, int y,int DIE_WIDTH,int DIE_HEIGHT,int DOT_DIAMETER,int HALF_DOT_DIAMETER) {
+    private void drawDots(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT,
+                          int DOT_DIAMETER, int HALF_DOT_DIAMETER) {
         utils.setColor(g, dot_colour);
-        int dots;
+        int dots = value;
         if (showOriginalValue) {
             utils.setColor(g, Color.RED);
-            dots=originalValue; //rarely we hide the real value form player, see above for why
-        } else {
-            dots = getValue();
+            dots = originalValue; // rarely we hide the real value form player, see above for why
         }
 
         switch(dots) {
@@ -181,8 +171,11 @@ public class Die {
                 utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             default:
-                /////Utils._E("Dave, I'm a bit confused: how can a dice have a value that isnt between 1 and 6??");
                 break;
         }
+    }
+
+    private void log(String s) {
+        Utils.log("Die{}:" + s);
     }
 }

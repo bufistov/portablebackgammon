@@ -141,15 +141,15 @@ public class Board {
 
     private void paintDice(Graphics g, int WIDTH, int HEIGHT) {
         if (CustomCanvas.showDice) {
-            int diex = (BORDER+((WIDTH/4)*3)) + Die.DIE_WIDTH;
-            int diey = (BORDER+(HEIGHT/2)) - Die.DIE_HEIGHT;
+            int diex = (BORDER+((WIDTH/4)*3)) + Die.getWidth();
+            int diey = (BORDER+(HEIGHT/2)) - Die.getHeight();
             if (!die1HasBeenUsed) {
                 die1.paint(g, diex, diey);
             } else {
                 die1.disable();
             }
 
-            diex += Die.DIE_WIDTH + CustomCanvas.TINY_GAP; // gap between dice
+            diex += Die.getWidth() + CustomCanvas.TINY_GAP; // gap between dice
             if (!die2HasBeenUsed) {
                 die2.paint(g, diex, diey);
             } else {

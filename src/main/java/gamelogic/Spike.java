@@ -203,26 +203,28 @@ public class Spike {
     }
 
     private void drawPotentialDieMoves(Graphics g) {
+        final int miniDieX = x2 - Board.die1.miniDieWidth() / 2;
+        final int miniDieHeight = Board.die1.miniDieHeight();
         if (whichDiei == Board.DIE1) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, x2 - Board.die1.MINI_DIE_WIDTH / 2, y1 - Board.die1.MINI_DIE_HEIGHT);
+                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, x2 - Board.die1.MINI_DIE_WIDTH / 2, y1);
+                Board.die1.drawMiniDie(g, miniDieX, y1);
             }
 
         } else if (whichDiei == Board.DIE2) {
             if (getType() == STALECMITE) {
-                Board.die2.drawMiniDie(g, x2 - Board.die2.MINI_DIE_WIDTH / 2, y1 - Board.die2.MINI_DIE_HEIGHT);
+                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die2.drawMiniDie(g, x2 - Board.die2.MINI_DIE_WIDTH / 2, y1);
+                Board.die2.drawMiniDie(g, miniDieX, y1);
             }
         } else if (whichDiei == Board.DIE1AND2) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, x2 - Board.die1.MINI_DIE_WIDTH / 2, y1 - Board.die1.MINI_DIE_HEIGHT * 2);
-                Board.die2.drawMiniDie(g, x2 - Board.die2.MINI_DIE_WIDTH / 2, y1 - Board.die2.MINI_DIE_HEIGHT);
+                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
+                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, x2 - Board.die1.MINI_DIE_WIDTH / 2, y1);
-                Board.die2.drawMiniDie(g, x2 - Board.die2.MINI_DIE_WIDTH / 2, y1 + Board.die1.MINI_DIE_HEIGHT);
+                Board.die1.drawMiniDie(g, miniDieX, y1);
+                Board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
         } else if (whichDiei == -1) {
             //not an error now just means dont draw s it must be -1

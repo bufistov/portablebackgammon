@@ -2340,7 +2340,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         board.makeColourObjects();
         Spike.makeColourObjects(true);
         Piece.makeColourObjects(true);
-        Die.makeColourObjects(true);
+        Die.makeColourObjects();
         log("Theme is loaded now and working.");
     }
 
