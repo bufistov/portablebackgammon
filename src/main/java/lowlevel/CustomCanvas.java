@@ -778,7 +778,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void drawHUDtext(int xpos) {
         int ypos = Board.BORDER + TINY_GAP;
         //draw black players score at top
-        String printme = "White (" + board.getBlackPlayer().name + ")";
+        String printme = "White (" + board.getWhitePlayer().name + ")";
         if (board.whoseTurnIsIt == Player.WHITE) {
             printme += "*";
         }
@@ -793,7 +793,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         //draw white players score at bot
         ypos = HEIGHT - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
-        printme = "Brown (" + board.getWhitePlayer().name + ")";
+        printme = "Brown (" + board.getBlackPlayer().name + ")";
         if (board.whoseTurnIsIt == Player.BLACK) {
             printme += "*";
         }
