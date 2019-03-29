@@ -18,7 +18,7 @@ public class Die {
     public static Color die_colour, dot_colour;
 
     Utils utils = new Utils();
-    private int value = -1; //1 to 6
+    public int value = -1; //1 to 6
     public Die() {
         log("Die made");
         makeColourObjects(false);
@@ -65,7 +65,7 @@ public class Die {
         value = newValue;
     }
 
-    //disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
+    // disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
     public void disable() {
         value = 0;
     }

@@ -35,6 +35,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static boolean showBoundaryBoxes = false;
     private static boolean PAINT_STATE = false;
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
+    private static final boolean ALWAYS_ROLL_DOUBLE = false;
 
     public static int TINY_GAP = 5; // when we need a tiny gap
     private int typeOfPlay = -1;
@@ -1082,6 +1083,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         D1lastDieRoll_toSendOverNetwork = val;
         GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true; // tells it to send a click over network
         int val2 = board.die2.roll();
+        if (ALWAYS_ROLL_DOUBLE) {
+            val2 = val;
+            board.die2.value = val;
+        }
         D2lastDieRoll_toSendOverNetwork = val2;
         GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true; // tells it to send a click over network
         log(String.format("####################################%s rolled:%d, %d", playerStr, val, val2));
@@ -1590,7 +1595,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //as no longer stuck, it is used when right clicking to cancel a move
     //but also once a piece has actually been moved.
     private void unstickPieceFromMouse() {
-        if (pieceStuckToMouse!=null) {
+        if (pieceStuckToMouse != null) {
             pieceStuckToMouse.unstickFromMouse();
         }
         pieceOnMouse = false;
@@ -1841,11 +1846,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (pieceWillGoToContainer) {
                 if (Board.whoseTurnIsIt == Player.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
+                    log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
                 } else if (Board.whoseTurnIsIt == Player.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
+                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
                 } else {
                     Utils._E("whoseTurnIsIt is invalid here.");
@@ -2048,29 +2053,27 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             }
         }
 
-        // see if the user clicked on that piece
-        Enumeration spikes_e = board.spikes.elements();
-        while(spikes_e.hasMoreElements()) {
-            Spike spike = (Spike) spikes_e.nextElement();
-            Enumeration pieces_e = spike.pieces.elements();
-            while(pieces_e.hasMoreElements()) {
-                Piece piece = (Piece) pieces_e.nextElement();
-                if (piece.userClickedOnThis(x, y)) {
-                    // only allow picking up of OUR OWN pieces
-                    // AND check if we already have a piece or not.
-                    //this was a bug so hopefully fixed.
-                    if (board.allowPieceToStickToMouse && piece.getColour() == Board.whoseTurnIsIt) {
-                    //And it has potential moves (i.e. not pointless to pick up)
-                        log("PICKED UP PIECE: "+Board.playerStr(piece.getColour()));
-                        //if this piece has options then we allow it to stick to
-                        //mouse, ie we allow player to pick it up..
-                        piece.stickToMouse();
-                        pieceOnMouse = true;
-                        pieceStuckToMouse=piece;
-                        originalSpikeForPieceSelected=spike;//keep a copy of this piece's original Spike (for removing the piece later if need be)
+        if (board.allowPieceToStickToMouse) {
+            // see if the user clicked on that piece
+            Enumeration spikes_e = board.spikes.elements();
+            while (spikes_e.hasMoreElements()) {
+                Spike spike = (Spike) spikes_e.nextElement();
+                Enumeration pieces_e = spike.pieces.elements();
+                while (pieces_e.hasMoreElements()) {
+                    Piece piece = (Piece) pieces_e.nextElement();
+                    if (piece.userClickedOnThis(x, y)) {
+                        if (piece.getColour() == Board.whoseTurnIsIt) {
+                            log("PICKED UP PIECE: " + Board.playerStr(piece.getColour()));
+                            piece.stickToMouse();
+                            pieceOnMouse = true;
+                            pieceStuckToMouse = piece;
+                            originalSpikeForPieceSelected = spike; // keep a copy of this piece's original Spike (for removing the piece later if need be)
+                        }
+                        log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse: true " +
+                            "board.whoseTurnIsIt:" + board.whoseTurnIsIt);
+                        // At most one piece can be sticked to the mouse!
+                        return;
                     }
-                    log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse:" +
-                        board.allowPieceToStickToMouse + " board.whoseTurnIsIt:" + board.whoseTurnIsIt);
                 }
             }
         }

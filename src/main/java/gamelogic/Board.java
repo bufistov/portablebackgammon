@@ -46,6 +46,7 @@ public class Board {
     private static final int BOARD_NEW_GAME = 0;
     private static final int DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME = 1;
     private static final int DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME = 2;
+    private static final int INIT_CONFIGURATIOIN = BOARD_NEW_GAME;
 
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
@@ -53,7 +54,7 @@ public class Board {
         loadSounds(config.soundOn());
         makeAllGameVars();
         makeColourObjects();
-        initialiseBoard(BOARD_NEW_GAME);
+        initialiseBoard(INIT_CONFIGURATIOIN);
         log("Board made");
     }
 
@@ -68,8 +69,8 @@ public class Board {
 
     private void makeAllGameVars() {
         log("making players");
-        whitePlayer = new Player(Player.WHITE,"WhitePlayer");
-        blackPlayer = new Player(Player.BLACK,"BlackPlayer");
+        whitePlayer = new Player(Player.WHITE,"Player1");
+        blackPlayer = new Player(Player.BLACK,"Player2");
 
         log("making spikes.");
         spikes = new Vector();
@@ -296,7 +297,7 @@ public class Board {
         SPtheMoveToMake = null;
 
         ROBOT_DESTINATION_MESSAGE = "";
-        initialiseBoardForNewGame();
+        initialiseBoard(INIT_CONFIGURATIOIN);
     }
 
     public static boolean HUMAN_VS_COMPUTER = false; // human is white, computer is black
@@ -351,7 +352,6 @@ public class Board {
     //simply nullifies the string that tells the spike to show its little dice
     //this is shown to user when they have potential moves.
     private void getRidOfLittleDice() {
-        //go thru all spikes and clear whichDie to null so it doesnt still show the dice that
         //would have carried out the potential move (shouldnt they be linked to these 3 spikes? not sure yet)
         Enumeration e = spikes.elements();
         while (e.hasMoreElements()) {
@@ -422,23 +422,17 @@ public class Board {
             return;
         }
 
-        //find out if the spike they have their mouse over is theirs
-        //That is does it already contain one of their Pieces (to potentially move)
         Spike currentSpikeHoveringOver = doesThisSpikeBelongToPlayer();
-        //yes this spike contains some of the players pieces, lets determin
-        //the potential moves the player can make.
-
-       
         //DIE ONE//////
         //check if die roll ONE results in a valid potential move
         //ie is future spike already theirs or empty, if so tell player
         //its an option graphically. (by making it pulse) otherwise do nothing.
-        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), 1);//1 indicates this is die1 for piece container code
+        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), DIE1);//1 indicates this is die1 for piece container code
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
         //so this "stillAnOption" variable gets updated below and used at the bottom to update canWeStickPieceToMouse
-        boolean die1StillAnOption=false;//set to false first so we know if its true its been updated below
+        boolean die1StillAnOption = false;//set to false first so we know if its true its been updated below
 
         //if die1 would yield a potential valid spike to land on AND if the
         //player has not used die1 this turn yet.
@@ -492,7 +486,7 @@ public class Board {
         }
 
         //do DIE2 in same way
-        boolean die2AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die2.getValue(), 2);//2 indicates this is die2 for piece container code
+        boolean die2AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die2.getValue(), DIE2);
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
@@ -561,18 +555,14 @@ public class Board {
                      die2StillAnOption=true;
                 }
             }
-            // die2StillAnOption=true;
-        }
-        else//its not a potential move
-        {
+        } else {
             //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
             //make this null if we know for certain its not a potential move or ot gets remembered
             copy_of_reachableFromDie2=null;
         }
 
-
         //and DIE1 + DIE2
-        boolean bothDiceAnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue()+die2.getValue(), 3);//3 indicates this is die1+die2 for piece container code
+        boolean bothDiceAnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue()+die2.getValue(), DIE1AND2);
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
@@ -742,24 +732,15 @@ public class Board {
     //is able to be moved to.
     public static int whichDieGetsUsToPieceContainer=-1;
 
-    //whichDieIsThis is passed in which indicates which die roll will be used in this potential move
+    // whichDieIsThis is passed in which indicates which die roll will be used in this potential move
     // 1 is die 1
     // 2 is die 2
     // 3 is die1+die2
     // these are used simply to update whichDieGetsUsToPieceContainer as it doesnt know otherwise
     private boolean checkValidPotentialMove(Spike currentSpike, int dieRoll, int whichDieIsThis) {
-        // can the die roll produce a valid move?
-        boolean yesThatsValid=false;
-        
-        //if the current spike theyre hovering over does contain
-        //one or more of their pieces (belongs to them)
-        if (currentSpike!=null) {
-            ///////////////calculate Future spikes we can move to:
-            ///---
-            //we need to work out if we are going clockwise around the board or
-            //not. If its whites turn then yes we are going clock wise, otherwise
-            //no its anti clockwise. 
+        boolean yesThatsValid = false;
 
+        if (currentSpike != null) {
             boolean withinLimits = false;
             final boolean clockwise = whoseTurnIsIt==Player.WHITE;// blacks pieces move anticlockwise, white clockwise
             boolean checkAbleToGetIntoPieceContainerWHITE = false;
@@ -780,7 +761,7 @@ public class Board {
             //work out the number of the potential spike
             if (checkAbleToGetIntoPieceContainer) {
                 //SPECIAL CASE
-                //if they are able to get into the piece container (ie theyre pieces are all in their homeside)
+                //if they are able to get into the piece container (ie they pieces are all in their homeside)
                 //then we need to consider the piece container as a potential spike (even tho its off board hence why we add/minus
                 //1 here) so depending on whose turn it is and where the potential move would be to we can return that it is
                 //within limits here in this special case
@@ -795,7 +776,7 @@ public class Board {
             }
 
             if (potentialSpike >= FIRST_SPIKE && potentialSpike <= LAST_SPIKE) {
-                withinLimits=true;
+                withinLimits = true;
             }
 
             if (withinLimits) {
@@ -823,25 +804,14 @@ public class Board {
     //actually belongs to them (that is, already contains one of their pieces)
     //otherwise returns null.
     private Spike doesThisSpikeBelongToPlayer() {
-        //get the Spike object that the players mouse is currently over
         Spike hoverSpike = grabSpikeHoveringOver();
-
-        // so now we know what spike the player is hovering over, the 2 die values
-        // and whose go it is, so we work out what moves can be made and
-        // indicate them to the player visually.
-
         boolean containsOneOfTheirPieces = false;
-        //first check, does the current spike (ie one theyre hovering over)
-        // contain one or more of their pieces (in order to show them potential moves)
         if (hoverSpike != null) {
-           containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike,whoseTurnIsIt);
+           containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike, whoseTurnIsIt);
         }
-
         if (containsOneOfTheirPieces) {
             return hoverSpike;
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
@@ -889,15 +859,9 @@ public class Board {
     // for testing (different backgammon rules might exist so if so we can add new starting positions easily
     //here too).
     private void initialiseBoard(int mode) {
-         /*why?
-           this is for testing conditions without having to play the full game, otherwise I would need to run the game
-         * and move all of the whites to their home manually to test etc, which is time consuming.
-         */
+        log("mode: BOARD_NEW_GAME");
+        initialiseBoardForNewGame();
         switch(mode) {
-            case BOARD_NEW_GAME:
-                log("mode: BOARD_NEW_GAME");
-                initialiseBoardForNewGame();
-                break;
             case DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME:
                 log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
                 // now we simply move all of the black pieces from where they are and add them into their home area
@@ -917,10 +881,10 @@ public class Board {
     // takes all pieces of the player passed in and moves them into their home area dropping them in on random spikes
     // for testing only.
     void movePiecesToHome(int player) {
-        final int WHITE_HOME_START_SPIKE = 0; // white home area is top right, 0,1,2,3,4,5
+        final int WHITE_HOME_START_SPIKE = 1; // white home area is top right, 0,1,2,3,4,5
         final int WHITE_HOME_END_SPIKE = 5;
         final int BLACK_HOME_START_SPIKE = 18; // black home area is bot right, 18,19,20,21,22,23
-        final int BLACK_HOME_END_SPIKE = 23;
+        final int BLACK_HOME_END_SPIKE = 22;
         int homeAreaStartSpike = 0;
         int homeAreaEndSpike = 0;
         Player father = null;
@@ -943,20 +907,14 @@ public class Board {
         Enumeration e1 = spikes.elements();
         while (e1.hasMoreElements()) {
             Spike spike = (Spike) e1.nextElement();
-            Enumeration e2 = spike.pieces.elements();
-            while(e2.hasMoreElements())
-            {
-                Piece piece = (Piece) e2.nextElement();
-                if (piece.colour==player)
-                {
-                    spike.removePiece(piece);
-                }
+            if (spike.pieces.size() > 0 && ((Piece)spike.pieces.get(0)).colour == player) {
+                spike.pieces.clear();
             }
         }
         //////////////////////////////////////////
         //add 15 pieces of correct colour to the home area, in random positions
-        for (int i=0; i<15; i++) {
-            int random = Utils.getRand(homeAreaStartSpike, homeAreaEndSpike-1);
+        for (int i = 0; i < 15; i++) {
+            int random = Utils.getRand(homeAreaStartSpike, homeAreaEndSpike);
             Spike spike = (Spike) spikes.elementAt(random);
             spike.addPiece(new Piece(father));
         }
@@ -1140,6 +1098,7 @@ public class Board {
                             botOptions += "->" + sp.pickMyPiece.spikeName + "->" + sp.dropPiecesOnMe.spikeName + " ";
                         }
                     }
+                    log("valid options: " + botOptions);
                 }
                 //PICK ONE AT RANDOM
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
@@ -1224,14 +1183,15 @@ public class Board {
      * valid (sourceSpike, destinationSpike) pairs.
      */
     private Vector getValidOptions() {
+        log("Getting valid spike pairs");
         Vector spikePairs = new Vector(5);
         int diceRoll = -1;
         if (!die1HasBeenUsed) {
-            log("using DIE1 value ");
             diceRoll = die1.getValue();
+            log("using DIE1 value " + diceRoll);
         } else if (!die2HasBeenUsed) {
-            log("using DIE2 value");
             diceRoll = die2.getValue();
+            log("using DIE2 value " + diceRoll);
         }
         // blacks pieces move anticlockwise, white clockwise
         boolean clockwise = whoseTurnIsIt == Player.WHITE;
@@ -1296,7 +1256,7 @@ public class Board {
         } else {
             log(" warnign dice roll was under 0 - this indicates no options for this player");
         }
-        log("finished theyWantToPickUpAPiece");
+        log("finished getValidOptions");
         return spikePairs;
     }
 
