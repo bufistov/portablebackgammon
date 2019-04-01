@@ -905,19 +905,13 @@ public class Board {
         }
     }
 
-    //puts the pieces where they need to be to initialise a new game of backgammon
+    // puts the pieces where they need to be to initialise a new game of backgammon
     private void initialiseBoardForNewGame() {
         log("initialiseBoardForNewGame");
         for (int i=0; i < 24; i++) {
             log("#### Dealing with Spike number " + i);
             Spike tempSpike = (Spike)spikes.elementAt(i);
             tempSpike.pieces.clear();
-            if (getWhitePlayer() == null) {
-               Utils._E("getWhitePlayer returned a null player");
-            }
-            if (getBlackPlayer() == null) {
-                Utils._E("getBlackPlayer returned a null player");
-            }
             switch (i) {
                 case 0:
                     //add 2 white pieces to first pin
@@ -1290,7 +1284,6 @@ public class Board {
                     pieceContainerWidth=CustomCanvas.blackContainerWidth;
                     pieceContainerHeight=CustomCanvas.blackContainerHeight;
                 } else { Utils._E("errori n theywanttoplaceapiece, turn is invalid");}
-                ///log("Piece container DEST set");
                 setBotDestination(pieceContainerX+pieceContainerWidth/2,pieceContainerY+pieceContainerHeight/2,"PIECE CONTAINER DESTINATION");
             } else {
                 //NORMAL CASE DROP ON SPIKE

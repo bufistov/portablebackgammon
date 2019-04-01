@@ -1591,7 +1591,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             pieceStuckToMouse.unstickFromMouse();
         }
         pieceOnMouse = false;
-        barPieceStuckOnMouse=false;
+        barPieceStuckOnMouse = false;
 
         if (board == null) {
             log("board null");
@@ -1723,7 +1723,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
                     while (e.hasMoreElements()) {
                         Spike sp = (Spike) e.nextElement();
-                        log("checkign spike:" + sp.getSpikeNumber());
+                        log("checking spike:" + sp.getSpikeNumber());
                         if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
                             log("YES WE CAN DROP OFF AT THIS SPIKE " + sp.getSpikeNumber());
                             //remove piece from bar
@@ -1737,13 +1737,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                     theBarBLACK.add(piece);///add this piece to the bar
                                     sp.removePiece(piece); //and remove from spike
                                     sfxKilled.playSound();
-
                                 }
                             }
                             if (Board.whoseTurnIsIt == Player.BLACK) {
                                 log("BLACK PIECE REMOVED FROM BAR");
                                 theBarBLACK.remove(pieceStuckToMouse);
-
                                 //IF this spike contains an enemy piece Kill it
                                 if (sp.getAmountOfPieces(Player.WHITE) == 1) {
                                     Piece piece = (Piece) sp.pieces.firstElement();
@@ -1756,14 +1754,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                             log("PLACED ON SPIKE");
                             //add it to the spike clicked on
                             sp.addPiece(pieceStuckToMouse);
-                            //and make sure nothing is stuck to mouse by finalising move like this
                             log("UNSTUCK");
                             unstickPieceFromMouse();
                             // USE UP THE CORRECT DIE
                             Die theDieThatGotUsHere = sp.get_stored_die();
 
                             // Here we check if both dice have been used so we can move onto next players turn:
-                            //UNLESS someone rolled a double
+                            // UNLESS someone rolled a double
                             if (someoneRolledADouble && doubleRollCounter <= 3) {
                                 log("Player is still enjoying his double round so dont move on. y");
                                 board.calculatePotentialNumberOfMoves = true;//so they get calc'd at start of each go.
@@ -1772,21 +1769,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                 if (theDieThatGotUsHere.getValue() == Board.die1.getValue()) {
                                     log("DIE1 USED GETTING OFF BAR " + Board.die1.getValue());
                                     Board.die1HasBeenUsed = true;
-
                                 } else {
                                     log("DIE2 USED GETTING OFF BAR " + Board.die2.getValue());
                                     Board.die2HasBeenUsed = true;
                                 }
                                 log("CORRECT DIE USED UP.");
                             }
-                            //done getting off bar
-
                             if (someoneRolledADouble) {
                                 log("doubleRollCounter incremented!");
-                                doubleRollCounter++;//increment this here to keep a track fi thi was a dbl
+                                doubleRollCounter++; // increment this here to keep a track fi thi was a dbl
                             }
-                        } else {
-                            //log("NO WE CANT DROP OFF AT THIS SPIKE "+sp.getSpikeNumber());
                         }
                     }
                 }
@@ -2002,17 +1994,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //indicates if this mouse click has been on a piece
+    // indicates if this mouse click has been on a piece
     private void checkIfPieceClickedOn(int x,int y) {
         if (pieceOnMouse) {
             //special case, if the player already has a piece stuck on the mouse dont let another
-            //one go on, this causes an error in the game, best way is to simply leap out of
-            //this method here if this is true
+            //one go on
             log("pieceOnMouse special case ignore this piece click");
             return;
         }
 
-        //check pieces on bar
+        // check pieces on bar
         if (Board.pickingPieceUpFromBar) {
             Vector piecesOnTheBar = (Board.whoseTurnIsIt == Player.WHITE) ? theBarWHITE : theBarBLACK;
             Enumeration e = piecesOnTheBar.elements();
