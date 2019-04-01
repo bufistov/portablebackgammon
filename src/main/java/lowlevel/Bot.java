@@ -3,6 +3,7 @@ import gamelogic.Board;
 import gamelogic.Player;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
 
 
 /** A robotic player who can move mouse etc, for demo and test automation and cpu player

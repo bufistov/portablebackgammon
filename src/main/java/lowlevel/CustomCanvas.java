@@ -10,6 +10,8 @@ import java.util.Vector;
 import javax.swing.JFrame;
 
 import static gamelogic.GuiState.*;
+import static java.awt.event.MouseEvent.BUTTON1;
+import static java.awt.event.MouseEvent.BUTTON3;
 
 /** This class is used basically for calling the right paint methods
  *  based on state, these paint due to this class being a subclass of canvas.
@@ -149,8 +151,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static String chatText="";
 
     private GameNetworkClient client;
-    public static final int LEFT_MOUSE_BUTTON = 0;
-    public static final int RIGHT_MOUSE_BUTTON = 1;
+    public static final int LEFT_MOUSE_BUTTON = BUTTON1;
+    public static final int RIGHT_MOUSE_BUTTON = BUTTON3;
 
     public static boolean pieceOnMouse = false; // is true when a piece is stuck to mouse
     public static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
@@ -1473,31 +1475,22 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             }
             return;
         }
-
+        if (gameComplete && e.getButton() == LEFT_MOUSE_BUTTON) {
+            board.RESET_ENTIRE_GAME_VARS(soundOn);
+            RESET_ENTIRE_GAME_VARS();
+            state = SPLASH_SCREEN;
+            return;
+        }
         // so our mouse doesnt influence anything
-        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
+        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.BLACK) ) {
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
-            int buttonPressed = -1;
-            if (e.getButton() == e.BUTTON1) {
-                buttonPressed = LEFT_MOUSE_BUTTON;
-            }
-            if (e.getButton() == e.BUTTON3) {
-                buttonPressed = RIGHT_MOUSE_BUTTON;
-            }
-            mouseClickedX(e.getX(), e.getY(), buttonPressed);
+            mouseClickedX(e.getX(), e.getY(), e.getButton());
         }
     }
 
     void mouseClickedX(int x, int y, int buttonPressed) {
         splashCounter = maxSplashCounter + 1; // turn off splash if its on
-        if (buttonPressed == LEFT_MOUSE_BUTTON) {
-            if (gameComplete) {
-                board.RESET_ENTIRE_GAME_VARS(soundOn);
-                RESET_ENTIRE_GAME_VARS();
-                state = SPLASH_SCREEN;
-            }
-        }
         if (buttonPressed == RIGHT_MOUSE_BUTTON) {
             log("RIGHT BUTTON PRESSED");
             unstickPieceFromMouse();
