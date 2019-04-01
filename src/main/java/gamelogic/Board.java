@@ -39,6 +39,10 @@ public class Board {
     public boolean thereAreOptions = false;
     public SpikePair SPtheMoveToMake; // stores the move they will make
 
+    //these flags indicate if the player has took their go yet for that dice
+    //if the dice are combined then they are both set to false in one go.
+    public static boolean die1HasBeenUsed, die2HasBeenUsed;
+
     public static boolean NOT_A_BOT_BUT_A_NETWORKED_PLAYER=false;
     private static final int LAST_SPIKE = 23;
     private static final int FIRST_SPIKE = 0;
@@ -671,52 +675,34 @@ public class Board {
     }
 
     private int calculateAmountOfPiecesInHomeArea(int player) {
-        int piecesinHomeArea=0;
+        int piecesinHomeArea = 0;
 
-        int homeAreaStart=-1;
-        int homeAreaEnd=-1;
-        if (player==Player.WHITE)
-        {
-            homeAreaStart=0;
-            homeAreaEnd=5;
-        }
-        else if (player==Player.BLACK)
-        {
-            homeAreaStart=18;
-            homeAreaEnd=23;
-        }
-        else
-        {
+        int homeAreaStart = -1;
+        int homeAreaEnd = -1;
+        if (player == Player.WHITE) {
+            homeAreaStart = 0;
+            homeAreaEnd = 5;
+        } else if (player == Player.BLACK) {
+            homeAreaStart = 18;
+            homeAreaEnd = 23;
+        } else {
             Utils._E("colour not defined in calculateAmountOfPiecesInHomeArea!");
         }
 
         Enumeration e = spikes.elements();
-        int spikePos=0;
-        while (e.hasMoreElements())
-        {
+        int spikePos = 0;
+        while (e.hasMoreElements()) {
             Spike spike = (Spike) e.nextElement();
-            if (spike.pieces.size()>0 && spikePos>=homeAreaStart && spikePos<=homeAreaEnd)
-            {
+            if (!spike.pieces.isEmpty() && spikePos >= homeAreaStart && spikePos <= homeAreaEnd) {
                 Piece p = (Piece) spike.pieces.firstElement();
-                if (p.colour==player)
-                {
-                    piecesinHomeArea+=spike.pieces.size();
-                    if (player==Player.WHITE)
-                    {
-                       // log("found "+spike.pieces.size()+" WHITE pieces on spike "+spikePos);
-                    }
-
+                if (p.colour == player) {
+                    piecesinHomeArea += spike.pieces.size();
                 }
             }
-            
             spikePos++;
         }
         return piecesinHomeArea;
     }
-
-    //these flags indicate if the player has took their go yet for that dice
-    //if the dice are combined then they are both set to false in one go.
-    public static boolean die1HasBeenUsed, die2HasBeenUsed;
 
     //takes in a spike and a die value,
     //this is to indicate to player its a potential move they can make

@@ -138,7 +138,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static Vector theBarWHITE = new Vector(4);//the bar holds pieces that get killed
     public static Vector theBarBLACK = new Vector(4);//the bar holds pieces that get killed
 
-    //these store the pieces that have been sent to the container, when all are in that player wins.
+    // these store the pieces that have been sent to the container, when all are in that player wins.
     public static Vector whitePiecesSafelyInContainer = new Vector(15);
     public static Vector blackPiecesSafelyInContainer = new Vector(15);
 
@@ -173,10 +173,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //a while
 
     private static final long SHOW_ME_LIMIT = 3000; // how long  show player message 1.5 sec
-    static String message2Players=""+VERSION;
+    private String message2Players = VERSION;
 
-    int messageWidth, messageHeight;
-    int messagex,messagey;
+    private int messageWidth, messageHeight;
+    private int messagex, messagey;
 
     //when the user clicks on a piece and it sticks to the mouse we hold it in
     //pieceStuckToMouse, this variable below is the spike that holds pieceStuckToMouse
@@ -709,7 +709,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             gameComplete = true;
             showRollButton = false;
         }
-        if (blackPiecesSafelyInContainer.size() == 15) {
+        if (Board.whoseTurnIsIt == Player.BLACK) {
             gameCompleteString = "Black has won the game!";
         }
 
@@ -1556,9 +1556,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         theBarWHITE = new Vector(4);//the bar holds pieces that get killed
         theBarBLACK = new Vector(4);//the bar holds pieces that get killed
 
-        //these store the pieces that have been sent to the container, when all are in that player wins.
-        whitePiecesSafelyInContainer = new Vector(15);
-        blackPiecesSafelyInContainer = new Vector(15);
+        whitePiecesSafelyInContainer.clear();
+        blackPiecesSafelyInContainer.clear();
 
         originalSpikeForPieceSelected = null;
         barPieceStuckOnMouse = false;
@@ -1833,14 +1832,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // removes piece from the spike it came from, adds it to the new one just clicked on, and sets the die that did this to used
     // dieToSetUnused requires 1 or 2 (representing die 1 or die 2), OR 3 (3 IS BOTH DICE)
-    //pieceWillGoToContainer is used ONLY when we are removig a piece from a spike and then adding it to the PIECE CONTAINER, in all other
-    //situations its simply removing from one spike and adding to another
+    // pieceWillGoToContainer is used ONLY when we are removing a piece from a spike and then adding it to the PIECE CONTAINER, in all other
+    // situations its simply removing from one spike and adding to another
     private void placePieceRemoveOldOneAndSetDieToUsed(int dieToSetUnused, boolean pieceWillGoToContainer) {
         log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:" + dieToSetUnused);
         if (pieceStuckToMouse == null) {
             Utils._E("pieceStuckToMouse was null somehow");
         }
-        //remove piece from its current spike
         originalSpikeForPieceSelected.removePiece(pieceStuckToMouse);
         if (dieToSetUnused == 1) {
             if (pieceWillGoToContainer) {
@@ -1926,11 +1924,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (pieceWillGoToContainer) {
                 if (Board.whoseTurnIsIt == Player.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
+                    log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
                 } else if (Board.whoseTurnIsIt == Player.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
+                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
                 } else {
                     Utils._E("whoseTurnIsIt is invalid here.");
