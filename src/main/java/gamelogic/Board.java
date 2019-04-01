@@ -64,7 +64,14 @@ public class Board {
         this.canvas = canvas;
         sfxNoMove = new Sound("/nomove.wav");
         loadSounds(config.soundOn());
-        makeAllGameVars();
+        whitePlayer = new Player(Player.WHITE,"Player1");
+        blackPlayer = new Player(Player.BLACK,"Player2");
+        spikes = new ArrayList<>();
+        for (int i = 1; i <= 24; i++) {
+            spikes.add(new Spike(i));
+        }
+        die1 = new Die();
+        die2 = new Die();
         makeColourObjects();
         initialiseBoard(INIT_CONFIGURATION);
         log("Board made");
@@ -77,22 +84,6 @@ public class Board {
     public void makeColourObjects() {
         board_colour = new Color(BOARD_COLOUR);
         bar_colour = new Color(BAR_COLOUR);
-    }
-
-    private void makeAllGameVars() {
-        log("making players");
-        whitePlayer = new Player(Player.WHITE,"Player1");
-        blackPlayer = new Player(Player.BLACK,"Player2");
-
-        log("making spikes.");
-        spikes = new ArrayList<>();
-        for (int i = 1; i <= 24; i++) {
-            spikes.add(new Spike(i));
-        }
-        log("spikes done.");
-        log("making dice");
-        die1 = new Die();
-        die2 = new Die();
     }
     
     public void paint(Graphics g, int WIDTH, int HEIGHT) {
@@ -114,12 +105,10 @@ public class Board {
         utils.setColor(g, Color.BLACK);
         utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
 
-        // spikes
         for (Spike spike: spikes) {
            spike.paint(g, WIDTH, HEIGHT);
         }
-        
-        // draw dice
+
         paintDice(g,WIDTH,HEIGHT);
 
         // draw the potential moves for whoevers go it is
@@ -130,7 +119,6 @@ public class Board {
             } else if (whoseTurnIsIt == Player.BLACK && CustomCanvas.theBarBLACK.size() > 0) {
                 drawPotentialMovesFromBar(g);
             } else {
-                // ORDINARY MOVE
                 // if no piece is stuck to mouse then just show up the potential
                 // moves as the mouse is hovered over each spike
                 if (!CustomCanvas.pieceOnMouse) {
@@ -151,8 +139,8 @@ public class Board {
 
     private void paintDice(Graphics g, int WIDTH, int HEIGHT) {
         if (CustomCanvas.showDice) {
-            int diex = (BORDER+((WIDTH/4)*3)) + Die.getWidth();
-            int diey = (BORDER+(HEIGHT/2)) - Die.getHeight();
+            int diex = (BORDER + ((WIDTH/4)*3)) + Die.getWidth();
+            int diey = (BORDER + (HEIGHT/2)) - Die.getHeight();
             if (!die1HasBeenUsed) {
                 die1.paint(g, diex, diey);
             } else {
@@ -895,21 +883,6 @@ public class Board {
 
         }
     }
-    //same but with nicer capitilisation
-    private String playerStrLC(int i)
-    {
-         switch(i)
-        {
-            case Player.WHITE:
-                return "White";
-            case Player.BLACK:
-                return "Black";
-            default:
-                Utils._E("playerStr did not receive a valid  i "+i);
-                return null;
-
-        }
-    }
 
     void calculatePotentialMoves() {
         if (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse && !thereAreOptions) {
@@ -1180,7 +1153,7 @@ public class Board {
         whoseTurnIsIt = currentPlayer.getColour();
     }
 
-    // returns the current pip count doe the player passed in.
+    // returns the current pip count of the given player.
     public int calculatePips(int player) {
         int pips = 0;
         /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
