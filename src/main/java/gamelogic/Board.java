@@ -1,12 +1,10 @@
 package gamelogic;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.util.*;
 
 import data.PlayerColor;
 import lowlevel.*;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Enumeration;
 
 import static data.PlayerColor.BLACK;
 import static data.PlayerColor.WHITE;
@@ -60,9 +58,22 @@ public class Board {
     private static final int FIRST_SPIKE = 0;
 
     private static final int BOARD_NEW_GAME = 0;
-    private static final int DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME = 1;
-    private static final int DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME = 2;
+    private static final int DEBUG_PIECES_IN_THEIR_HOME = 1;
     private static final int INIT_CONFIGURATION = BOARD_NEW_GAME;
+    private static final int[] whiteInitPositions = {
+        0, 0, 0, 0, 0, 5,
+        0, 3, 0, 0, 0, 0,
+        5, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 2
+    };
+
+    private static final int[] blackInitPositioin = new int[24];
+    static {
+        int blackIdx = 23;
+        for (int i = 0; i < whiteInitPositions.length; ++i, --blackIdx) {
+            blackInitPositioin[blackIdx] = whiteInitPositions[i];
+        }
+    }
 
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
@@ -696,155 +707,45 @@ public class Board {
         return false;
     }
 
-    //add both players pieces to necc spikes
-    //in order to initialise a new game
-    // modes are specified above, the only real one is BOARD_NEW_GAME, but we have debug ones also
-    // for testing (different backgammon rules might exist so if so we can add new starting positions easily
-    //here too).
     void initialiseBoard(int mode) {
         log("mode: BOARD_NEW_GAME");
-        initialiseBoardForNewGame();
-        switch(mode) {
-            case DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME:
-                log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
-                // now we simply move all of the black pieces from where they are and add them into their home area
-                //randomly.
-                movePiecesToHome(PlayerColor.WHITE);
-                break;
-            case DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME:
-                log("mode: DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME");
-                // now we simply move all of the white pieces from where they are and add them into their home area
-                //randomly.
-                movePiecesToHome(PlayerColor.BLACK);
-                break;
-            default: Utils._E("Board.initialiseBoard received an invalid mode!");break;
+        initialiseBoardForNewGame(whiteInitPositions, blackInitPositioin);
+        if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
+            log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
+            int[] whiteHome = {
+                5, 5, 5, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0
+            };
+            int[] blackHome = {
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                5, 5, 5, 0, 0, 0
+            };
+            initialiseBoardForNewGame(whiteHome, blackHome);
         }
     }
 
-    // takes all pieces of the player passed in and moves them into their home area dropping them in on random spikes
-    // for testing only.
-    void movePiecesToHome(PlayerColor player) {
-        final int WHITE_HOME_START_SPIKE = 1; // white home area is top right, 0,1,2,3,4,5
-        final int WHITE_HOME_END_SPIKE = 5;
-        final int BLACK_HOME_START_SPIKE = 18; // black home area is bot right, 18,19,20,21,22,23
-        final int BLACK_HOME_END_SPIKE = 22;
-        int homeAreaStartSpike = 0;
-        int homeAreaEndSpike = 0;
-        Player father = null;
-
-        if (player == PlayerColor.WHITE) {
-            homeAreaStartSpike  = WHITE_HOME_START_SPIKE; // white home area is top right, 0,1,2,3,4,5
-            homeAreaEndSpike    = WHITE_HOME_END_SPIKE;
-            father=whitePlayer;
-            log("movePiecesToHome  white");
-        } else if (player == PlayerColor.BLACK) {
-            homeAreaStartSpike  = BLACK_HOME_START_SPIKE; // black home area is bot right, 18,19,20,21,22,23
-            homeAreaEndSpike    = BLACK_HOME_END_SPIKE;
-            father=blackPlayer;
-            log("movePiecesToHome  black");
-        } else {
-            Utils._E("piecesInHomeSide received an invalid player to check.");
-        }
-
-        //Remove all pieces from spikes of player passed in:////
-       for (Spike spike: spikes) {
-            if (spike.pieces.size() > 0 && ((Piece)spike.pieces.get(0)).getColour() == player) {
-                spike.pieces.clear();
-            }
-        }
-        //////////////////////////////////////////
-        //add 15 pieces of correct colour to the home area, in random positions
-        for (int i = 0; i < 15; i++) {
-            int random = Utils.getRand(homeAreaStartSpike, homeAreaEndSpike);
-            spikes.get(random).addPiece(new Piece(father));
-        }
-    }
 
     // puts the pieces where they need to be to initialise a new game of backgammon
-    void initialiseBoardForNewGame() {
+    void initialiseBoardForNewGame(int[] whiteInitPositions, int[] blackInitPositions) {
         log("initialiseBoardForNewGame");
-        for (int i = 0; i < 24; i++) {
-            log("#### Dealing with Spike number " + i);
-            Spike tempSpike = spikes.get(i);
-            tempSpike.pieces.clear();
-            switch (i) {
-                case 0:
-                    //add 2 white pieces to first pin
-                    for (int j=0; j<2; j++) {
-                        Piece addMe = new Piece(blackPlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add white piece to spike " + i);
-                    }
-                break;
-                case 5:
-                    //add 5 pieces to first pin
-                    for (int j=0; j < 5; j++) {
-                        Piece addMe = new Piece(whitePlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add black piece to spike " + i);
-                    }
-                break;
-                case 7: //SPIKE EIGHT
-                    //add 3 pieces to first pin
-                    for (int j=0; j<3; j++) {
-                        Piece addMe = new Piece(whitePlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add black piece to spike " + i);
-                    }
-                break;
-                case 11: //SPIKE EIGHT
-                    //add 3 pieces to first pin
-                    for (int j=0; j<5; j++) {
-                        Piece addMe = new Piece(blackPlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add white piece to spike " + i);
-                    }
-                break;
-                case 12: //SPIKE THIRTEEN
-                    //add 3 pieces to first pin
-                    for (int j=0; j<5; j++) {
-                        Piece addMe = new Piece(whitePlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add black piece to spike " + i);
-                    }
-                break;
-                case 16: //SPIKE SEVENTINE
-                    //add 3 pieces to first pin
-                    for (int j=0; j<3; j++) {
-                        Piece addMe = new Piece(blackPlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add white piece to spike " + i);
-                    }
-                break;
-                case 18:
-                    //add 5 pieces to first pin
-                    for (int j=0; j<5; j++) {
-                        Piece addMe = new Piece(blackPlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add white piece to spike " + i);
-                    }
-                break;
-                case 23: //SPIKE TWENTY FOUR
-                    //add 2 pieces to first pin
-                    for (int j=0; j < 2; j++) {
-                        Piece addMe = new Piece(whitePlayer);
-                        tempSpike.addPiece(addMe);
-                        log("Add black piece to spike " + i);
-                    }
-                break;
+        for (Spike spike: spikes) {
+            spike.pieces.clear();
+        }
+        for (int i = 0; i < whiteInitPositions.length; ++i) {
+            for (int j = 0; j < whiteInitPositions[i]; ++j) {
+                Piece newPiece = new Piece(whitePlayer);
+                spikes.get(i).addPiece(newPiece);
             }
         }
-    }
-
-    private Player getPlayer(PlayerColor col) {
-        switch(col) {
-            case WHITE:
-                return getWhitePlayer();
-            case BLACK:
-                return getBlackPlayer();
-            default:
-                Utils._E("getPlayer did not receive a valid player colour " + col);
-                return null;
+        for (int i = 0; i < whiteInitPositions.length; ++i) {
+            for (int j = 0; j < blackInitPositions[i]; ++j) {
+                Piece newPiece = new Piece(blackPlayer);
+                spikes.get(i).addPiece(newPiece);
+            }
         }
     }
 
