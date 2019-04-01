@@ -1474,7 +1474,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
 
-        //so our mouse doesnt influence anything
+        // so our mouse doesnt influence anything
         if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==Player.BLACK) ) {
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
@@ -1519,8 +1519,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 touchedButton(x, y);
                 if (showRollButton) {
                     log("respond to no clicks as the roll button is up");
-                    //only thign that will respond is the about window
-                    //brings up the about window.
+                    // only thing that will respond is the about window
+                    // brings up the about window.
                     checkIfPrefsButtonClickedOn(x, y);
                 } else {
                     //Making a move//////////
@@ -1687,28 +1687,19 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= myX && x < (myX + myWidth)) {
             if (y > myY && y < (myY + myHeight)) {
                 log("" + clickedOnText);
-                //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
-                //then we simply let it go into the piece container.
+                // if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
+                // then we simply let it go into the piece container.
                 if (Board.pulsateWhiteContainer && pieceOnMouse && Board.whoseTurnIsIt == Player.WHITE) {
                     log("WHITE put in container");
-                    //remove from spike
-                    //add to container vector
                     int correctDie = Board.whichDieGetsUsToPieceContainer;
-                    boolean pieceWillGoToContainer = true;
-                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, pieceWillGoToContainer);
-                    //continue
-                } else
+                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
+                } else if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt == Player.BLACK) {
                     //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
                     //then we simply let it go into the piece container.
-                    if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt == Player.BLACK) {
-                        log("BLACK put in container");
-                        //remove from spike
-                        //add to container vector
-                        int correctDie = Board.whichDieGetsUsToPieceContainer;
-                        boolean pieceWillGoToContainer = true;
-                        placePieceRemoveOldOneAndSetDieToUsed(correctDie, pieceWillGoToContainer);
-                        //continue
-                    }
+                    log("BLACK put in container");
+                    int correctDie = Board.whichDieGetsUsToPieceContainer;
+                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
+                }
             }
         }
     }
@@ -1887,7 +1878,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     sfxPutPieceInContainer.playSound();
                 } else if (Board.whoseTurnIsIt == Player.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
+                    log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
                 } else {
                     Utils._E("whoseTurnIsIt is invalid here.");
@@ -1912,7 +1903,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
                 } else {
                     //NORMAL CONDITION
-                    //add it to the spike user just clicked on
                     board.copy_of_reachableFromDie2.addPiece(pieceStuckToMouse);
                 }
             }
@@ -1953,15 +1943,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
                 } else {
                     //NORMAL CONDITION
-                    //add it to the spike user just clicked on
                     board.copy_of_reachableFromBothDice.addPiece(pieceStuckToMouse);
                 }
             }
-            //so player cant use die one OR die two again
-            //(and it wont come up as a potential valid option)
             Board.die1HasBeenUsed = true;
             Board.die2HasBeenUsed = true;
-
             log("die1HasBeenUsed B.");
             log("die2HasBeenUsed B.");
         } else {
@@ -1977,12 +1963,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     log("someoneRolledADouble DIE 1 doubleRollCounter:" + doubleRollCounter);
                     if (doubleRollCounter <= 1) {
                         log("dont hide die yet as it was a double");
-                        Board.die1HasBeenUsed = false;// so it doesnt vanish
+                        Board.die1HasBeenUsed = false;
                     }
                     if (doubleRollCounter >= 4) {
                         log("double round done.1");
-                        //ADDED TO FIX DOUBLES ISSUE 243PM JAN 21
-                        Board.die1HasBeenUsed = true;//so they dont vanish
+                        Board.die1HasBeenUsed = true;
                         Board.die2HasBeenUsed = true;
                         someoneRolledADouble = false;
                     }
@@ -1992,7 +1977,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     log("someoneRolledADouble DIE2 doubleRollCounter:" + doubleRollCounter);
                     if (doubleRollCounter <= 3) {
                         log("dont hide die yet as it was a double");
-                        Board.die2HasBeenUsed = false;//so it doesnt vanish
+                        Board.die2HasBeenUsed = false; // so it doesnt vanish
                     }
                     if (doubleRollCounter >= 4) {
                         log("double round done.2");
@@ -2004,14 +1989,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     break;
                 case 3:
                     doubleRollCounter++;
-                    doubleRollCounter++;//2 dice used in a roll like this
+                    doubleRollCounter++; // 2 dice used in a roll like this
                     log("someoneRolledADouble BOTH DIE doubleRollCounter:" + doubleRollCounter);
                     log("dont hide die yet as it was a double");
-                    Board.die1HasBeenUsed = false;//so they dont vanish
+                    Board.die1HasBeenUsed = false;
                     Board.die2HasBeenUsed = false;
                     if (doubleRollCounter >= 4) {
                         log("double round done.3");
-                        Board.die1HasBeenUsed = true;//so they do vanish
+                        Board.die1HasBeenUsed = true;
                         log("die1HasBeenUsed C.");
                         Board.die2HasBeenUsed = true;
                         someoneRolledADouble = false;

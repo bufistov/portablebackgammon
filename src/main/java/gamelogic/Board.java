@@ -22,6 +22,11 @@ public class Board {
     static int BAR;   // the bar in the middle of the board
     static int PIECE_CONTAINER; // piece contrainers are them things to the sides that hold the pieces
 
+    public static boolean HUMAN_VS_COMPUTER = false; // human is white, computer is black
+    public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
+    public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
+    public static final int DIE1AND2 = 3;
+
     public static int whoseTurnIsIt = Player.WHITE; // so when it says roll to see who goes
     //first, white should roll their one die then black
 
@@ -304,12 +309,7 @@ public class Board {
         initialiseBoard(INIT_CONFIGURATIOIN);
     }
 
-    public static boolean HUMAN_VS_COMPUTER = false; // human is white, computer is black
-    public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
-    public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
-    public static final int DIE1AND2 = 3;
-
-    // simply pulses the spikes while theyre not null
+    // simply pulses the spikes while they are not null
     // "Pulses" means color them differently, so it is clear that a piece can be moved there.
     private void keepPotentialSpikesPulsing() {
         boolean debugmessages = false;
@@ -417,7 +417,6 @@ public class Board {
      */
     private void drawPotentialMoves(Graphics g) {
         boolean debugmessages = false; // this one can be very handy for debugging, too verbose once you know it works
-                                       // see the other messages below that might be stubbed out too
         allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
         getRidOfLittleDice(); // kind of intensive?
         detectIfPiecesAreHome(); // sets the right bools if pieces are home
