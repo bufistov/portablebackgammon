@@ -20,8 +20,6 @@ public class Main {
     static JFrame frame;
     private static final int WINDOWY_MINUS = 50;
 
-    private static int insetY;
-    private static int insetX;
     private static final int FRAME_DELAY_MILLIS = 50;//50;//20; // 20ms. implies 50fps (1000/20) = 50
     private static boolean gameThreadIsRunning = true;
     private static int windowX;
@@ -29,7 +27,6 @@ public class Main {
 
      public static void main(String[] args) {
          log("Main called, Backgammon starting.");
-         log("insetY:" + insetY + ", insetX" + insetX);
          ConfigFactory.setProperty("configFileName", "backgammon.config");
          GameConfig config = ConfigFactory.create(GameConfig.class);
          canvas = new CustomCanvas(config); // create our canvas object that has custom rendering in it.
@@ -58,10 +55,6 @@ public class Main {
          frame.setVisible(true); // start AWT painting.
          frame.setTitle("Midokura Backgammon "+ CustomCanvas.VERSION);
          log("Backgammon visible.");
-
-         Insets insets = frame.getInsets();
-         insetY=insets.top;
-         insetX=insets.left;
 
          windowX = frame.getLocationOnScreen().x;
          windowY = frame.getLocationOnScreen().y;
