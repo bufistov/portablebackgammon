@@ -199,7 +199,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
     public static boolean showDice;
 
-    CustomCanvas(GameConfig config) {
+    public CustomCanvas(GameConfig config) {
         log("CustomCanvas made.");
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");

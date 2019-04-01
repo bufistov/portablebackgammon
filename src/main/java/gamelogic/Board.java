@@ -625,9 +625,9 @@ public class Board {
         spike.flash(whichDice);
     }
 
-    //takes in spike the player is currently hovering over with mouse
-    //and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
-    //is able to be moved to.
+    // takes in spike the player is currently hovering over with mouse
+    // and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
+    // is able to be moved to. TODO: this variable is only needed if active player wants to put piece into container.
     public static int whichDieGetsUsToPieceContainer = -1;
 
     // whichDieIsThis is passed in which indicates which die roll will be used in this potential move
