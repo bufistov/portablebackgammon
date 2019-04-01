@@ -5,7 +5,7 @@ public class Player {
 
     public String name;
     public int score;
-    int colour;
+    private int colour;
 
     Player(int colour_, String name_) {
         colour = colour_;
@@ -15,7 +15,7 @@ public class Player {
     public static final int WHITE = 0;
     public static final int BLACK = 1;
     
-    int getColour()
+    public int getColour()
     {
         return colour;
     }
@@ -34,5 +34,22 @@ public class Player {
     private void log(String s)
     {
         Utils.log("Player{}:" + s);
+    }
+
+    int homeSpikeStart() {
+        return colour == WHITE ? 0 : 18;
+    }
+
+    int homeSpikeEnd() {
+        return colour == WHITE ? 5 : 23;
+    }
+
+    int containerId() {
+        return colour == WHITE ? -1 : 24;
+    }
+
+    int getDestinationSpike(Spike source, int roll) {
+        return colour == WHITE ? source.getSpikeNumber() - roll :
+            source.getSpikeNumber() + roll;
     }
 }

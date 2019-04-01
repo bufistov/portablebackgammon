@@ -787,7 +787,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
 
-        printme = "Pips: " + calculatePips(Player.WHITE);
+        printme = "Pips: " + board.calculatePips(Player.WHITE);
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
         printme = "Score: " + board.getBlackPlayer().score;
@@ -801,7 +801,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
-        printme = "Pips: " + calculatePips(Player.BLACK);/*board.getWhitePlayer().pips;*/
+        printme = "Pips: " + board.calculatePips(Player.BLACK);
         fontwhite.drawString(g, printme, xpos, ypos, 0);
         ypos += fontwhite.getHeight();
         printme = "Score: " + board.getWhitePlayer().score;
@@ -893,35 +893,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.setColor(g, Color.red);
             utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
         }
-    }
-
-    // returns the current pip count doe the player passed in.
-    private int calculatePips(int player) {
-        int pips = 0;
-        /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
-         * counting the number of pieces of that colour on the spike, then multiply that by the amount of spikes it is away from the
-         * end of the board (INCLUDING the one to get onto the pice container), add these all up . as an example the starting pip count is 167 because:
-         * 2 pieces on spike 0 (23 steps from end) * 2 = 48
-         * 5 pieces on spike 11 (13 steps from end)*5=65
-         * 3 pieces on spike 16 (8 steps from end) *3 = 24
-         * 6 pieces on spike 18 (5 steps from the end) *6 =30
-         * total is 167
-         */
-        if (player == Player.WHITE) {
-            //works for white logic is simple
-            for (int i = 0; i < 24; i++) {
-                Spike spike = (Spike) board.spikes.elementAt(i);
-                pips += (i + 1) * spike.getAmountOfPieces(Player.WHITE);
-            }
-        } else {
-            int j = 0;
-            for (int i = 23; i >= 0; i--) {
-                Spike spike = (Spike) board.spikes.elementAt(i);
-                pips += (j + 1) * spike.getAmountOfPieces(Player.BLACK);
-                j++;
-            }
-        }
-        return pips;
     }
 
     // simply sets glow to true if the mouse is over the button
@@ -1117,7 +1088,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     //this needs to be called when swapping turns form one player to another
     //to ensure things behave correctly.
-    public static void resetVarsTurn() {
+    private void resetVarsTurn() {
         log("resetVarsTurn");
         //so it doesnt think dice have been used anymore
         Board.die1HasBeenUsed = false;
@@ -1571,14 +1542,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public void turnOver() {
         log("---- THIS TURN IS OVER ----");
-        if (Board.whoseTurnIsIt == Player.WHITE) {
-            Board.whoseTurnIsIt = Player.BLACK;
-            log("BLACKS TURN");
+        if (board.getCurrentPlayer().getColour() ==  Player.WHITE) {
             tellPlayers("Black's turn to roll.");
         } else {
-            Board.whoseTurnIsIt = Player.WHITE;
-            log("WHITES TURN");
             tellPlayers("White's turn to roll.");
+        }
+        if (!gameComplete()) {
+            board.nextTurn();
         }
         resetVarsTurn();
     }
@@ -1699,24 +1669,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // see if the user clicked on some spike
     private void checkIfSpikeClickedOn(int x, int y) {
-        Enumeration spikes_e = board.spikes.elements();
-        while (spikes_e.hasMoreElements()) {
-            Spike spike = (Spike) spikes_e.nextElement();
+        for (Spike spike: board.getSpikes()) {
             if (spike.userClickedOnThis(x, y)) {
                 log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
-
-                /* REMOVING A PIECE FROM ONE SPIKE AND ADDING IT TO ANOTHER.
-                 * When the player has a piece stuck to their mouse pointer
-                 * and the valid potential spikes are pulsating, we have copies
-                 * of them valid spikes stored as
-                 * board.copy_of_reachableFromDie1, board.copy_of_reachableFromDie2,
-                 * and board.copy_of_reachableFromBothDice.
-                 * So we compare the number of the spike they just clicked on to the
-                 * potential spikes the piece can go to, if they match then we know the
-                 * player has placed a piece from one spike to another spike. So we remove it
-                 * from the initial spike and add it to the new one, as shown below:
-                 */
-
                 // find out if this is a valid spike to go to from bar
                 if (barPieceStuckOnMouse) {
                     log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + Board.spikesAllowedToMoveToFromBar.size());
@@ -2022,9 +1977,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         if (board.allowPieceToStickToMouse) {
             // see if the user clicked on that piece
-            Enumeration spikes_e = board.spikes.elements();
-            while (spikes_e.hasMoreElements()) {
-                Spike spike = (Spike) spikes_e.nextElement();
+           for (Spike spike: board.getSpikes()) {
                 Enumeration pieces_e = spike.pieces.elements();
                 while (pieces_e.hasMoreElements()) {
                     Piece piece = (Piece) pieces_e.nextElement();
@@ -2606,11 +2559,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     void startGame() {
         int val = Utils.getRand(0, 999_999);
         String playerStr = "White";
-        board.whoseTurnIsIt = Player.WHITE;
+        int player = Player.WHITE;
         if (val >= 500_000) {
-            board.whoseTurnIsIt = Player.BLACK;
+            player = Player.BLACK;
             playerStr = "Black";
         }
+        board.setCurrentPlayer(player);
         tellPlayers(String.format("%s won the roll off", playerStr));
         state = GAME_IN_PROGRESS;
     }

@@ -1,5 +1,7 @@
 package gamelogic;
+import java.util.ArrayList;
 import java.util.Vector;
+
 import lowlevel.*;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -14,8 +16,9 @@ public class Board {
 
     // -- game variables
     public int matchPoints;
-    public Vector spikes;
+    private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
+    private Player currentPlayer;
     public static Die die1, die2;
     private Utils utils = new Utils();
     public static int BORDER; // the gap around the board
@@ -82,8 +85,8 @@ public class Board {
         blackPlayer = new Player(Player.BLACK,"Player2");
 
         log("making spikes.");
-        spikes = new Vector();
-        for (int i=1; i <= 24; i++) {
+        spikes = new ArrayList<>();
+        for (int i = 1; i <= 24; i++) {
             spikes.add(new Spike(i));
         }
         log("spikes done.");
@@ -112,9 +115,7 @@ public class Board {
         utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
 
         // spikes
-        Enumeration e = spikes.elements();
-        while (e.hasMoreElements()) {
-           Spike spike = (Spike) e.nextElement();
+        for (Spike spike: spikes) {
            spike.paint(g, WIDTH, HEIGHT);
         }
         
@@ -297,7 +298,6 @@ public class Board {
         die1HasBeenUsed = false;
         die2HasBeenUsed = false;
 
-        highlightPieceContainerAsOption = false;
         whichDieGetsUsToPieceContainer = -1;
 
         listBotsOptions = false;
@@ -353,13 +353,11 @@ public class Board {
     public static Spike copy_of_reachableFromDie2;
     public static Spike copy_of_reachableFromBothDice;
 
-    //simply nullifies the string that tells the spike to show its little dice
-    //this is shown to user when they have potential moves.
+    // simply nullifies the string that tells the spike to show its little dice
+    // this is shown to user when they have potential moves.
     private void getRidOfLittleDice() {
         //would have carried out the potential move (shouldnt they be linked to these 3 spikes? not sure yet)
-        Enumeration e = spikes.elements();
-        while (e.hasMoreElements()) {
-            Spike s = (Spike)e.nextElement();
+        for (Spike s: spikes) {
             s.whichDiei = -1;
         }
     }
@@ -369,7 +367,6 @@ public class Board {
     // will throw an error if all pieces in play (or on piece container) arent equals to 15 for both players
     private void detectIfPiecesAreHome() {
          //RESET THESE HERE?
-        highlightPieceContainerAsOption = false;
         pulsateWhiteContainer = false;
         pulsateBlackContainer = false;
 
@@ -377,10 +374,10 @@ public class Board {
         //and if so make the piece container a different colour. (piece containers are painted in
         //green when this is true) - this also takes into accoutn when pieces are already safely in the piece container
         // TODO Optimise this so its only called once each time not constantly *******
-        allWhitePiecesAreHome = calculateAmountOfPiecesInHomeArea(Player.WHITE) +
+        allWhitePiecesAreHome = calculateAmountOfPiecesInHomeArea(whitePlayer) +
             CustomCanvas.whitePiecesSafelyInContainer.size() == 15;
 
-        allBlackPiecesAreHome = calculateAmountOfPiecesInHomeArea(Player.BLACK) +
+        allBlackPiecesAreHome = calculateAmountOfPiecesInHomeArea(blackPlayer) +
             CustomCanvas.blackPiecesSafelyInContainer.size() == 15;
 
         final int whitePieces = calculateAmountOfPiecesOnBoard(Player.WHITE) +
@@ -426,57 +423,48 @@ public class Board {
         }
 
         Spike currentSpikeHoveringOver = doesThisSpikeBelongToPlayer();
-        //DIE ONE//////
-        //check if die roll ONE results in a valid potential move
-        //ie is future spike already theirs or empty, if so tell player
-        //its an option graphically. (by making it pulse) otherwise do nothing.
-        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), DIE1);//1 indicates this is die1 for piece container code
+        if (currentSpikeHoveringOver == null) {
+            return;
+        }
+        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), DIE1);
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
         //so this "stillAnOption" variable gets updated below and used at the bottom to update canWeStickPieceToMouse
         boolean die1StillAnOption = false;//set to false first so we know if its true its been updated below
 
-        //if die1 would yield a potential valid spike to land on AND if the
-        //player has not used die1 this turn yet.
+        // if die1 would yield a potential valid spike to land on AND if the
+        // player has not used die1 this turn yet.
         if (die1AnOption && !die1HasBeenUsed) {
-            copy_of_reachableFromDie1=null; // Set to null here so we know if its valid by the end it true is
-           int potentialSpikeIndex = -1;
-           if (whoseTurnIsIt==Player.BLACK) {
-               potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()+die1.getValue();
-           } else {
-                potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()-die1.getValue();
-           }
-            //only for the case when a piece can go into the piece container
+            copy_of_reachableFromDie1 = null; // Set to null here so we know if its valid by the end it true is
+            int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue());
+            // only for the case when a piece can go into the piece container
+            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
+                && !anybodyNotInHome(currentPlayer);
             if (highlightPieceContainerAsOption) { //<-- this can get set by checkValidPotentialMove when the situation is right
-                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==Player.WHITE)
-                {
-                    //log("yes "+potentialSpikeIndex+" is a valid option DIE1 TO GET ONTO PIECE WHITE CONTAINER");
-                    pulsateWhiteContainer=true;
-                    die1StillAnOption=true;
-                     copy_of_reachableFromDie1=null;//EXPERIMENT-YES THIS WORKS // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
+                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt == Player.WHITE) {
+                    pulsateWhiteContainer = true;
+                    die1StillAnOption = true;
+                    copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
-                    pulsateBlackContainer=true;
-                    die1StillAnOption=true;
-                     copy_of_reachableFromDie1=null;//EXPERIMENT-YES THIS WORKS // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
-                } else {
-                   //EXPERIMENTAL JAN 21 1212PM - IF ITS THE CONTAINER THAT IS VALID THEN I GUESS THIS CANNOT BE. (SHOULD STOP IT GETTING REEMBERED)
-                   /// copy_of_reachableFromDie1=null;
+                    pulsateBlackContainer = true;
+                    die1StillAnOption = true;
+                    copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 }
             }
            ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
-            if (potentialSpikeIndex>=FIRST_SPIKE && potentialSpikeIndex<=LAST_SPIKE) {
-                 Spike reachableFromDie1 = (Spike) spikes.elementAt(potentialSpikeIndex);
+            if (potentialSpikeIndex >= FIRST_SPIKE && potentialSpikeIndex <= LAST_SPIKE) {
+                 Spike reachableFromDie1 = spikes.get(potentialSpikeIndex);
                  if (debugmessages) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1");
                  }
                  //graphically indicate the spike that is a valid move using die1s value:
-                 pulsatePotentialSpike(reachableFromDie1,DIE1);
+                 pulsatePotentialSpike(reachableFromDie1, DIE1);
 
                  //copy this so we can keep it pulsating during placing of piece
                  //and not just when the point is hovered over this spike
-                 copy_of_reachableFromDie1=reachableFromDie1;
+                 copy_of_reachableFromDie1 = reachableFromDie1;
                  if (debugmessages) {
                     log("copy_of_reachableFromDie1 set up.");
                  }
@@ -485,7 +473,7 @@ public class Board {
         } else {
             //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
             //make this null if we know for certain its not a potential move or ot gets remembered
-            copy_of_reachableFromDie1=null;
+            copy_of_reachableFromDie1 = null;
         }
 
         //do DIE2 in same way
@@ -494,69 +482,46 @@ public class Board {
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
         //so this "stillAnOption" variable gets updated below and used at the bottom to update canWeStickPieceToMouse
-        boolean die2StillAnOption=false;//set to false first so we know if its true its been updated below
+        boolean die2StillAnOption = false;//set to false first so we know if its true its been updated below
 
-         //if die2 would yield a potential valid spike to land on AND if the
+         // if die2 would yield a potential valid spike to land on AND if the
         //player has not used die2 this turn yet.
-        if (die2AnOption && !die2HasBeenUsed)
-        {
-            copy_of_reachableFromDie2=null;//Set to null here so we know if its valid by the end it true is
-
-             ////////int potentialSpikeIndex = -1;//currentSpikeHoveringOver.getSpikeNumber()+die2.getValue();
-             int potentialSpikeIndex = -1;
-             if (whoseTurnIsIt==Player.BLACK)
-             {
-                potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()+die2.getValue();
-             }
-             else
-             {
-                potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()-die2.getValue();
-             }
+        if (die2AnOption && !die2HasBeenUsed) {
+            copy_of_reachableFromDie2 = null; //Set to null here so we know if its valid by the end it true is
+            int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die2.getValue());
+            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
+                && !anybodyNotInHome(currentPlayer);
               //only for the case when a piece can go into the piece container
-            if (highlightPieceContainerAsOption)//<-- this can get set by checkValidPotentialMove when the situation is right
-            {
+            if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
                 if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==Player.WHITE)
                 {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     pulsateWhiteContainer=true;
                     die2StillAnOption=true;
                     copy_of_reachableFromDie2=null;//EXPERIMENT- YES IT WORKS
-                }
-                else
-                if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK)
-                {
+                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer=true;
                     die2StillAnOption=true;
                     copy_of_reachableFromDie2=null;//EXPERIMENT-YES IT WORKS
                 }
-                else
-                {
-                   //EXPERIMENTAL JAN 21 1212PM - IF ITS THE CONTAINER THAT IS VALID THEN I GUESS THIS CANNOT BE. (SHOULD STOP IT GETTING REEMBERED)
-                    ///////copy_of_reachableFromDie2=null;
-                }
             }
             ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
-            {
-                if (potentialSpikeIndex>=FIRST_SPIKE && potentialSpikeIndex<=LAST_SPIKE)
-                {
-                     Spike reachableFromDie2 = (Spike) spikes.elementAt(potentialSpikeIndex);
-                     if (debugmessages)
-                     {
-                        log("yes " + potentialSpikeIndex + " is a valid option DIE2");
-                     }
-                     //graphically indicate the spike that is a valid move using die1s value:
-                     pulsatePotentialSpike(reachableFromDie2,DIE2);
+            if (potentialSpikeIndex>=FIRST_SPIKE && potentialSpikeIndex<=LAST_SPIKE) {
+                 Spike reachableFromDie2 = spikes.get(potentialSpikeIndex);
+                 if (debugmessages) {
+                    log("yes " + potentialSpikeIndex + " is a valid option DIE2");
+                 }
+                 //graphically indicate the spike that is a valid move using die1s value:
+                 pulsatePotentialSpike(reachableFromDie2,DIE2);
 
-                     //copy this so we can keep it pulsating during placing of piece
-                     //and not just when the point is hovered over this spike
-                     copy_of_reachableFromDie2=reachableFromDie2;
-                     if (debugmessages)
-                     {
-                        log("copy_of_reachableFromDie2 set up.");
-                     }
-                     die2StillAnOption=true;
-                }
+                 //copy this so we can keep it pulsating during placing of piece
+                 //and not just when the point is hovered over this spike
+                 copy_of_reachableFromDie2=reachableFromDie2;
+                 if (debugmessages) {
+                    log("copy_of_reachableFromDie2 set up.");
+                 }
+                 die2StillAnOption=true;
             }
         } else {
             //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
@@ -578,75 +543,41 @@ public class Board {
         //AND ***IMPORTANTLY IF die1 OR die2 are valid options, since the player needs to be able to take each
         //turn and not simply add them together (therefore making an invalid move by combining their rolls)
         //this is not how backgammon works.
-        if (bothDiceAnOption && (!die1HasBeenUsed) && (!die2HasBeenUsed)
-            && (die1AnOption || die2AnOption) //***
-                )
-        {
-            copy_of_reachableFromBothDice=null;//Set to null here so we know if its valid by the end it true is
-
-             //////////int potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()+(die1.getValue()+die2.getValue());
-             int potentialSpikeIndex = -1;
-             if (whoseTurnIsIt==Player.BLACK)
-             {
-                potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()+(die1.getValue()+die2.getValue());
-             }
-             else
-             {
-                potentialSpikeIndex = currentSpikeHoveringOver.getSpikeNumber()-(die1.getValue()+die2.getValue());
-             }
-
-              //only for the case when a piece can go into the piece container
-            if (highlightPieceContainerAsOption)//<-- this can get set by checkValidPotentialMove when the situation is right
-            {
-                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==Player.WHITE)
-                {
+        if (bothDiceAnOption && !die1HasBeenUsed && !die2HasBeenUsed && (die1AnOption || die2AnOption)) {
+            copy_of_reachableFromBothDice = null; // Set to null here so we know if its valid by the end it true is
+            int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue() + die2.getValue());
+            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId() &&
+                !anybodyNotInHome(currentPlayer);
+            // only for the case when a piece can go into the piece container
+            if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
+                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt == Player.WHITE) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
-                    pulsateWhiteContainer=true;
-                    bothDiceStillAnOption=true;
-                    copy_of_reachableFromBothDice=null;//EXPERIMENTAL yes this works
-                }
-                else
-                if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==Player.BLACK)
-                {
+                    pulsateWhiteContainer = true;
+                    bothDiceStillAnOption = true;
+                } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt==Player.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE BLACK CONTAINER");
-                    pulsateBlackContainer=true;
-                    bothDiceStillAnOption=true;
-                    copy_of_reachableFromBothDice=null;//EXPERIMENTAL yes this works
+                    pulsateBlackContainer = true;
+                    bothDiceStillAnOption = true;
                 }
-                else
-                {
-                   //EXPERIMENTAL JAN 21 1212PM - IF ITS THE CONTAINER THAT IS VALID THEN I GUESS THIS CANNOT BE. (SHOULD STOP IT GETTING REEMBERED)
-                    ///copy_of_reachableFromBothDice=null;
-                }
-
             }
             ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
-            {
-                if (potentialSpikeIndex>=FIRST_SPIKE && potentialSpikeIndex<=LAST_SPIKE)
-                {
-                     Spike reachableFromBothDice = (Spike) spikes.elementAt(potentialSpikeIndex);
-                     if (debugmessages)
-                     {
-                        log("yes " + potentialSpikeIndex + " is a valid option BOTH DICE");
-                     }
-                     //graphically indicate the spike that is a valid move using die1s value:
-                     pulsatePotentialSpike(reachableFromBothDice,DIE1AND2);
+            if (potentialSpikeIndex >= FIRST_SPIKE && potentialSpikeIndex <= LAST_SPIKE) {
+                 Spike reachableFromBothDice = spikes.get(potentialSpikeIndex);
+                 if (debugmessages) {
+                    log("yes " + potentialSpikeIndex + " is a valid option BOTH DICE");
+                 }
+                 //graphically indicate the spike that is a valid move using die1s value:
+                 reachableFromBothDice.flash(DIE1AND2);
 
-                     //copy this so we can keep it pulsating during placing of piece
-                     //and not just when the point is hovered over this spike
-                     copy_of_reachableFromBothDice=reachableFromBothDice;
-                     if (debugmessages)
-                     {
-                        log("copy_of_reachableFromBothDice set up.");
-                     }
-                     bothDiceStillAnOption=true;
-
-                }
+                 //copy this so we can keep it pulsating during placing of piece
+                 //and not just when the point is hovered over this spike
+                 copy_of_reachableFromBothDice = reachableFromBothDice;
+                 if (debugmessages) {
+                    log("copy_of_reachableFromBothDice set up.");
+                 }
+                 bothDiceStillAnOption=true;
             }
-             //bothDiceStillAnOption=true;
-        }
-        else//its not a potential move
-        {
+        } else {
             //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
             //make this null if we know for certain its not a potential move or ot gets remembered
             copy_of_reachableFromBothDice=null;
@@ -665,42 +596,33 @@ public class Board {
 
     private int calculateAmountOfPiecesOnBoard(int player) {
         int piecesOnBoard = 0;
-        Enumeration e = spikes.elements();
-        while (e.hasMoreElements()) {
-            Spike spike = (Spike) e.nextElement();
+        for (Spike spike: spikes) {
             piecesOnBoard += spike.getAmountOfPieces(player);
         }
         return piecesOnBoard;
     }
 
-    private int calculateAmountOfPiecesInHomeArea(int player) {
+    private int calculateAmountOfPiecesInHomeArea(Player player) {
         int piecesinHomeArea = 0;
-
-        int homeAreaStart = -1;
-        int homeAreaEnd = -1;
-        if (player == Player.WHITE) {
-            homeAreaStart = 0;
-            homeAreaEnd = 5;
-        } else if (player == Player.BLACK) {
-            homeAreaStart = 18;
-            homeAreaEnd = 23;
-        } else {
-            Utils._E("colour not defined in calculateAmountOfPiecesInHomeArea!");
-        }
-
-        Enumeration e = spikes.elements();
-        int spikePos = 0;
-        while (e.hasMoreElements()) {
-            Spike spike = (Spike) e.nextElement();
-            if (!spike.pieces.isEmpty() && spikePos >= homeAreaStart && spikePos <= homeAreaEnd) {
+        for (Spike spike: spikes) {
+            if (!spike.pieces.isEmpty() &&
+                spike.getSpikeNumber() >= player.homeSpikeStart() && spike.getSpikeNumber() <= player.homeSpikeEnd()) {
                 Piece p = (Piece) spike.pieces.firstElement();
-                if (p.colour == player) {
+                if (p.colour == player.getColour()) {
                     piecesinHomeArea += spike.pieces.size();
                 }
             }
-            spikePos++;
         }
         return piecesinHomeArea;
+    }
+
+    private boolean anybodyNotInHome(Player player) {
+        for (Spike spike: spikes) {
+            if (spike.getAmountOfPieces(player.getColour()) > 0 &&
+                (spike.getSpikeNumber() < player.homeSpikeStart() || spike.getSpikeNumber() > player.homeSpikeEnd()))
+                return true;
+        }
+        return false;
     }
 
     //takes in a spike and a die value,
@@ -711,11 +633,10 @@ public class Board {
         spike.flash(whichDice);
     }
 
-    boolean highlightPieceContainerAsOption;
     //takes in spike the player is currently hovering over with mouse
     //and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
     //is able to be moved to.
-    public static int whichDieGetsUsToPieceContainer=-1;
+    public static int whichDieGetsUsToPieceContainer = -1;
 
     // whichDieIsThis is passed in which indicates which die roll will be used in this potential move
     // 1 is die 1
@@ -723,66 +644,14 @@ public class Board {
     // 3 is die1+die2
     // these are used simply to update whichDieGetsUsToPieceContainer as it doesnt know otherwise
     private boolean checkValidPotentialMove(Spike currentSpike, int dieRoll, int whichDieIsThis) {
-        boolean yesThatsValid = false;
-
-        if (currentSpike != null) {
-            boolean withinLimits = false;
-            final boolean clockwise = whoseTurnIsIt==Player.WHITE;// blacks pieces move anticlockwise, white clockwise
-            boolean checkAbleToGetIntoPieceContainerWHITE = false;
-            boolean checkAbleToGetIntoPieceContainerBLACK = false;
-            boolean checkAbleToGetIntoPieceContainer = false; // this gets set to black or whites one
-            if (whoseTurnIsIt==Player.WHITE && allWhitePiecesAreHome) { //for when they want to be able to get into piece container
-                checkAbleToGetIntoPieceContainerWHITE = true;
-                checkAbleToGetIntoPieceContainer = true;
-            } else if (whoseTurnIsIt==Player.BLACK && allBlackPiecesAreHome) {
-                checkAbleToGetIntoPieceContainerBLACK = true;
-                checkAbleToGetIntoPieceContainer = true;
-            }
-
-            //now check if we were to take one of those pieces, would we be able to place it?
-            int potentialSpike = clockwise ? currentSpike.getSpikeNumber() - dieRoll :
-                currentSpike.getSpikeNumber() + dieRoll;
-
-            //work out the number of the potential spike
-            if (checkAbleToGetIntoPieceContainer) {
-                //SPECIAL CASE
-                //if they are able to get into the piece container (ie they pieces are all in their homeside)
-                //then we need to consider the piece container as a potential spike (even tho its off board hence why we add/minus
-                //1 here) so depending on whose turn it is and where the potential move would be to we can return that it is
-                //within limits here in this special case
-                //check one further in each direction here since the piece contaienrs are also valid landing points in this circumstance
-                if (potentialSpike == FIRST_SPIKE - 1 && whoseTurnIsIt == Player.WHITE && checkAbleToGetIntoPieceContainerWHITE) {
-                    // this would be an ideal way to get the piece safely into the piece collector
-                    withinLimits = true;
-                }
-                if (potentialSpike == LAST_SPIKE + 1 && whoseTurnIsIt == Player.BLACK && checkAbleToGetIntoPieceContainerBLACK) {
-                    withinLimits = true;
-                }
-            }
-
-            if (potentialSpike >= FIRST_SPIKE && potentialSpike <= LAST_SPIKE) {
-                withinLimits = true;
-            }
-
-            if (withinLimits) {
-                if (checkAbleToGetIntoPieceContainer) {
-                    if (potentialSpike == FIRST_SPIKE-1 && whoseTurnIsIt == Player.WHITE) {
-                        highlightPieceContainerAsOption = true;
-                        whichDieGetsUsToPieceContainer = whichDieIsThis;
-                        return true;
-                    }
-                    if (potentialSpike == LAST_SPIKE+1 && whoseTurnIsIt == Player.BLACK) {
-                        highlightPieceContainerAsOption = true;
-                        whichDieGetsUsToPieceContainer = whichDieIsThis;
-                        return true;
-                    }
-                }
-                Spike reachableFromDie = (Spike) spikes.elementAt(potentialSpike);
-                yesThatsValid = isThisSpikeEmpty(reachableFromDie) ||
-                    doesThisSpikeBelongToPlayer(reachableFromDie, whoseTurnIsIt);
-            }
+        int potentialSpike = currentPlayer.getDestinationSpike(currentSpike, dieRoll);
+        if (potentialSpike == currentPlayer.containerId() && !anybodyNotInHome(currentPlayer)) {
+            whichDieGetsUsToPieceContainer = whichDieIsThis;
+            return true;
         }
-        return yesThatsValid;
+        return (potentialSpike >= FIRST_SPIKE) && (potentialSpike <= LAST_SPIKE) &&
+            (isThisSpikeEmpty(spikes.get(potentialSpike)) ||
+                doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt));
     }
 
     //returns the Spike the player has their mouse over currently IFF it
@@ -805,10 +674,7 @@ public class Board {
     // mouse pointer is currently hovering over. If its not over any then
     // it returns null
     private Spike grabSpikeHoveringOver() {
-        //check which spike we are hovering over if any
-        Enumeration e = spikes.elements();
-        while (e.hasMoreElements()) {
-           Spike currentSpike = (Spike) e.nextElement();
+       for (Spike currentSpike: spikes) {
            if (mouseHoverX > currentSpike.collision_x && mouseHoverX < currentSpike.collision_x + currentSpike.TRIANGLE_WIDTH ) {
                if (mouseHoverY > currentSpike.collision_y && mouseHoverY < currentSpike.collision_y + currentSpike.TRIANGLE_HEIGHT) {
                     return currentSpike;
@@ -843,7 +709,7 @@ public class Board {
     // modes are specified above, the only real one is BOARD_NEW_GAME, but we have debug ones also
     // for testing (different backgammon rules might exist so if so we can add new starting positions easily
     //here too).
-    private void initialiseBoard(int mode) {
+    void initialiseBoard(int mode) {
         log("mode: BOARD_NEW_GAME");
         initialiseBoardForNewGame();
         switch(mode) {
@@ -889,9 +755,7 @@ public class Board {
         }
 
         //Remove all pieces from spikes of player passed in:////
-        Enumeration e1 = spikes.elements();
-        while (e1.hasMoreElements()) {
-            Spike spike = (Spike) e1.nextElement();
+       for (Spike spike: spikes) {
             if (spike.pieces.size() > 0 && ((Piece)spike.pieces.get(0)).colour == player) {
                 spike.pieces.clear();
             }
@@ -900,17 +764,16 @@ public class Board {
         //add 15 pieces of correct colour to the home area, in random positions
         for (int i = 0; i < 15; i++) {
             int random = Utils.getRand(homeAreaStartSpike, homeAreaEndSpike);
-            Spike spike = (Spike) spikes.elementAt(random);
-            spike.addPiece(new Piece(father));
+            spikes.get(random).addPiece(new Piece(father));
         }
     }
 
     // puts the pieces where they need to be to initialise a new game of backgammon
-    private void initialiseBoardForNewGame() {
+    void initialiseBoardForNewGame() {
         log("initialiseBoardForNewGame");
-        for (int i=0; i < 24; i++) {
+        for (int i = 0; i < 24; i++) {
             log("#### Dealing with Spike number " + i);
-            Spike tempSpike = (Spike)spikes.elementAt(i);
+            Spike tempSpike = spikes.get(i);
             tempSpike.pieces.clear();
             switch (i) {
                 case 0:
@@ -1178,12 +1041,7 @@ public class Board {
         boolean checkAbleToGetIntoPieceContainer = clockwise ? allWhitePiecesAreHome : allBlackPiecesAreHome;
 
         if (diceRoll > 0) {
-            Enumeration e = spikes.elements();
-            // go thru each spike and work where we have piece than can be picked up and moved
-            // using that dice roll, when we find that spike we grab its first piece and use that dice roll
-            // to pick up the piece and move it to the spike
-            while (e.hasMoreElements()) {
-                Spike spike = (Spike) e.nextElement();
+            for (Spike spike: spikes) {
                 // check if we own it already (ie we have parts on it)
                 if (doesThisSpikeBelongToPlayer(spike, whoseTurnIsIt) && spike.pieces.size() > 0) {
                     // so we have a spike that belongs to us for sure and has our pieces  on it
@@ -1223,7 +1081,7 @@ public class Board {
                         /*FORMULATE SETS THE PICKER UPER AND THE ENDER, KEEP THESE SETS THATS THE
                          KEY... */
                         //this sets up the spike we use for moving piece to
-                        Spike destinationSpike = (Spike) spikes.elementAt(potentialSpike);
+                        Spike destinationSpike = spikes.get(potentialSpike);
                         //if its empty or we own it, we can move to it (ADD IN HERE KILLING OTHER PLAYER)
                         if (destinationSpike.pieces.size() <= 1 ||
                             doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt)) {
@@ -1296,5 +1154,60 @@ public class Board {
         } else {
             Utils._E("DROP ON ME IS NULL.");
         }
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public void setCurrentPlayer(int player) {
+        if (player == Player.WHITE) {
+            currentPlayer = whitePlayer;
+        } else {
+            currentPlayer = blackPlayer;
+        }
+        whoseTurnIsIt = currentPlayer.getColour();
+    }
+
+    public void nextTurn() {
+        if (currentPlayer.getColour() == Player.WHITE) {
+            currentPlayer = blackPlayer;
+            log("BLACKS TURN");
+        } else {
+            currentPlayer = whitePlayer;
+            log("WHITES TURN");
+        }
+        whoseTurnIsIt = currentPlayer.getColour();
+    }
+
+    // returns the current pip count doe the player passed in.
+    public int calculatePips(int player) {
+        int pips = 0;
+        /*pips is the amount of dots on the die it would take to get off the board, so to count them you go through the spikes
+         * counting the number of pieces of that colour on the spike, then multiply that by the amount of spikes it is away from the
+         * end of the board (INCLUDING the one to get onto the pice container), add these all up . as an example the starting pip count is 167 because:
+         * 2 pieces on spike 0 (23 steps from end) * 2 = 48
+         * 5 pieces on spike 11 (13 steps from end)*5=65
+         * 3 pieces on spike 16 (8 steps from end) *3 = 24
+         * 6 pieces on spike 18 (5 steps from the end) *6 =30
+         * total is 167
+         */
+        if (player == Player.WHITE) {
+            for (int i = 0; i < 24; i++) {
+                Spike spike = spikes.get(i);
+                pips += (i + 1) * spike.getAmountOfPieces(Player.WHITE);
+            }
+        } else {
+            int j = 0;
+            for (int i = 23; i >= 0; i--, j++) {
+                Spike spike = spikes.get(i);
+                pips += (j + 1) * spike.getAmountOfPieces(Player.BLACK);
+            }
+        }
+        return pips;
+    }
+
+    public ArrayList<Spike> getSpikes() {
+        return spikes;
     }
 }

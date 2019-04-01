@@ -35,7 +35,7 @@ public class Spike {
     public static final int NOT_A_REAL_SPIKE_MINUS_99=-99;
     public static final String NOT_A_REAL_SPIKE_MINUS_99_STR="-99";
     private Die storedDie;
-    int whichDiei = -1;
+    int whichDiei = -1; // the die combination that brings piece at mouse to given spike
     private boolean flash=false;
 
     // these are used for drawing the spike (3 points, each with x,y)
