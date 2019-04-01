@@ -23,5 +23,33 @@ public class BoardTest {
 
         assertEquals(167, board.calculatePips(PlayerColor.WHITE));
         assertEquals(167, board.calculatePips(PlayerColor.BLACK));
+        assertEquals(PlayerColor.WHITE, board.getCurrentPlayer().getColour());
+    }
+
+    @Test
+    @DisplayName("Board allows only correct moves")
+    public void test2() {
+        ConfigFactory.setProperty(
+            "configFileName", "somenonexistingconfig.config");
+        GameConfig config = ConfigFactory.create(GameConfig.class);
+
+        CustomCanvas canvas = new CustomCanvas(config);
+        // Given a board with all pieces at home spikes
+        Board board = new Board(canvas, config);
+        int[] whiteHome = {
+            5, 5, 5, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0
+        };
+        int[] blackHome = {
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            5, 5, 5, 0, 0, 0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+
+        board.calculatePotentialMoves();
     }
 }

@@ -81,6 +81,7 @@ public class Board {
         loadSounds(config.soundOn());
         whitePlayer = new Player(PlayerColor.WHITE,"Player1");
         blackPlayer = new Player(PlayerColor.BLACK,"Player2");
+        currentPlayer = whitePlayer;
         spikes = new ArrayList<>();
         for (int i = 1; i <= 24; i++) {
             spikes.add(new Spike(i));
