@@ -55,7 +55,7 @@ public class Board {
     private static final int BOARD_NEW_GAME = 0;
     private static final int DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME = 1;
     private static final int DEBUG_BOARD_BLACK_PIECES_IN_THEIR_HOME = 2;
-    private static final int INIT_CONFIGURATIOIN = BOARD_NEW_GAME;
+    private static final int INIT_CONFIGURATION = BOARD_NEW_GAME;
 
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
@@ -63,7 +63,7 @@ public class Board {
         loadSounds(config.soundOn());
         makeAllGameVars();
         makeColourObjects();
-        initialiseBoard(INIT_CONFIGURATIOIN);
+        initialiseBoard(INIT_CONFIGURATION);
         log("Board made");
     }
 
@@ -306,7 +306,7 @@ public class Board {
         SPtheMoveToMake = null;
 
         ROBOT_DESTINATION_MESSAGE = "";
-        initialiseBoard(INIT_CONFIGURATIOIN);
+        initialiseBoard(INIT_CONFIGURATION);
     }
 
     // simply pulses the spikes while they are not null
