@@ -1,6 +1,8 @@
 package gamelogic;
 import java.awt.Color;
 import java.awt.Graphics;
+
+import data.PlayerColor;
 import lowlevel.*;
 
 public class Piece {
@@ -18,16 +20,15 @@ public class Piece {
     int collision_x;
     int collision_y;
 
-    int colour;
-    Utils utils = new Utils();
+    private PlayerColor colour;
+    private Utils utils = new Utils();
     private boolean stickToMouse;
 
     Piece(Player father) {
         if (father == null) {
             Utils._E("Piece was made with a null father");
         }
-        String colstr = father.printColour();
-        log("Piece made. father is "+colstr);
+        log("Piece made. father is " + father.getColour());
         colour = father.getColour();
         makeColourObjects(false);
     }
@@ -41,7 +42,7 @@ public class Piece {
         }
     }
 
-    public int getColour()
+    public PlayerColor getColour()
     {
         return colour;
     }
@@ -53,9 +54,9 @@ public class Piece {
 
     public void paint(Graphics g, int x, int y) {
         PIECE_DIAMETER = Spike.TRIANGLE_HEIGHT/7;
-        if (colour == Player.WHITE) {
+        if (colour == PlayerColor.WHITE) {
             utils.setColor(g, white_piece_color);
-        } else if (colour == Player.BLACK) {
+        } else if (colour == PlayerColor.BLACK) {
             utils.setColor(g, black_piece_color);
         } else {
             Utils._E("Dave, Im a bit worried that this piece doesnt know what colour it is.");

@@ -1,34 +1,28 @@
 package gamelogic;
+import data.PlayerColor;
 import lowlevel.*;
+
+import static data.PlayerColor.WHITE;
 
 public class Player {
 
-    public String name;
+    private String name;
     public int score;
-    private int colour;
+    private PlayerColor colour;
 
-    Player(int colour_, String name_) {
-        colour = colour_;
-        name = name_;
-        log("Player made: "+name+" :: "+printColour());
+    Player(PlayerColor colour, String name) {
+        this.colour = colour;
+        this.name = name;
+        log("Player made: " + name + " ::  " + colour);
     }
-    public static final int WHITE = 0;
-    public static final int BLACK = 1;
     
-    public int getColour()
+    public PlayerColor getColour()
     {
         return colour;
     }
 
-    String printColour() {
-        if (getColour() == WHITE)
-            return "WHITE";
-        else if(getColour()==BLACK)
-            return "BLACK";
-        else {
-            Utils._E("PRINT COLOUR NEITHER B OR W");
-            return "ERROR NO COLOUR";
-        }
+    public String getName() {
+        return name;
     }
 
     private void log(String s)

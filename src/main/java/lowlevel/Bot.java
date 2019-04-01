@@ -1,4 +1,5 @@
 package lowlevel;
+import data.PlayerColor;
 import gamelogic.Board;
 import gamelogic.Player;
 import java.awt.Robot;
@@ -55,7 +56,7 @@ public class Bot extends Thread {
     }
 
     private void tick() {
-        if (dead || canvas.gameComplete() || (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == Player.WHITE)) {
+        if (dead || canvas.gameComplete() || (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.WHITE)) {
             try {
                 Thread.sleep(50);
                 return;

@@ -1,5 +1,7 @@
 package gamelogic;
 import java.awt.Color;
+
+import data.PlayerColor;
 import lowlevel.*;
 import java.awt.Graphics;
 import java.util.Enumeration;
@@ -80,8 +82,8 @@ public class Spike {
         return true;
     }
 
-    public int getAmountOfPieces(int playerColor) {
-        if (pieces.size() == 0 || ((Piece)pieces.get(0)).colour != playerColor)
+    public int getAmountOfPieces(PlayerColor playerColor) {
+        if (pieces.size() == 0 || ((Piece)pieces.get(0)).getColour() != playerColor)
             return 0;
         return pieces.size();
     }
