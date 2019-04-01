@@ -2,7 +2,9 @@ package lowlevel;
 import data.PlayerColor;
 import gamelogic.Board;
 import gamelogic.Player;
-import java.awt.Robot;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
@@ -12,16 +14,15 @@ import java.awt.event.MouseEvent;
  */
 public class Bot extends Thread {
 
-    Robot robot;
-    CustomCanvas canvas;
+    private Robot robot;
+    private CustomCanvas canvas;
+    private JFrame mainWindow;
 
-    public static  long DELAY_BETWEEN_CLICKS_MILLIS = 1000;
-    public static  long ROBOT_DELAY_AFTER_CLICKS = 100;
-    public static boolean dead = true;
+    static  long DELAY_BETWEEN_CLICKS_MILLIS = 1000;
+    static  long ROBOT_DELAY_AFTER_CLICKS = 100;
+    static boolean dead = true;
     public static int x = 0;
     public static int y = 0;
-    int addMeX;
-    int addMeY;
     public static int destX;
     public static int destY;
 
@@ -36,9 +37,10 @@ public class Bot extends Thread {
     private static boolean TAKES_OVER_MOUSE = false;
     private boolean isRunning = true;
 
-    public Bot(CustomCanvas canvas_) {
+    public Bot(CustomCanvas canvas, JFrame mainWindow) {
         log("Bot born.");
-        canvas = canvas_;
+        this.canvas = canvas;
+        this.mainWindow = mainWindow;
         try {
             robot = new Robot();
         }
@@ -51,7 +53,7 @@ public class Bot extends Thread {
         return FULL_AUTO_PLAY;
     }
 
-    public static void setFullAutoPlay(boolean value) {
+    static void setFullAutoPlay(boolean value) {
         FULL_AUTO_PLAY = value;
     }
 
@@ -66,29 +68,27 @@ public class Bot extends Thread {
             }
         }
 
-        addMeX = Main.getWindowXpos();
-        addMeY = Main.getWindowYpos() + 20; // WORK OUT WHY IT NEEDS 15
         if (x == destX && y == destY && x != 0 && y != 0 ) {
             long difference = System.currentTimeMillis() - clickedTime;
             if (difference > DELAY_BETWEEN_CLICKS_MILLIS && !STOPCLICKING) {
-                READY2CLICK=true;
+                READY2CLICK = true;
                 log("DEST REACHED. destX:" + destX + " destY:" + destY);
             }
 
             if (READY2CLICK) {
-                if (lastX==destX && lastY==destY) {
+                if (lastX == destX && lastY == destY) {
                     sameDestCounter++;
-                    if(sameDestCounter>3) {
+                    if(sameDestCounter > 3) {
                         log("SAME DEST FIXER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                         canvas.mouseClickedX(destX, destY, CustomCanvas.RIGHT_MOUSE_BUTTON);
                         clickedTime = System.currentTimeMillis();
-                        READY2CLICK=false;
+                        READY2CLICK = false;
                     }
                 } else {
-                    sameDestCounter=0;
+                    sameDestCounter = 0;
                 }
-                lastX=destX;
-                lastY=destY;
+                lastX = destX;
+                lastY = destY;
                 if (TAKES_OVER_MOUSE) {
                     robot.delay(100);
                     clickedTime = System.currentTimeMillis();
@@ -103,15 +103,17 @@ public class Bot extends Thread {
                     }
                     canvas.mouseClickedX(destX, destY, CustomCanvas.LEFT_MOUSE_BUTTON);
                     clickedTime = System.currentTimeMillis();
-                    READY2CLICK=false;
+                    READY2CLICK = false;
                 }
             }
         }
+        Point windowPosition = mainWindow.getLocationOnScreen();
+        windowPosition.setLocation(windowPosition.x, windowPosition.y + 20);
         if (JUMP_DIRECT_TO_DEST) {
-            x=destX;
-            y=destY;
+            x = destX;
+            y = destY;
             if (TAKES_OVER_MOUSE) {
-                robot.mouseMove(x+addMeX, y+addMeY);
+                robot.mouseMove(x + windowPosition.x, y + windowPosition.y);
             }
         } else {
             try {
@@ -120,27 +122,27 @@ public class Bot extends Thread {
             catch(Exception e) {
                 Utils._E("insomnia!");
             }
-            if (x<destX) {
+            if (x < destX) {
                 x++;
                 if (TAKES_OVER_MOUSE) {
-                    robot.mouseMove(x+addMeX, y+addMeY);
+                    robot.mouseMove(x + windowPosition.x, y + windowPosition.y);
                 }
             }
-            if (x>destX) {
+            if (x > destX) {
                 x--;
                 if (TAKES_OVER_MOUSE) {
-                    robot.mouseMove(x+addMeX, y+addMeY);
+                    robot.mouseMove(x + windowPosition.x, y + windowPosition.y);
                 }
-            } if (y<destY) {
+            } if (y < destY) {
                 y++;
                 if (TAKES_OVER_MOUSE) {
-                    robot.mouseMove(x+addMeX, y+addMeY);
+                    robot.mouseMove(x + windowPosition.x, y + windowPosition.y);
                 }
             }
-            if (y>destY) {
+            if (y > destY) {
                 y--;
                 if (TAKES_OVER_MOUSE) {
-                    robot.mouseMove(x+addMeX, y+addMeY);
+                    robot.mouseMove(x + windowPosition.x, y + windowPosition.y);
                 }
             }
         }

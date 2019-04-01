@@ -256,7 +256,6 @@ public class Board {
             }
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
-            //pick first piece on bar
             Piece p = (Piece) theBarPieces.firstElement();
             setBotDestination(p.collision_x+Piece.PIECE_DIAMETER/2,
                 p.collision_y+Piece.PIECE_DIAMETER/2,"DESTINATION FOR BOT, PIECE ON BAR......");
@@ -976,36 +975,39 @@ public class Board {
             thereAreOptions = false;
             return;
         }
-        if (!Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER && whoseTurnIsIt==PlayerColor.WHITE) {
+        if (!Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER && whoseTurnIsIt == PlayerColor.WHITE) {
             return;
         }
         Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe; // gets the spike to drop pieces on
-        if (dropOnMe!=null) {
+        if (dropOnMe != null) {
             if (dropOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)) {
-                //SPECIAL CASE DROP ON CONTAINER
-                int pieceContainerX=0;
-                int pieceContainerY=0;
-                int pieceContainerWidth=0;
-                int pieceContainerHeight=0;
-                //decide whose piece container the destination is:
-                if (whoseTurnIsIt==PlayerColor.WHITE) {
-                    pieceContainerX=CustomCanvas.whiteContainerX;
-                    pieceContainerY=CustomCanvas.whiteContainerY;
-                    pieceContainerWidth=CustomCanvas.whiteContainerWidth;
-                    pieceContainerHeight=CustomCanvas.whiteContainerHeight;
-                } else if (whoseTurnIsIt==PlayerColor.BLACK) {
-                    pieceContainerX=CustomCanvas.blackContainerX;
-                    pieceContainerY=CustomCanvas.blackContainerY;
-                    pieceContainerWidth=CustomCanvas.blackContainerWidth;
-                    pieceContainerHeight=CustomCanvas.blackContainerHeight;
-                } else { Utils._E("errori n theywanttoplaceapiece, turn is invalid");}
-                setBotDestination(pieceContainerX+pieceContainerWidth/2,pieceContainerY+pieceContainerHeight/2,"PIECE CONTAINER DESTINATION");
+                // SPECIAL CASE DROP ON CONTAINER
+                int pieceContainerX = 0;
+                int pieceContainerY = 0;
+                int pieceContainerWidth = 0;
+                int pieceContainerHeight = 0;
+                if (whoseTurnIsIt == PlayerColor.WHITE) {
+                    pieceContainerX = CustomCanvas.whiteContainerX;
+                    pieceContainerY = CustomCanvas.whiteContainerY;
+                    pieceContainerWidth = CustomCanvas.whiteContainerWidth;
+                    pieceContainerHeight = CustomCanvas.whiteContainerHeight;
+                } else if (whoseTurnIsIt == PlayerColor.BLACK) {
+                    pieceContainerX = CustomCanvas.blackContainerX;
+                    pieceContainerY = CustomCanvas.blackContainerY;
+                    pieceContainerWidth = CustomCanvas.blackContainerWidth;
+                    pieceContainerHeight = CustomCanvas.blackContainerHeight;
+                } else {
+                    Utils._E("errori n theywanttoplaceapiece, turn is invalid");
+                }
+                setBotDestination(pieceContainerX + pieceContainerWidth / 2,
+                    pieceContainerY + pieceContainerHeight / 2,"PIECE CONTAINER DESTINATION");
             } else {
-                //NORMAL CASE DROP ON SPIKE
-                if (dropOnMe.getType()==Spike.STALECTITE) {
-                    setBotDestination(dropOnMe.x3-dropOnMe.TRIANGLE_WIDTH/2,dropOnMe.y2-dropOnMe.TRIANGLE_HEIGHT/2,"NORMAL CASE DROP ON SPIKE A");
+                if (dropOnMe.getType() == Spike.STALECTITE) {
+                    setBotDestination(dropOnMe.x3 - dropOnMe.TRIANGLE_WIDTH / 2,
+                        dropOnMe.y2 - dropOnMe.TRIANGLE_HEIGHT / 2,"NORMAL CASE DROP ON SPIKE A");
                 } else if (dropOnMe.getType()==Spike.STALECMITE) {
-                     setBotDestination(dropOnMe.x3-dropOnMe.TRIANGLE_WIDTH/2,dropOnMe.y2+dropOnMe.TRIANGLE_HEIGHT/2,"NORMAL CASE DROP ON SPIKE B");
+                     setBotDestination(dropOnMe.x3 - dropOnMe.TRIANGLE_WIDTH/2,
+                         dropOnMe.y2 + dropOnMe.TRIANGLE_HEIGHT / 2,"NORMAL CASE DROP ON SPIKE B");
                 }
             }
         } else {

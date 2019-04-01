@@ -62,7 +62,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
     private int PANEL_WIDTH = 0;
-    private Bot bot;
 
     /////j2se specific vars
     // Acquiring the current Graphics Device and Graphics Configuration
@@ -213,8 +212,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         this.gameComplete = false;
         loadSounds(this.soundOn);
         board = new Board(this, config);
-        bot = new Bot(this);
-        bot.start();
 
         addMouseListener(this);
         addMouseMotionListener( this );
