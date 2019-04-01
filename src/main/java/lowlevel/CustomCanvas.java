@@ -65,10 +65,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Bot bot;
 
     /////j2se specific vars
-    JFrame jFrame;
     // Acquiring the current Graphics Device and Graphics Configuration
-    GraphicsEnvironment   graphEnv     = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    GraphicsDevice        graphDevice  = graphEnv.getDefaultScreenDevice();
+    private GraphicsEnvironment   graphEnv     = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    private GraphicsDevice        graphDevice  = graphEnv.getDefaultScreenDevice();
     GraphicsConfiguration graphicConf  = graphDevice.getDefaultConfiguration();
     Graphics2D g;
     BufferStrategy bufferStrategy;
@@ -149,7 +148,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static boolean DEBUG_CONSOLE = false;
     private boolean PAUSED;
     NetworkChatClient chatClient;
-    boolean ignoreRepaints=true;
     public static String chatText="";
 
     private GameNetworkClient client;
@@ -201,7 +199,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
     public static boolean showDice;
 
-    CustomCanvas(JFrame jFrame_, GameConfig config) {
+    CustomCanvas(GameConfig config) {
         log("CustomCanvas made.");
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -217,26 +215,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         board = new Board(this, config);
         bot = new Bot(this);
         bot.start();
-       
-        // j2se specifics
-        jFrame = jFrame_;
+
         addMouseListener(this);
         addMouseMotionListener( this );
         addKeyListener( this );
-
-        // set icon in corner
-        jFrame.setIconImage(utils.loadImage("/icon.gif"));
-        jFrame.setResizable(false);
 
         setTheme(theme);
         makeColourObjects();
         loadCustomFonts();
         loadImages();
-
-        requestFocus();  // get focus for keys
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-          setIgnoreRepaint(true);
-        }
+        requestFocus();
     }
 
     @Override
@@ -2063,14 +2051,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
 
-        if (e.getKeyCode() == KeyEvent.VK_F1) {
-            ignoreRepaints = !ignoreRepaints;
-            setIgnoreRepaint(ignoreRepaints);
-            jFrame.setResizable(!ignoreRepaints);
-            tellPlayers("F1 Pressed, ignoreRepaints is now " + ignoreRepaints);
-            log("F1 Pressed, ignoreRepaints is now " + ignoreRepaints);
-        }
-
         if (e.getKeyChar() == 'q' || e.getKeyChar() == 'Q') {//QUIT
             System.exit(0);
         }
@@ -2547,7 +2527,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         NETWORK_GAME_IN_PROCESS = true;
         I_AM_CLIENT = true;
         NetworkChatClient.KEEP_LOBBY_GOING = false;
-        this.jFrame.setTitle(Main.frame.getTitle() + " Online game in progress. (Connected as client)");
     }
 
     void startGame() {

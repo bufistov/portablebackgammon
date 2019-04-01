@@ -15,10 +15,10 @@ import java.awt.image.*;
 
 public class Main {
 
-    public static final boolean CENTRALISE_ON_SECOND_MONITOR = false; // for testing on my 2 monitr setup.
-    public static Canvas canvas;
-    public static JFrame frame;
-    public static final int WINDOWY_MINUS=50;
+    private static final boolean CENTRALISE_ON_SECOND_MONITOR = false; // for testing on my 2 monitr setup.
+    private static Canvas canvas;
+    static JFrame frame;
+    private static final int WINDOWY_MINUS = 50;
 
     private static int insetY;
     private static int insetX;
@@ -29,15 +29,16 @@ public class Main {
 
      public static void main(String[] args) {
          log("Main called, Backgammon starting.");
-         frame = new JFrame();
          log("insetY:" + insetY + ", insetX" + insetX);
-
          ConfigFactory.setProperty("configFileName", "backgammon.config");
          GameConfig config = ConfigFactory.create(GameConfig.class);
-         canvas = new CustomCanvas(frame, config); // create our canvas object that has custom rendering in it.
+         canvas = new CustomCanvas(config); // create our canvas object that has custom rendering in it.
+         frame = new JFrame();
          frame.getContentPane().add(canvas);
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
          frame.setSize(810, 500);
+         frame.setIconImage(Utils.loadImage("/icon.gif"));
+         frame.setResizable(false);
          Thread gameThread = new Thread(() -> {
             long cycleTime = System.currentTimeMillis();
             while(gameThreadIsRunning) {
@@ -66,8 +67,8 @@ public class Main {
          windowY = frame.getLocationOnScreen().y;
      }
 
-     static boolean isHidden;
-     public static void hideMousePointer(boolean hide) {
+     private static boolean isHidden;
+     static void hideMousePointer(boolean hide) {
          if (hide && !isHidden) {
             isHidden=true;
             int[] pixels = new int[16 * 16];
@@ -91,11 +92,11 @@ public class Main {
         }
      }
 
-     public static int getWindowXpos() {
+     static int getWindowXpos() {
          return windowX;
      }
 
-     public static int getWindowYpos() {
+     static int getWindowYpos() {
           return windowY;
      }
 

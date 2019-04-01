@@ -9,6 +9,9 @@ public class Utils {
     public static boolean CANVAS_LOGGING = false;
     private static final Random randomizer = new Random();
 
+    private static int LINES_THAT_FIT_VERTICALLY = 25;
+    static Vector systemOuts = new Vector(0);
+
     private Color colour;
     private Color transparent;
 
@@ -72,11 +75,11 @@ public class Utils {
           g.fillArc(x, y,width, height, 1, 360);
     }
 
-    public Image loadImage(String path) {
+    static Image loadImage(String path) {
         Image image = null;
         try {
             log("LOADIMAGE: Attempting to load: " + path);
-            image = new javax.swing.ImageIcon(getClass().getResource(path)).getImage();
+            image = new javax.swing.ImageIcon(Utils.class.getResource(path)).getImage();
         } catch (Exception e) {
             _E("error loading image ("+path+") "+e.getMessage());
         }
@@ -92,9 +95,6 @@ public class Utils {
         g.drawImage(i,x-(i.getWidth(observer)/2),y-(i.getHeight(observer)/2), observer);
     }
 
-
-    public static int LINES_THAT_FIT_VERTICALLY = 25;
-    public static Vector systemOuts = new Vector(0);
     public static void log(String s) {
         if (CANVAS_LOGGING) {
             systemOuts.add(s);
