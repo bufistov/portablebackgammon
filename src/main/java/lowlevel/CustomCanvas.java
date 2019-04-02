@@ -934,11 +934,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 Bot.dead = false;
                 log("CPU OPPONENT PRIMED.");
                 startGame();
-                if (typeOfPlay == LOCAL_PLAY) {
-                    log("Selected LOCAL play against CPU");
-                } else {
-                    log("Selected NETWORK play against CPU");
-                }
             }
         }
     }
@@ -954,11 +949,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 startGame();
                 Board.HUMAN_VS_COMPUTER = false;
                 log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
-                if (typeOfPlay == LOCAL_PLAY) {
-                    log("Selected LOCAL play against HUMAN");
-                } else {
-                    log("Selected NETWORK play against HUMAN");
-                }
             }
         }
     }
@@ -970,7 +960,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxB && x <= buttonxB + buttonwB) {
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-                typeOfPlay = NETWORK_PLAY;
                 buttonPressed = true;
                 state = NETWORKING_ENTER_NAME;
             }
@@ -983,7 +972,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-                typeOfPlay = LOCAL_PLAY;
                 buttonPressed = true;
                 state = OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
             }
