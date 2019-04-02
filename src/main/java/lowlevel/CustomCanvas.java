@@ -20,7 +20,7 @@ import static java.awt.event.MouseEvent.BUTTON3;
  */
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
-    private final int maxSplashCounter = 50;
+    private final int maxSplashCounter;
     private static final boolean drawMousePointer = true;
     private static final String SERVER_IP_ADDRESS = "localhost";
     private static final String SPECIAL_END_SYMBOL = "::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
@@ -28,7 +28,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // properly.
 
     private static boolean I_AM_CLIENT;
-    public static boolean I_AM_SERVER;
+    static boolean I_AM_SERVER;
 
     public static final String VERSION = "v0.0.1";
     private static final boolean RELEASE_BUILD = false;
@@ -68,10 +68,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private GraphicsEnvironment   graphEnv     = GraphicsEnvironment.getLocalGraphicsEnvironment();
     private GraphicsDevice        graphDevice  = graphEnv.getDefaultScreenDevice();
     GraphicsConfiguration graphicConf  = graphDevice.getDefaultConfiguration();
-    Graphics2D g;
-    BufferStrategy bufferStrategy;
 
-    public static boolean NETWORK_GAME_IN_PROCESS;
+    static boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
     private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled, sfxGameOver;
     private Sound sfxdouble, sfxResign;
@@ -91,7 +89,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     static long robotMessageSetTimeLong;
     private static int TRANSPARENCY_LEVEL = 100;
 
-    private Board board;
+    public Board board;
     private int y;
     private int x;
     private int splashCounter;
@@ -198,8 +196,20 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
     public static boolean showDice;
 
+    private int debugMenuPos = 0;
+    public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
+    public static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
+    public static final int DEBUG_OPTION_paintRobotMessages=2;
+    public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
+    public static final int LAST_DEBUG_OPTION=3;
+
+    public static final int DEBUGLEFT=1;
+    public static final int DEBUGRIGHT=2;
+
     public CustomCanvas(GameConfig config) {
         log("CustomCanvas made.");
+        this.maxSplashCounter = config.maxSplashCounter();
+
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
         sfxPutPieceInContainer = new Sound("/pieceputaway.wav");
@@ -210,7 +220,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         this.soundOn = config.soundOn();
         this.gameComplete = false;
-        loadSounds(this.soundOn);
         board = new Board(this, config);
 
         addMouseListener(this);
@@ -219,15 +228,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         setTheme(theme);
         makeColourObjects();
+    }
+
+    public void init() {
+        loadSounds(this.soundOn);
         loadCustomFonts();
         loadImages();
         requestFocus();
+        createBufferStrategy(2);
     }
 
     @Override
     public void paint(Graphics g_) {
-        doubleBuffering(1); // pass 1 in to start dbl buffering
+        BufferStrategy bufferStrategy = this.getBufferStrategy();
+        if (bufferStrategy == null) {
+            log("Buffer strategy is not yet created, waiting");
+            return;
+        }
+        Graphics2D g = (Graphics2D)bufferStrategy.getDrawGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         // whole game canvas:
         WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
@@ -258,7 +278,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 }
             }
         }
-        doubleBuffering(2); // pass 2 in to start dbl buffering
+        bufferStrategy.show();
+    }
+
+    public GuiState getState() {
+        return state;
     }
 
     private void loadSounds(boolean soundOn) {
@@ -275,21 +299,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("Sounds loaded");
         } else {
             log("Sounds are disabled");
-        }
-    }
-
-    // implements double buffering, phase is 1 or 2, 1 is called before
-    // painting and 2 is called after. Any other phase is erroneous
-    private void doubleBuffering(int phase) {
-        if (phase==1) {
-            //START DBL BUFFERING
-            this.createBufferStrategy(2); // must be after we are visible!
-            bufferStrategy = this.getBufferStrategy();
-            g = (Graphics2D)bufferStrategy.getDrawGraphics();
-        } else if (phase==2) {
-            bufferStrategy.show();
-        } else {
-            Utils._E("doubleBuffering() phase was invalid "+phase);
         }
     }
 
@@ -489,16 +498,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         y += fontblack.getHeight();
     }
 
-    int debugMenuPos=0;
-    public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
-    public static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
-    public static final int DEBUG_OPTION_paintRobotMessages=2;
-    public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
-    public static final int LAST_DEBUG_OPTION=3;
-
-    public static final int DEBUGLEFT=1;
-    public static final int DEBUGRIGHT=2;
-
     private void debugOptionChanged(int direction) {
         switch (debugMenuPos) {
             //DELAY_BETWEEN_CLICKS_MILLIS
@@ -570,13 +569,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void loadImages() {
         log("Attempting to loadImages()");
         if (splashScreenLogo == null) {
-            splashScreenLogo      = utils.loadImage("/midokura-logo.png");
-             splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
-             pointer               = utils.loadImage("/pointer.png");
-             op                    = utils.loadImage("/op.png");
-             admin                 =  utils.loadImage("/admin.png");
-        }
-        else {
+            splashScreenLogo = utils.loadImage("/midokura-logo.png");
+            splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
+            pointer = utils.loadImage("/pointer.png");
+            op = utils.loadImage("/op.png");
+            admin = utils.loadImage("/admin.png");
+        } else {
             log("Images already pre-cached...");
         }
     }
@@ -595,7 +593,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
              ydebug += fontblack.getHeight();
              fontblack.drawString(g, splashCounter + "/" + maxSplashCounter, xdebug, ydebug,0);
         }
-        if (splashCounter++ > maxSplashCounter) {
+        if (++splashCounter > maxSplashCounter) {
             log("Splash done.");
             state = OPTIONS_SCREEN_LOCAL_OR_NETWORK;
         }
@@ -681,7 +679,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             Piece p = (Piece) eB.nextElement();
             p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
         }
-        drawHUDtext(xpos);
+        drawHUDtext(g, xpos);
     }
 
     private void checkIfGameIsOver() {
@@ -756,7 +754,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     //draw all of the text on the panel
-    private void drawHUDtext(int xpos) {
+    private void drawHUDtext(Graphics g, int xpos) {
         int ypos = Board.BORDER + TINY_GAP;
         //draw black players score at top
         String printme = "White (" + board.getWhitePlayer().getName() + ")";
@@ -1085,6 +1083,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
+        utils.backGround(g, Color.WHITE, getWidth(), getHeight());
         String printme = question;
         int widthOfPrintMe;
         int xposTmp;
@@ -1370,11 +1369,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             printme = "IP:";
             fontwhite.drawString(g, printme, xabout - fontwhite.stringWidth(printme) / 2, yabout, 0);
         }
-    }
-
-    //paint helpers///////////////
-    private void bg(Color col, Graphics g) {
-        utils.backGround(g,col,WIDTH,HEIGHT);
     }
 
     // gets called each frame to repaint

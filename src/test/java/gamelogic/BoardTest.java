@@ -2,12 +2,18 @@ package gamelogic;
 
 import data.PlayerColor;
 import lowlevel.CustomCanvas;
+import lowlevel.Main;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import javax.swing.*;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
 
@@ -28,14 +34,18 @@ public class BoardTest {
 
     @Test
     @DisplayName("Board allows only correct moves")
-    public void test2() {
+    void test2() throws Exception {
         ConfigFactory.setProperty(
             "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
 
         CustomCanvas canvas = new CustomCanvas(config);
+        JFrame frame = new JFrame();
+        frame.getContentPane().add(canvas);
+        Main.initMainWindow(frame, true);
+        canvas.init();
         // Given a board with all pieces at home spikes
-        Board board = new Board(canvas, config);
+        Board board = canvas.board;
         int[] whiteHome = {
             5, 5, 5, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
@@ -48,8 +58,14 @@ public class BoardTest {
             0, 0, 0, 0, 0, 0,
             5, 5, 5, 0, 0, 0
         };
-        board.initialiseBoardForNewGame(whiteHome, blackHome);
 
-        board.calculatePotentialMoves();
+        assertEquals(810, frame.getWidth());
+        assertEquals(500, frame.getHeight());
+
+        assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
+        for (int i = 0; i <= config.maxSplashCounter(); ++i) {
+            canvas.paint(null);
+        }
+        assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_OR_NETWORK, canvas.getState());
     }
 }

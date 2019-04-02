@@ -15,33 +15,34 @@ import java.awt.image.*;
 
 public class Main {
 
-    static JFrame frame;
+    private static JFrame frame;
     private static CustomCanvas canvas;
     private static final int WINDOWY_MINUS = 50;
     private static Bot bot;
+    private static final String windowTitle = "Backgammon";
 
     private static final int FRAME_DELAY_MILLIS = 50; //50;//20; // 20ms. implies 50fps (1000/20) = 50
     private static boolean gameThreadIsRunning = true;
-    private static int windowX;
-    private static int windowY;
     private static boolean isHidden;
 
-     public static void main(String[] args) {
-         log("Main called, Backgammon starting.");
-         ConfigFactory.setProperty("configFileName", "backgammon.config");
-         GameConfig config = ConfigFactory.create(GameConfig.class);
-         frame = new JFrame();
-         canvas = new CustomCanvas(config);
-         bot = new Bot(canvas, frame);
-         bot.start();
-         frame.getContentPane().add(canvas);
-         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE );
-         frame.setSize(810, 500);
-         frame.setIconImage(Utils.loadImage("/icon.gif"));
-         frame.setResizable(false);
-         Thread gameThread = new Thread(() -> {
+    public static void main(String[] args) {
+        log("Main called, Backgammon starting.");
+        ConfigFactory.setProperty("configFileName", "backgammon.config");
+        GameConfig config = ConfigFactory.create(GameConfig.class);
+        canvas = new CustomCanvas(config);
+        frame = new JFrame();
+        frame.getContentPane().add(canvas);
+        initMainWindow(frame, true);
+        frame.setIconImage(Utils.loadImage("/icon.gif"));
+        centralise(frame);
+        frame.setTitle(windowTitle);
+        canvas.init();
+        bot = new Bot(canvas, frame);
+        bot.start();
+
+        Thread gameThread = new Thread(() -> {
             long cycleTime = System.currentTimeMillis();
-            while(gameThreadIsRunning) {
+            while (gameThreadIsRunning) {
                 canvas.repaint();
                 cycleTime = cycleTime + FRAME_DELAY_MILLIS;
                 long difference = cycleTime - System.currentTimeMillis();
@@ -51,16 +52,11 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-         });
-         gameThread.setPriority(Thread.MIN_PRIORITY);
-         gameThread.start();
-         centralise(frame);
-         frame.setVisible(true); // start AWT painting.
-         frame.setTitle("Midokura Backgammon "+ CustomCanvas.VERSION);
-         log("Backgammon visible.");
-         windowX = frame.getLocationOnScreen().x;
-         windowY = frame.getLocationOnScreen().y;
-     }
+        });
+        gameThread.setPriority(Thread.MIN_PRIORITY);
+        gameThread.start();
+        log("Backgammon visible.");
+    }
 
      static void hideMousePointer(boolean hide) {
          if (hide && !isHidden) {
@@ -73,6 +69,21 @@ public class Main {
              isHidden = false;
              frame.setCursor(null);
          }
+     }
+
+     public static void initMainWindow(JFrame frame, boolean visible) {
+         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+         frame.setSize(810, 500);
+         frame.setResizable(false);
+         frame.setVisible(visible);
+     }
+
+     public static String getTitle() {
+        return frame.getTitle();
+     }
+
+     public static void setTitle(String title) {
+        frame.setTitle(title);
      }
 
      private static void centralise(JFrame frame) {

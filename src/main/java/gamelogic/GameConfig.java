@@ -11,4 +11,6 @@ public interface GameConfig extends Config {
     int totalCheckers();
 
     boolean soundOn();
+
+    int maxSplashCounter();
 }

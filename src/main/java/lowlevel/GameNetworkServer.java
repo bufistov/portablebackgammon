@@ -24,7 +24,7 @@ public class GameNetworkServer implements Runnable {
                 server = listener.accept();
                 log("connection accepted!");
                 CustomCanvas.NETWORK_GAME_IN_PROCESS = true;
-                Main.frame.setTitle(Main.frame.getTitle() + " Online game in progress. (You are server, client connected to you on port " + port + ")");
+                Main.setTitle(Main.getTitle() + " Online game in progress. (You are server, client connected to you on port " + port + ")");
                 doComms conn_c = new doComms(server, canvas);
                 Thread t = new Thread(conn_c);
                 t.start();
