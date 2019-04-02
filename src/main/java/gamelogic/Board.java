@@ -292,7 +292,6 @@ public class Board {
         allowPieceToStickToMouse = false;
         allWhitePiecesAreHome = false;
         allBlackPiecesAreHome = false;
-        calculatePotentialNumberOfMoves = true; // at the start of using a new dice we work out if the player has potential moves
         potentialNumberOfMoves = 0;
         noMovesAvailable = false; // this gets set to true when no moves at all are available.
         pulsateWhiteContainer = false;
@@ -401,7 +400,6 @@ public class Board {
     // to the player they can put them into their container now.
     public static boolean allWhitePiecesAreHome;
     public static boolean allBlackPiecesAreHome;
-    public static boolean calculatePotentialNumberOfMoves = true; // at the start of using a new dice we work out if the player has potential moves
     static int potentialNumberOfMoves = 0;
     static public boolean noMovesAvailable = false; // this gets set to true when no moves at all are available.
 

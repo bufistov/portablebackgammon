@@ -1050,7 +1050,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             sfxDoubleRolled.playSound();
         }
         showRollButton = false; // dont show it now theyve just rolled.
-        board.calculatePotentialNumberOfMoves = true;
     }
 
     //clears the potential spikes used for highlighting possible moves,
@@ -1076,8 +1075,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //make sure roll button gets redrawn
         showRollButton = true;
         showDice = false; // dont draw til the next player clicks roll.
-
-        Board.calculatePotentialNumberOfMoves = true; // so they get calc'd at start of each go.
         someoneRolledADouble = false;
         doubleRollCounter = 0;
     }
@@ -1439,10 +1436,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("RIGHT BUTTON PRESSED");
             unstickPieceFromMouse();
             if (board != null) {
-                board.calculatePotentialNumberOfMoves = true;
                 board.thereAreOptions = false;
             }
-            return; // do nothing else with right click
+            return;
         }
 
         switch(state) {
@@ -1541,7 +1537,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
         board.SPtheMoveToMake=null; // reset the move to make once a move is made or right click
-        board.calculatePotentialNumberOfMoves = true; // so they get calc'd at start of each go.
         Board.spikesAllowedToMoveToFromBar = new Vector(4); // RESET THIS HERE?
         pieceStuckToMouse = null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
     }
@@ -1691,7 +1686,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                             // UNLESS someone rolled a double
                             if (someoneRolledADouble && doubleRollCounter <= 3) {
                                 log("Player is still enjoying his double round so dont move on. y");
-                                board.calculatePotentialNumberOfMoves = true;//so they get calc'd at start of each go.
                                 log("DONT USE UP DICE SINCE ITS A DOUBLE XXX");
                             } else {
                                 if (theDieThatGotUsHere.getValue() == Board.die1.getValue()) {
