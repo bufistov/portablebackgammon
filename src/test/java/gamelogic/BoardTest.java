@@ -15,14 +15,14 @@ class BoardTest {
 
     @Test
     @DisplayName("Board object can be constructed")
-    void test1() {
+    void test1() throws Exception {
         ConfigFactory.setProperty(
             "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
 
         CustomCanvas canvas = new CustomCanvas(new JFrame(), config);
 
-        Board board = canvas.board;
+        Board board = (Board)CustomCanvasTest.makeCanvasFieldPublic("board").get(canvas);
         assertEquals(167, board.calculatePips(PlayerColor.WHITE));
         assertEquals(167, board.calculatePips(PlayerColor.BLACK));
         assertEquals(PlayerColor.WHITE, board.getCurrentPlayer().getColour());

@@ -86,7 +86,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     static long robotMessageSetTimeLong;
     private static int TRANSPARENCY_LEVEL = 100;
 
-    public Board board;
+    private Board board;
     private int y;
     private int x;
     private int splashCounter;

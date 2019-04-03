@@ -33,7 +33,7 @@ class TestableCanvas extends CustomCanvas {
 
 class CustomCanvasTest {
 
-    private Field makeCanvasFieldPublic(String fieldName) throws Exception {
+    static Field makeCanvasFieldPublic(String fieldName) throws Exception {
         Field field = CustomCanvas.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         return field;
