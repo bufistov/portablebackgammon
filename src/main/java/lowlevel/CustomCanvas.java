@@ -3,6 +3,7 @@ package lowlevel;
 import java.awt.*;
 import java.awt.event.*;
 
+import data.GuiState;
 import data.PlayerColor;
 import gamelogic.*;
 import graphics.GameColour;
@@ -14,7 +15,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.swing.JFrame;
 
-import static gamelogic.GuiState.*;
+import static data.GuiState.*;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.awt.event.MouseEvent.BUTTON3;
 

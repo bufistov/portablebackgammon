@@ -1,4 +1,4 @@
-package gamelogic;
+package data;
 
 public enum GuiState {
     SPLASH_SCREEN,
