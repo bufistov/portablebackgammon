@@ -232,12 +232,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         setTheme(theme);
         makeColourObjects();
+        loadSounds(this.soundOn);
+        loadImages();
+        loadCustomFonts();
     }
 
+    /**
+     * Must be called after canvas has window associated.
+     */
     public void init() {
-        loadSounds(this.soundOn);
-        loadCustomFonts();
-        loadImages();
         requestFocus();
         if (enableDoubleBuffering) {
             createBufferStrategy(2);
@@ -2209,40 +2212,35 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         roll_button_colour = new Color(ROLL_BUTTON_COLOUR);
     }
 
-    // prepare the customfont
     private void loadCustomFonts() {
-        if (fontwhite == null) {
-            boolean land = false;
-            int gap = 10;
-            String path = "/";
-            int GAP = 3;//REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
-            try {
-                utils.log("loading fonts:");
-                fontwhite = CustomFont.getFont(utils.loadImage(path + "whitefont.png"),
-                    CustomFont.SIZE_SMALL,
-                    CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
-                if (fontwhite == null) {
-                    Utils._E("-- fontwhite image is null");
-                }
-                fontblack = CustomFont.getFont(utils.loadImage(path + "blackfont.png"),
-                    CustomFont.SIZE_SMALL,
-                    CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
-                if (fontblack == null) {
-                    Utils._E("-- fontblack image is null");
-                }
-            } catch (Exception e) {
-                Utils._E("== error loading fonts " + e.getMessage());
+        boolean land = false;
+        int gap = 10;
+        String path = "/";
+        int GAP = 3; // REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
+        try {
+            utils.log("loading fonts:");
+            fontwhite = CustomFont.getFont(utils.loadImage(path + "whitefont.png"),
+                CustomFont.SIZE_SMALL,
+                CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
+            if (fontwhite == null) {
+                Utils._E("-- fontwhite image is null");
             }
-        } else {
-            log("Fonts already pre-cached...");
+            fontblack = CustomFont.getFont(utils.loadImage(path + "blackfont.png"),
+                CustomFont.SIZE_SMALL,
+                CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
+            if (fontblack == null) {
+                Utils._E("-- fontblack image is null");
+            }
+        } catch (Exception e) {
+            Utils._E("== error loading fonts " + e.getMessage());
         }
     }
 
     //for debugging, paints sytem.out to screen
-    public void paintStringsToCanvas(Graphics g) {
+    void paintStringsToCanvas(Graphics g) {
         Enumeration e = Utils.systemOuts.elements();
-        int x=3;
-        int y=3;
+        int x = 3;
+        int y = 3;
         while (e.hasMoreElements()) {
              String printthis = (String)e.nextElement();
              fontwhite.drawString(g, printthis, x, y, 0);y+=fontwhite.getHeight();
@@ -2254,12 +2252,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         message2Players = s;
     }
 
-    public static void robotExplain(String s) {
+    static void robotExplain(String s) {
          robotMessageSetTimeLong = System.currentTimeMillis();
          robotMoveDesc = s;
     }
 
-    public void paintMessageToPlayers(Graphics g) {
+    void paintMessageToPlayers(Graphics g) {
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
         if (gameComplete) {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
@@ -2285,7 +2283,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    public void paintRobotMessage(Graphics g) {
+    void paintRobotMessage(Graphics g) {
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
         messageWidth = fontwhite.stringWidth(robotMoveDesc + "  ");
         messagex = WIDTH - (messageWidth + 10);
@@ -2303,7 +2301,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static int themecolours[]; // this gets assigned in constructor
 
     // DEFAULT VALUES (ms xp backgammon colours)
-    public static int defaultms[] = {
+    static int defaultms[] = {
         BACKGROUND_COLOUR,
         PANEL_COLOUR,
         ROLL_BUTTON_COLOUR,

@@ -6,65 +6,66 @@ import lowlevel.Main;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import javax.swing.*;
 
+import java.awt.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BoardTest {
+
+class TestableCanvas extends CustomCanvas {
+
+    TestableCanvas(GameConfig config) {
+        super(config);
+    }
+
+    @Override
+    public int getWidth() {
+        return 810;
+    }
+
+    @Override
+    public int getHeight() {
+        return 500;
+    }
+}
+
+class BoardTest {
 
     @Test
     @DisplayName("Board object can be constructed")
-    public void test1() {
+    void test1() {
         ConfigFactory.setProperty(
             "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
 
         CustomCanvas canvas = new CustomCanvas(config);
-        Board board = new Board(canvas, config);
 
+        Board board = canvas.board;
         assertEquals(167, board.calculatePips(PlayerColor.WHITE));
         assertEquals(167, board.calculatePips(PlayerColor.BLACK));
         assertEquals(PlayerColor.WHITE, board.getCurrentPlayer().getColour());
     }
 
     @Test
-    @DisplayName("Board allows only correct moves")
-    void test2() throws Exception {
-        ConfigFactory.setProperty(
-            "configFileName", "somenonexistingconfig.config");
-        GameConfig config = ConfigFactory.create(GameConfig.class);
+    @DisplayName("Game screen changes to LOCAL_OR_NETWORK after 50 frames")
+    void test2() {
+        GameConfig config = Mockito.mock(GameConfig.class);
+        Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
-        CustomCanvas canvas = new CustomCanvas(config);
+        CustomCanvas canvas = new TestableCanvas(config);
         JFrame frame = new JFrame();
         frame.getContentPane().add(canvas);
-        Main.initMainWindow(frame, true);
-        canvas.init();
-        // Given a board with all pieces at home spikes
-        Board board = canvas.board;
-        int[] whiteHome = {
-            5, 5, 5, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0
-        };
-        int[] blackHome = {
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            5, 5, 5, 0, 0, 0
-        };
-
-        assertEquals(810, frame.getWidth());
-        assertEquals(500, frame.getHeight());
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
+        Graphics graphics = Mockito.mock(Graphics.class);
         for (int i = 0; i <= config.maxSplashCounter(); ++i) {
-            canvas.paint(null);
+            canvas.paint(graphics);
         }
         assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_OR_NETWORK, canvas.getState());
     }

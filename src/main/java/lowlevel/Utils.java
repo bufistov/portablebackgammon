@@ -86,12 +86,12 @@ public class Utils {
         return image;
     }
 
-    public void backGround(Graphics g, Color c, int WIDTH, int HEIGHT) {
+    void backGround(Graphics g, Color c, int WIDTH, int HEIGHT) {
         setColor(g, c);
         fillRect(g,0,0, WIDTH, HEIGHT);
     }
 
-    public void drawImage(Graphics g, Image i, int x, int y, ImageObserver observer) {
+    void drawImage(Graphics g, Image i, int x, int y, ImageObserver observer) {
         g.drawImage(i,x-(i.getWidth(observer)/2),y-(i.getHeight(observer)/2), observer);
     }
 
