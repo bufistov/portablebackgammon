@@ -6,43 +6,36 @@ package lowlevel;
 import gamelogic.GameConfig;
 import org.aeonbits.owner.ConfigFactory;
 
-import java.awt.*;
 import javax.swing.*;
 
 import java.awt.Toolkit;
 import java.awt.Dimension;
-import java.awt.image.*;
 
 public class Main {
 
+    private static final int WINDOWY_MINUS = 50;
+    private static final String MAIN_WINDOW_TITLE = "Backgammon";
+
     private static JFrame frame;
     private static CustomCanvas canvas;
-    private static final int WINDOWY_MINUS = 50;
     private static Bot bot;
-    private static final String windowTitle = "Backgammon";
 
     private static final int FRAME_DELAY_MILLIS = 50; //50;//20; // 20ms. implies 50fps (1000/20) = 50
-    private static boolean gameThreadIsRunning = true;
-    private static boolean isHidden;
 
     public static void main(String[] args) {
         log("Main called, Backgammon starting.");
         ConfigFactory.setProperty("configFileName", "backgammon.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
-        canvas = new CustomCanvas(config);
         frame = new JFrame();
-        frame.getContentPane().add(canvas);
+        canvas = new CustomCanvas(frame, config);
         initMainWindow(frame, true);
-        frame.setIconImage(Utils.loadImage("/icon.gif"));
-        centralise(frame);
-        frame.setTitle(windowTitle);
         canvas.init();
         bot = new Bot(canvas, frame);
         bot.start();
 
         Thread gameThread = new Thread(() -> {
             long cycleTime = System.currentTimeMillis();
-            while (gameThreadIsRunning) {
+            while (true) {
                 canvas.repaint();
                 cycleTime = cycleTime + FRAME_DELAY_MILLIS;
                 long difference = cycleTime - System.currentTimeMillis();
@@ -58,40 +51,30 @@ public class Main {
         log("Backgammon visible.");
     }
 
-     static void hideMousePointer(boolean hide) {
-         if (hide && !isHidden) {
-            isHidden = true;
-            int[] pixels = new int[16 * 16];
-            Image image = Toolkit.getDefaultToolkit().createImage( new MemoryImageSource(16, 16, pixels, 0, 16));
-            Cursor transparentCursor =  Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), "invisibleCursor");
-            frame.setCursor(transparentCursor);
-         } else if (!hide && isHidden) {
-             isHidden = false;
-             frame.setCursor(null);
-         }
-     }
+    private static void initMainWindow(JFrame frame, boolean visible) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(810, 500);
+        frame.setResizable(false);
+        frame.setVisible(visible);
+        frame.setIconImage(Utils.loadImage("/icon.gif"));
+        centralise(frame);
+        frame.setTitle(MAIN_WINDOW_TITLE);
+    }
 
-     public static void initMainWindow(JFrame frame, boolean visible) {
-         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         frame.setSize(810, 500);
-         frame.setResizable(false);
-         frame.setVisible(visible);
-     }
-
-     public static String getTitle() {
+    static String getTitle() {
         return frame.getTitle();
      }
 
-     public static void setTitle(String title) {
+    static void setTitle(String title) {
         frame.setTitle(title);
      }
 
-     private static void centralise(JFrame frame) {
-         Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-         frame.setLocation(screenDim.width, (screenDim.height / 8) - WINDOWY_MINUS);
-         frame.setLocation(screenDim.width / 2 - frame.getWidth() / 2,
-             (screenDim.height / 2) - (frame.getHeight() / 2) - WINDOWY_MINUS);
-     }
+    private static void centralise(JFrame frame) {
+        Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setLocation(screenDim.width, (screenDim.height / 8) - WINDOWY_MINUS);
+        frame.setLocation(screenDim.width / 2 - frame.getWidth() / 2,
+            (screenDim.height / 2) - (frame.getHeight() / 2) - WINDOWY_MINUS);
+    }
 
      private static void log(String s) {
          Utils.log("Main{}:" + s);

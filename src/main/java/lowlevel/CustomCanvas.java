@@ -6,6 +6,7 @@ import java.awt.event.*;
 import data.PlayerColor;
 import gamelogic.*;
 import java.awt.image.BufferStrategy;
+import java.awt.image.MemoryImageSource;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -66,6 +67,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled, sfxGameOver;
     private Sound sfxdouble, sfxResign;
     private static Image splashScreenLogo, splashScreenLogoSmall, op, admin, pointer;
+    private static Cursor transparentCursor;
+
+    private JFrame mainWindow;
 
     // Garbage
     static String robotMoveDesc = "Bot loaded.";
@@ -151,11 +155,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     String personToChallenge;
 
     // for screens with 2 buttons this is button 1
-    int buttonxA, buttonyA;
-    int buttonwA, buttonhA;
+    private int buttonxA, buttonyA;
+    private int buttonwA, buttonhA;
+
     //and button 2
-    int buttonxB, buttonyB;
-    int buttonwB, buttonhB;
+    private int buttonxB, buttonyB;
+    private int buttonwB, buttonhB;
 
     private int glowCounter = 125;
 
@@ -199,11 +204,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int DEBUGLEFT=1;
     public static final int DEBUGRIGHT=2;
 
-    public CustomCanvas(GameConfig config) {
+    public CustomCanvas(JFrame mainWindow, GameConfig config) {
         log("CustomCanvas made.");
         this.maxSplashCounter = config.maxSplashCounter();
         this.drawMousePointer = config.drawMousePointer();
         this.enableDoubleBuffering = config.enableDoubleBuffering();
+        this.mainWindow = mainWindow;
 
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -225,7 +231,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         makeColourObjects();
         loadSounds(this.soundOn);
         loadImages();
+        int[] pixels = new int[16 * 16];
+        Image image = Toolkit.getDefaultToolkit().createImage( new MemoryImageSource(16, 16, pixels, 0, 16));
+        transparentCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+            image, new Point(0, 0), "invisibleCursor");
         loadCustomFonts();
+        mainWindow.getContentPane().add(this);
     }
 
     /**
@@ -323,11 +334,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             Board.mouseHoverY = pointerY;
         } else {
             if (botIsPlaying) {
-                Main.hideMousePointer(true);
+                mainWindow.setCursor(transparentCursor);
                 Board.mouseHoverX = Bot.x;
                 Board.mouseHoverY = Bot.y;
             } else {
-                Main.hideMousePointer(false);
+                mainWindow.setCursor(null);
             }
         }
         if (this.drawMousePointer && (NETWORK_GAME_IN_PROCESS || botIsPlaying)) {
