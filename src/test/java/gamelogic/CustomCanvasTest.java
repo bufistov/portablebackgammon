@@ -85,7 +85,7 @@ class CustomCanvasTest {
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
-        Board board = new Board(new GameColour(), config);
+        TestableBoard board = new TestableBoard(new GameColour(), config, 1);
         CustomCanvas canvas = new TestableCanvas(frame, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
@@ -112,20 +112,35 @@ class CustomCanvasTest {
         canvas.paint(graphics);
 
         int[] whiteHome = {
-            0,5,5,5,0,0,
+            0,15,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0
         };
 
         int[] blackHome = {
+            2,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0,
-            0,0,5,5,5,0
+            0,0,13,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.setCurrentPlayer(PlayerColor.WHITE);
         assertTrue(CustomCanvas.showRollButton);
+
+        Field rollButtonX = makeCanvasFieldPublic("rollButtonX");
+        Field rollButtonY = makeCanvasFieldPublic("rollButtonY");
+        Field rollButtonW = makeCanvasFieldPublic("rollButtonW");
+        Field rollButtonH = makeCanvasFieldPublic("rollButtonH");
+
+        buttonX = (int)rollButtonX.get(canvas) + (int)rollButtonW.get(canvas) / 2;
+        buttonY = (int)rollButtonY.get(canvas) + (int)rollButtonH.get(canvas) / 2;
+        MouseEvent clickRollButton = new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false);
+        canvas.mouseClicked(clickRollButton);
+        assertTrue(board.rolledDouble());
+        canvas.paint(graphics);
+        for (int i = 0; i < 10; ++i) {
+            canvas.paint(graphics);
+        }
     }
 }

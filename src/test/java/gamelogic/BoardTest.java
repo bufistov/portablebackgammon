@@ -11,6 +11,19 @@ import javax.swing.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+class TestableBoard extends Board {
+    private final int rollValue;
+    TestableBoard(GameColour gameColour, GameConfig config, int rollValue) {
+        super(gameColour, config);
+        this.rollValue = rollValue;
+    }
+
+    @Override
+    public void rollDies(){
+        die1.setActualValue(rollValue);
+        die2.setActualValue(rollValue);
+    }
+}
 
 class BoardTest {
 
