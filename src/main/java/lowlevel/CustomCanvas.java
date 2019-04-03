@@ -5,6 +5,8 @@ import java.awt.event.*;
 
 import data.PlayerColor;
 import gamelogic.*;
+import graphics.GameColour;
+
 import java.awt.image.BufferStrategy;
 import java.awt.image.MemoryImageSource;
 import java.util.Enumeration;
@@ -34,6 +36,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public static final String VERSION = "v0.0.1";
     private static final boolean RELEASE_BUILD = false;
+
+    private GameColour gameColour;
+
     private boolean soundOn;
     private boolean gameComplete;
 
@@ -46,9 +51,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int TINY_GAP = 5; // when we need a tiny gap
 
     // -- constants
-    private static int PANEL_COLOUR = 0x000000;
-    public static int BACKGROUND_COLOUR = 0x993300;
-    private static int ROLL_BUTTON_COLOUR = 0xffcc66;
     private Color panel_colour, background_colour, roll_button_colour;
 
     private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
@@ -204,12 +206,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int DEBUGLEFT=1;
     public static final int DEBUGRIGHT=2;
 
-    public CustomCanvas(JFrame mainWindow, GameConfig config) {
+    public CustomCanvas(JFrame mainWindow, GameColour gameColour, Board board, GameConfig config) {
         log("CustomCanvas made.");
         this.maxSplashCounter = config.maxSplashCounter();
         this.drawMousePointer = config.drawMousePointer();
         this.enableDoubleBuffering = config.enableDoubleBuffering();
         this.mainWindow = mainWindow;
+        this.board = board;
+        this.gameColour = gameColour;
 
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -221,7 +225,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         this.soundOn = config.soundOn();
         this.gameComplete = false;
-        board = new Board(this, config);
 
         addMouseListener(this);
         addMouseMotionListener( this );
@@ -608,8 +611,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //paint board and its containing parts
         int boardWidth = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         int boardHeight = getHeight();
-        board.paint(g, boardWidth, boardHeight);
+        board.paint(g, boardWidth, boardHeight, !gameComplete());
 
+        // FIXME: check this when turn is over to avoid races
         checkIfGameIsOver();
 
         //paint the message panel to the right with players name etc
@@ -682,6 +686,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
         }
         drawHUDtext(g, xpos);
+        if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
+            log("GO TO NEW TURN AA");
+            turnOver();
+        }
     }
 
     private void checkIfGameIsOver() {
@@ -1347,7 +1355,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // wrapper around system out to console
     private static void log(String s) {
-        Utils.log("CustomCanvas{}:" + s);
+        Utils.log(String.format("thread-%s CustomCanvas{}:%s", Thread.currentThread().getName(), s));
     }
 
     /**
@@ -1396,6 +1404,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         // so our mouse doesnt influence anything
         if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK) ) {
+            log("skip mouse clicked at " + e.getX() + " " + e.getY()+ " turn: " + Board.whoseTurnIsIt);
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
             mouseClickedX(e.getX(), e.getY(), e.getButton());
@@ -1433,11 +1442,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     checkIfPieceContainerClickedOn(x, y);
                     checkIfDoubleClickedOn(x, y);
                     checkIfResignClickedOn(x, y);
-                    //if both dice used move to next turn
-                    if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
-                        log("GO TO NEW TURN AA");
-                        turnOver();
-                    }
                 }
                 break;
         }
@@ -2130,23 +2134,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         firstThemeSet = false;
         //assigns each colour from the one specified
+        gameColour.setBackgroundColour(themecolours[0]);
+        gameColour.setRollButtonColour(themecolours[2]);
+        gameColour.setPanelColour(themecolours[1]);
+        gameColour.setBoardColour(themecolours[3]);
+        gameColour.setBarColour(themecolours[4]);
         for (int i = 0; i < themecolours.length; i++) {
             switch (i) {
-                case 0:
-                    BACKGROUND_COLOUR = themecolours[i];
-                    break;
-                case 1:
-                    PANEL_COLOUR = themecolours[i];
-                    break;
-                case 2:
-                    ROLL_BUTTON_COLOUR = themecolours[i];
-                    break;
-                case 3:
-                    Board.BOARD_COLOUR = themecolours[i];
-                    break;
-                case 4:
-                    Board.BAR_COLOUR = themecolours[i];
-                    break;
                 case 5:
                     Spike.BLACK_SPIKE_COLOUR = themecolours[i];
                     break;
@@ -2172,7 +2166,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     Die.DOT_COLOUR = themecolours[i];
                     break;
                 default:
-                    Utils._E("theme state error, should not exceed 12!");
+                    if (i > 12)
+                        Utils._E("theme state error, should not exceed 12!");
             }
         }
         //force recreation of colour objects
@@ -2187,9 +2182,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private void makeColourObjects() {
-        panel_colour = new Color(PANEL_COLOUR);
-        background_colour = new Color(BACKGROUND_COLOUR);
-        roll_button_colour = new Color(ROLL_BUTTON_COLOUR);
+        panel_colour = new Color(gameColour.getPanelColour());
+        background_colour = new Color(gameColour.getBackgroundColour());
+        roll_button_colour = new Color(gameColour.getRollButtonColour());
     }
 
     private void loadCustomFonts() {
@@ -2282,11 +2277,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // DEFAULT VALUES (ms xp backgammon colours)
     static int defaultms[] = {
-        BACKGROUND_COLOUR,
-        PANEL_COLOUR,
-        ROLL_BUTTON_COLOUR,
-        Board.BOARD_COLOUR,
-        Board.BAR_COLOUR,
+        0x993300,
+        0x000000,
+        0xffcc66,
+        0x000000,
+        0x993300,
         Spike.BLACK_SPIKE_COLOUR,
         Spike.WHITE_SPIKE_COLOUR,
         Piece.WHITE_PIECE_COLOUR,

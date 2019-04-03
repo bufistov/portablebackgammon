@@ -1,6 +1,7 @@
 package gamelogic;
 
 import data.PlayerColor;
+import graphics.GameColour;
 import lowlevel.CustomCanvas;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -11,14 +12,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestableCanvas extends CustomCanvas {
 
-    TestableCanvas(JFrame frame, GameConfig config) {
-        super(frame, config);
+    TestableCanvas(JFrame frame, Board board, GameConfig config) {
+        super(frame, new GameColour(), board, config);
     }
 
     @Override
@@ -47,7 +51,8 @@ class CustomCanvasTest {
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
-        CustomCanvas canvas = new TestableCanvas(frame, config);
+        Board board = new Board(new GameColour(), config);
+        CustomCanvas canvas = new TestableCanvas(frame, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -80,7 +85,8 @@ class CustomCanvasTest {
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
-        CustomCanvas canvas = new TestableCanvas(frame, config);
+        Board board = new Board(new GameColour(), config);
+        CustomCanvas canvas = new TestableCanvas(frame, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -89,7 +95,7 @@ class CustomCanvasTest {
         }
         assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_OR_NETWORK, canvas.getState());
         canvas.paint(graphics);
-
+        System.err.println("Turn: " + Board.whoseTurnIsIt);
         Field buttonxA = makeCanvasFieldPublic("buttonxA");
         Field buttonyA = makeCanvasFieldPublic("buttonyA");
         Field buttonwA = makeCanvasFieldPublic("buttonwA");
@@ -97,15 +103,14 @@ class CustomCanvasTest {
 
         int buttonX = (int)buttonxA.get(canvas) + (int)buttonwA.get(canvas) / 2;
         int buttonY = (int)buttonyA.get(canvas) + (int)buttonhA.get(canvas) / 2;
-        canvas.mouseClicked(new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false));
+        MouseEvent clickComputerPlay = new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false);
+        canvas.mouseClicked(clickComputerPlay);
         assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN, canvas.getState());
         canvas.paint(graphics);
 
         canvas.mouseClicked(new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false));
         assertEquals(GuiState.GAME_IN_PROGRESS, canvas.getState());
         canvas.paint(graphics);
-
-        Board board = (Board)CustomCanvasTest.makeCanvasFieldPublic("board").get(canvas);
 
         int[] whiteHome = {
             0,5,5,5,0,0,

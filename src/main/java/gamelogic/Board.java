@@ -2,6 +2,7 @@ package gamelogic;
 import java.util.*;
 
 import data.PlayerColor;
+import graphics.GameColour;
 import lowlevel.*;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -12,13 +13,10 @@ import static data.PlayerColor.WHITE;
 public class Board {
 
     // Colour constants
-    public static int BOARD_COLOUR = 0x000000;
-    public static int BAR_COLOUR = CustomCanvas.BACKGROUND_COLOUR;
     private Color board_colour, bar_colour;
+    private GameColour gameColour;
 
     // -- game variables
-    private final boolean alwaysRollDouble;
-
     public int matchPoints;
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
@@ -34,12 +32,9 @@ public class Board {
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
     public static final int DIE1AND2 = 3;
 
-    public static PlayerColor whoseTurnIsIt = WHITE; // so when it says roll to see who goes
-    //first, white should roll their one die then black
+    public static PlayerColor whoseTurnIsIt = WHITE;
 
     private Sound sfxNoMove;
-
-    private CustomCanvas canvas;
 
     // Garbage
     public static boolean pickingPieceUpFromBar;
@@ -76,9 +71,8 @@ public class Board {
         }
     }
 
-    public Board(CustomCanvas canvas, GameConfig config) {
-        this.canvas = canvas;
-        this.alwaysRollDouble = config.alwaysRollDouble();
+    public Board(GameColour gameColour, GameConfig config) {
+        this.gameColour = gameColour;
         sfxNoMove = new Sound("/nomove.wav");
         loadSounds(config.soundOn());
         whitePlayer = new Player(PlayerColor.WHITE,"Player1");
@@ -100,11 +94,11 @@ public class Board {
     }
 
     public void makeColourObjects() {
-        board_colour = new Color(BOARD_COLOUR);
-        bar_colour = new Color(BAR_COLOUR);
+        board_colour = new Color(gameColour.getBoardColor());
+        bar_colour = new Color(gameColour.getBarColor());
     }
     
-    public void paint(Graphics g, int WIDTH, int HEIGHT) {
+    public void paint(Graphics g, int WIDTH, int HEIGHT, boolean gameInProgress) {
         utils.setColor(g, Color.BLACK);
         BORDER = WIDTH / 64;
         BAR = BORDER * 2;
@@ -118,8 +112,8 @@ public class Board {
         utils.setColor(g, Color.BLACK);
         utils.drawRect(g,BORDER,BORDER,widthMinusBorder,HEIGHT-BORDER*2);
         // bar between 2 halves
-        utils.setColor(g,bar_colour);
-        utils.fillRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
+        utils.setColor(g, bar_colour);
+        utils.fillRect(g,(BORDER + widthMinusBorder/2) - BAR/2, BORDER,BAR,HEIGHT - BORDER*2);
         utils.setColor(g, Color.BLACK);
         utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
 
@@ -130,7 +124,7 @@ public class Board {
         paintDice(g,WIDTH,HEIGHT);
 
         // draw the potential moves for whoevers go it is
-        if (!canvas.gameComplete()) {
+        if (gameInProgress) {
             // SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
             if (whoseTurnIsIt == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) {
                 drawPotentialMovesFromBar(g);
@@ -225,7 +219,6 @@ public class Board {
             log("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!");
             die1HasBeenUsed = true;
             die2HasBeenUsed = true;
-            canvas.turnOver();
         }
     }
 
@@ -764,7 +757,7 @@ public class Board {
     }
 
     private static void log(String s) {
-        Utils.log("Board{}:" + s);
+        Utils.log(String.format("thread-%s Board{}:%s", Thread.currentThread().getName(), s));
     }
 
     void calculatePotentialMoves() {
@@ -837,7 +830,7 @@ public class Board {
                         //use this die up so it can move onto next one
                         die1HasBeenUsed = true;
                         log("DISABLED DIE 1x");
-                        canvas.tellPlayers("No option with Die 1 (" + die1.getValue() + ")");
+                        // canvas.tellPlayers("No option with Die 1 (" + die1.getValue() + ")");
                         sfxNoMove.playSound();
                     }
                 } else if (!die2HasBeenUsed) {
@@ -854,7 +847,7 @@ public class Board {
                         //use this die up so it can move onto next go
                         die2HasBeenUsed = true;
                         log("DISABLED DIE 2x");
-                        canvas.tellPlayers("No options available with Die 2 (" + die2.getValue() + ")");
+                        // canvas.tellPlayers("No options available with Die 2 (" + die2.getValue() + ")");
                         sfxNoMove.playSound();
                         //it should move onto next players go NOW...
                         if (CustomCanvas.someoneRolledADouble) {
@@ -869,10 +862,6 @@ public class Board {
         } else if (CustomCanvas.pieceOnMouse) {
             theyWantToPlaceAPiece();
             thereAreOptions = false;
-        }
-        if (die1HasBeenUsed && die2HasBeenUsed) {
-            //SO DICE DONT REAPPEAR
-            canvas.turnOver();
         }
     }
 

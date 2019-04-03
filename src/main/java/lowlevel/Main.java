@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 package lowlevel;
+import gamelogic.Board;
 import gamelogic.GameConfig;
+import graphics.GameColour;
 import org.aeonbits.owner.ConfigFactory;
 
 import javax.swing.*;
@@ -18,6 +20,7 @@ public class Main {
 
     private static JFrame frame;
     private static CustomCanvas canvas;
+    private static Board board;
     private static Bot bot;
 
     private static final int FRAME_DELAY_MILLIS = 50; //50;//20; // 20ms. implies 50fps (1000/20) = 50
@@ -27,7 +30,9 @@ public class Main {
         ConfigFactory.setProperty("configFileName", "backgammon.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
         frame = new JFrame();
-        canvas = new CustomCanvas(frame, config);
+        GameColour gameColour = new GameColour();
+        board = new Board(gameColour, config);
+        canvas = new CustomCanvas(frame, gameColour, board, config);
         initMainWindow(frame, true);
         canvas.init();
         bot = new Bot(canvas, frame);
