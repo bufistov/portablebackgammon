@@ -22,6 +22,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     private final int maxSplashCounter;
     private final boolean drawMousePointer;
+    private final boolean enableDoubleBuffering;
     private static final String SERVER_IP_ADDRESS = "localhost";
     private static final String SPECIAL_END_SYMBOL = "::"; // this signifiys to scroll bar the end is reached whislt being invisible to our customfont
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
@@ -211,6 +212,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         log("CustomCanvas made.");
         this.maxSplashCounter = config.maxSplashCounter();
         this.drawMousePointer = config.drawMousePointer();
+        this.enableDoubleBuffering = config.enableDoubleBuffering();
 
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -237,25 +239,34 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         loadCustomFonts();
         loadImages();
         requestFocus();
-        createBufferStrategy(2);
+        if (enableDoubleBuffering) {
+            createBufferStrategy(2);
+        }
     }
 
     @Override
     public void paint(Graphics g_) {
-        BufferStrategy bufferStrategy = this.getBufferStrategy();
-        if (bufferStrategy == null) {
-            log("Buffer strategy is not yet created, waiting");
-            return;
+        Graphics graphics = g_;
+        BufferStrategy bufferStrategy = null;
+        if (enableDoubleBuffering) {
+            bufferStrategy = this.getBufferStrategy();
+            if (bufferStrategy == null) {
+                log("Buffer strategy is not yet created, waiting");
+                return;
+            }
+            Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            graphics = g;
         }
-        Graphics2D g = (Graphics2D)bufferStrategy.getDrawGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
         HEIGHT = getHeight();
-        paintSwitch(g);
-        handleMousePointer(g);
-        bufferStrategy.show();
+        paintSwitch(graphics);
+        handleMousePointer(graphics);
+        if (bufferStrategy != null) {
+            bufferStrategy.show();
+        }
     }
 
     public GuiState getState() {
