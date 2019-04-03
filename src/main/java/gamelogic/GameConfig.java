@@ -12,5 +12,9 @@ public interface GameConfig extends Config {
 
     boolean soundOn();
 
+    @Key("gui.maxSplashCounter")
     int maxSplashCounter();
+
+    @Key("gui.drawMousePointer")
+    boolean drawMousePointer();
 }

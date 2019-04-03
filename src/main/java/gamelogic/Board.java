@@ -40,7 +40,6 @@ public class Board {
     private CustomCanvas canvas;
 
     // Garbage
-    public static String ROBOT_DESTINATION_MESSAGE = "";
     public static boolean pickingPieceUpFromBar;
     public static Vector spikesAllowedToMoveToFromBar = new Vector(6);
 
@@ -307,7 +306,6 @@ public class Board {
         thereAreOptions = false;
         SPtheMoveToMake = null;
 
-        ROBOT_DESTINATION_MESSAGE = "";
         initialiseBoard(INIT_CONFIGURATION);
     }
 
@@ -953,10 +951,8 @@ public class Board {
     }
 
     public static void setBotDestination(int x, int y, String desc) {
-        boolean sameDest = Bot.destX == x && Bot.destY == y;
-        if (!sameDest) {
-            ROBOT_DESTINATION_MESSAGE = "NEW BOT DEST: " + x + "," + y + ":" + desc;
-            log(ROBOT_DESTINATION_MESSAGE);
+        if (Bot.destX != x || Bot.destY != y) {
+            log("NEW BOT DEST: " + x + "," + y + ":" + desc);
             Bot.destX = x;
             Bot.destY = y;
         }

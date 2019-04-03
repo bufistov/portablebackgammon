@@ -21,9 +21,9 @@ import static java.awt.event.MouseEvent.BUTTON3;
 public class CustomCanvas extends Canvas implements MouseListener, MouseMotionListener, KeyListener {
 
     private final int maxSplashCounter;
-    private static final boolean drawMousePointer = true;
+    private final boolean drawMousePointer;
     private static final String SERVER_IP_ADDRESS = "localhost";
-    private static final String SPECIAL_END_SYMBOL = "::";// this signifiys to scroll bar the end is reached whislt being invisible to our customfont
+    private static final String SPECIAL_END_SYMBOL = "::"; // this signifiys to scroll bar the end is reached whislt being invisible to our customfont
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
 
@@ -73,6 +73,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static Sound sfxError = new Sound("/error.wav");
     private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled, sfxGameOver;
     private Sound sfxdouble, sfxResign;
+    private static Image splashScreenLogo, splashScreenLogoSmall, op, admin, pointer;
 
     // Garbage
     static String robotMoveDesc = "Bot loaded.";
@@ -209,6 +210,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public CustomCanvas(GameConfig config) {
         log("CustomCanvas made.");
         this.maxSplashCounter = config.maxSplashCounter();
+        this.drawMousePointer = config.drawMousePointer();
 
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -248,36 +250,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         Graphics2D g = (Graphics2D)bufferStrategy.getDrawGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // whole game canvas:
         WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
         HEIGHT = getHeight();
         paintSwitch(g);
-        if (drawMousePointer) {
-            if (NETWORK_GAME_IN_PROCESS) {
-                utils.drawImage(g, pointer, pointerX, pointerY + 6, this); // this 6 lines it up
-                Board.mouseHoverX = pointerX;
-                Board.mouseHoverY = pointerY;
-            } else {
-                if (Bot.getFullAutoPlay()) {
-                    utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this); // this 6 lines it up
-                    Board.mouseHoverX = Bot.x;
-                    Board.mouseHoverY = Bot.y;
-                } else {
-                    if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.WHITE) {
-                        Main.hideMousePointer(false);
-                    } else if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK) {
-                        Main.hideMousePointer(true);
-                        Bot.dead = false;
-                        utils.drawImage(g, pointer, Bot.x, Bot.y + 6, this); // this 6 lines it up
-                        Board.mouseHoverX = Bot.x;
-                        Board.mouseHoverY = Bot.y;
-                    } else {
-                        Main.hideMousePointer(false);
-                    }
-                }
-            }
-        }
+        handleMousePointer(g);
         bufferStrategy.show();
     }
 
@@ -330,6 +307,27 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 break;
         }
         drawExtras(g);
+    }
+
+    private void handleMousePointer(Graphics g) {
+        boolean botIsPlaying = Bot.getFullAutoPlay() ||
+            (Board.HUMAN_VS_COMPUTER && board.getCurrentPlayer().getColour() == PlayerColor.BLACK);
+
+        if (NETWORK_GAME_IN_PROCESS) {
+            Board.mouseHoverX = pointerX;
+            Board.mouseHoverY = pointerY;
+        } else {
+            if (botIsPlaying) {
+                Main.hideMousePointer(true);
+                Board.mouseHoverX = Bot.x;
+                Board.mouseHoverY = Bot.y;
+            } else {
+                Main.hideMousePointer(false);
+            }
+        }
+        if (this.drawMousePointer && (NETWORK_GAME_IN_PROCESS || botIsPlaying)) {
+            utils.drawImage(g, pointer, Board.mouseHoverX, Board.mouseHoverY + 6, this); // this 6 lines it up
+        }
     }
 
     //draws any of the extras:
@@ -474,11 +472,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             y += fontblack.getHeight();
         }
         y += 5;
-        printme = Board.ROBOT_DESTINATION_MESSAGE;
-
-        y = drawMeWrapped(g, x, y, printme, fontwhite, false, false, true, WIDTH / 2, false);
-        if (robotMoveDesc.length() < 20)//avoid printing textual things, just moves.
-        {
+        if (robotMoveDesc.length() < 20) {//avoid printing textual things, just moves.
             printme = "Bot is thinking:" + robotMoveDesc;
             fontwhite.drawString(g, printme, x, y, 0);
             y += fontblack.getHeight();
@@ -556,27 +550,19 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     int infoCounter=0;
-    Image splashScreenLogo,splashScreenLogoSmall;
-    Image op,admin;
-    public static Image pointer;
     public static int WIDTH;
     public static int HEIGHT;
 
     public static int pointerX;
     public static int pointerY;
 
-    //loads all images needed
     private void loadImages() {
         log("Attempting to loadImages()");
-        if (splashScreenLogo == null) {
-            splashScreenLogo = utils.loadImage("/midokura-logo.png");
-            splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
-            pointer = utils.loadImage("/pointer.png");
-            op = utils.loadImage("/op.png");
-            admin = utils.loadImage("/admin.png");
-        } else {
-            log("Images already pre-cached...");
-        }
+        splashScreenLogo = utils.loadImage("/midokura-logo.png");
+        splashScreenLogoSmall = utils.loadImage("/midokura-logo-small.png");
+        pointer = utils.loadImage("/pointer.png");
+        op = utils.loadImage("/op.png");
+        admin = utils.loadImage("/admin.png");
     }
 
     ///////// ALL PAINT STATE METHODS //////////////////////
@@ -875,16 +861,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // simply sets glow to true if the mouse is over the button
     // glow is a boolean used to make the button glow when pointer is over it.
     private void glowButton(int x, int y) {
-        if (x >= buttonxA && x <= buttonxA + buttonwA) {
-            if (y >= buttonyA && y <= buttonyA + buttonhA) {
-                glowA = true;
-            }
-        }
-        if (x >= buttonxB && x <= buttonxB + buttonwB) {
-            if (y >= buttonyB && y <= buttonyB + buttonhB) {
-                glowB = true;
-            }
-        }
+        glowA = (x >= buttonxA && x <= buttonxA + buttonwA) &&
+            (y >= buttonyA && y <= buttonyA + buttonhA);
+        glowB = (x >= buttonxB && x <= buttonxB + buttonwB) &&
+            (y >= buttonyB && y <= buttonyB + buttonhB);
 
         if (glowA || glowB) {
             glowCounter += GLOW_INCREMENTER;
@@ -1970,6 +1950,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         log("mousedragged");
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
          //so our mouse doesnt influence anything
         if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==PlayerColor.BLACK) ) {
@@ -2509,6 +2490,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (val >= 500_000) {
             player = PlayerColor.BLACK;
             playerStr = "Black";
+            if (Board.HUMAN_VS_COMPUTER) {
+                Bot.dead = false;
+            }
         }
         board.setCurrentPlayer(player);
         tellPlayers(String.format("%s won the roll off", playerStr));

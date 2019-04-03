@@ -33,7 +33,7 @@ public class Bot extends Thread {
     private int lastX, lastY;
     private int sameDestCounter;
 
-    private static boolean FULL_AUTO_PLAY = false;//Plays everything via the bot so you can watch it all
+    private static boolean FULL_AUTO_PLAY = false; // Plays everything via the bot so you can watch it all
     private static boolean TAKES_OVER_MOUSE = false;
     private boolean isRunning = true;
 
@@ -68,7 +68,7 @@ public class Bot extends Thread {
             }
         }
 
-        if (x == destX && y == destY && x != 0 && y != 0 ) {
+        if (x == destX && y == destY && x != 0 && y != 0) {
             long difference = System.currentTimeMillis() - clickedTime;
             if (difference > DELAY_BETWEEN_CLICKS_MILLIS && !STOPCLICKING) {
                 READY2CLICK = true;

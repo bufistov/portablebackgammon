@@ -9,6 +9,7 @@ import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GameConfigTest {
 
@@ -20,6 +21,8 @@ public class GameConfigTest {
         GameConfig config = ConfigFactory.create(GameConfig.class);
         assertEquals(24, config.boardSize());
         assertFalse(config.soundOn());
+        assertTrue(config.drawMousePointer());
+        assertEquals(50, config.maxSplashCounter());
     }
 
     @Test
