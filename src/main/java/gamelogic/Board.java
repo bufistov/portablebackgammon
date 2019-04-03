@@ -150,7 +150,7 @@ public class Board {
     }
 
     private void paintDice(Graphics g, int WIDTH, int HEIGHT) {
-        if (CustomCanvas.showDice) {
+        if (!CustomCanvas.showRollButton) {
             int diex = (BORDER + ((WIDTH/4)*3)) + Die.getWidth();
             int diey = (BORDER + (HEIGHT/2)) - Die.getHeight();
             if (!die1HasBeenUsed) {
@@ -178,7 +178,7 @@ public class Board {
         boolean cantGetOfBarWithDie1 = false;
         boolean cantGetOfBarWithDie2 = false;
 
-        if (!CustomCanvas.showDice) {
+        if (CustomCanvas.showRollButton) {
             return;
         }
 
@@ -412,7 +412,7 @@ public class Board {
         getRidOfLittleDice(); // kind of intensive?
         detectIfPiecesAreHome(); // sets the right bools if pieces are home
 
-        if (!CustomCanvas.showDice) {
+        if (CustomCanvas.showRollButton) {
             return;
         }
 
@@ -1057,6 +1057,7 @@ public class Board {
     public void rollDies() {
         die1.roll();
         die2.roll();
+        die1HasBeenUsed = die2HasBeenUsed = false;
     }
 
     public boolean rolledDouble() {

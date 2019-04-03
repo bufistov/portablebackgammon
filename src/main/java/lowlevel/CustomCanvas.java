@@ -40,8 +40,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static final boolean RELEASE_BUILD = false;
 
     private GameColour gameColour;
+    private JFrame mainWindow;
+    private Board board;
 
     private boolean soundOn;
+    private int splashCounter;
+    private int infoCounter;
     private boolean gameComplete;
 
     // Debug
@@ -73,27 +77,20 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static Image splashScreenLogo, splashScreenLogoSmall, op, admin, pointer;
     private static Cursor transparentCursor;
 
-    private JFrame mainWindow;
+    private static String robotMoveDesc = "Bot loaded.";
+    private int paraYoffset;
+    private Vector playerPositions; // Positions of players in network lobby
 
     // Garbage
-    static String robotMoveDesc = "Bot loaded.";
-    boolean flip;
-    int paraYoffset=0;
-    int OUTLINE_FOR_CHAT_BOXES=0;
-    Vector playerPositions;
+    private final static int OUTLINE_FOR_CHAT_BOXES = 0;
 
     //prefs button x,y width and height
     private static final int prefw = 20;
     private static final int prefh = 20;
-    public static long FIFTY_SECONDS = 50000L;
-    public static long TEN_SECONDS = 10000L;
-    static long robotMessageSetTimeLong;
+    private static long FIFTY_SECONDS = 50000L;
+    private static long TEN_SECONDS = 10000L;
+    private static long robotMessageSetTimeLong;
     private static int TRANSPARENCY_LEVEL = 100;
-
-    private Board board;
-    private int y;
-    private int x;
-    private int splashCounter;
 
     // for collisions.
     public static int whiteContainerX;
@@ -106,16 +103,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static int blackContainerHeight;
 
     // use these to detect if the roll button was clicked.
-    int rollButtonX;
-    int rollButtonY;
-    int rollButtonW;
-    int rollButtonH;
+    private int rollButtonX;
+    private int rollButtonY;
+    private int rollButtonW;
+    private int rollButtonH;
 
     public static boolean showRollButton = true;
 
-    public static int D1lastDieRoll_toSendOverNetwork;
-    public static int D2lastDieRoll_toSendOverNetwork;
-    public static boolean someoneRolledADouble=false;
+    static int D1lastDieRoll_toSendOverNetwork;
+    static int D2lastDieRoll_toSendOverNetwork;
+    public static boolean someoneRolledADouble;
     public static int doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
     //ie, we want them to have 4 rolls if thats the case and not 2
 
@@ -145,18 +142,18 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     private static boolean DEBUG_CONSOLE = false;
     private boolean PAUSED;
-    NetworkChatClient chatClient;
-    public static String chatText="";
+    private NetworkChatClient chatClient;
+    static String chatText = "";
 
     private GameNetworkClient client;
-    public static final int LEFT_MOUSE_BUTTON = BUTTON1;
-    public static final int RIGHT_MOUSE_BUTTON = BUTTON3;
+    static final int LEFT_MOUSE_BUTTON = BUTTON1;
+    static final int RIGHT_MOUSE_BUTTON = BUTTON3;
 
     public static boolean pieceOnMouse = false; // is true when a piece is stuck to mouse
     public static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
 
-    boolean showChallengeWindow;
-    String personToChallenge;
+    private boolean showChallengeWindow;
+    private String personToChallenge;
 
     // for screens with 2 buttons this is button 1
     private int buttonxA, buttonyA;
@@ -187,16 +184,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static boolean barPieceStuckOnMouse;
 
     //////////////////THEMES CODE/////////////////
-    public static final int DEFAULT   = 0;
-    public static final int METALIC   = 1;
-    public static final int CLASSIC   = 2;
-    public static final int FUNNYMAN  = 3;
-    public static final int BUMBLEBEE = 4;
-    public static final int MAX_THEMES = 4; // this should always equals the last one
+    private static final int DEFAULT   = 0;
+    private static final int METALIC   = 1;
+    private static final int CLASSIC   = 2;
+    private static final int FUNNYMAN  = 3;
+    private static final int BUMBLEBEE = 4;
+    private static final int MAX_THEMES = 4; // this should always equals the last one
     private int theme = DEFAULT;
     private String themeName;
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
-    public static boolean showDice;
 
     private int debugMenuPos = 0;
     public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
@@ -429,8 +425,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
 
         utils.setColor(g, 0, 0, 0, 125);
-        x = 10;
-        y = 10;
+        int x = 10;
+        int y = 10;
         utils.fillRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
         utils.setColor(g, Color.yellow);
         utils.drawRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
@@ -537,7 +533,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     log("ROBOT_DELAY_AFTER_CLICKS:" + Bot.ROBOT_DELAY_AFTER_CLICKS);
                 }
                 break;
-            //DEBUG_OPTION_paintRobotMessages
             case DEBUG_OPTION_paintRobotMessages:
                 if (direction == DEBUGLEFT) {
                     paintRobotMessages = !paintRobotMessages;
@@ -570,7 +565,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontblack.drawString(g, state.name(),20,20,0);
     }
 
-    int infoCounter=0;
     public static int WIDTH;
     public static int HEIGHT;
 
@@ -980,11 +974,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= rollButtonX && x <= rollButtonX + rollButtonW) {
             if (y >= rollButtonY && y <= rollButtonY + rollButtonH) {
                 log("Roll Dice button clicked.");
-                Board.die1HasBeenUsed = false;
-                Board.die2HasBeenUsed = false;
                 sfxDiceRoll.playSound();
                 dealWithOrdinaryRolls();
-                showDice = true;
                 showRollButton = false;
             }
         }
@@ -1055,7 +1046,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         clearPotentialSpikes();
 
         showRollButton = true;
-        showDice = false;
         someoneRolledADouble = false;
         doubleRollCounter = 0;
     }
@@ -1089,7 +1079,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, Color.black);
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
 
-        robotMoveDesc = "Bot Loaded. Answer: (" + question + ") ";
+        String robotMoveDesc = "Bot Loaded. Answer: (" + question + ") ";
         Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2, ypos + (fontblack.getHeight() / 2),
             "Bot Loaded. Answer: (" + question + ") ");
         tellRobot(false, robotMoveDesc);
@@ -1173,8 +1163,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.fillRect(g,0,0,getWidth(),getHeight());
         int SMALLGAP=5;
 
-        x=SMALLGAP;
-        y=SMALLGAP+fontblack.getHeight()*2;
+        int x = SMALLGAP;
+        int y = SMALLGAP + fontblack.getHeight()*2;
 
         int BORDER=10;
         int WIDTH_OF_MESSAGE_TEXT  = ((getWidth()-getWidth()/6)-BORDER);
@@ -1218,7 +1208,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
          y=SMALLGAP+fontblack.getHeight()*2;
          y+=paraYoffset;//scrolls it
          e = NetworkChatClient.messageText.elements();
-         flip=false;
+         boolean flip = false;
          while (e.hasMoreElements()) {
              if (y>(getHeight()-topofChatBox-HEIGHT_OF_ENTERTEXT_BOX)+fontblack.getHeight()) {
                  paraYoffset--;//smooth scrolling
