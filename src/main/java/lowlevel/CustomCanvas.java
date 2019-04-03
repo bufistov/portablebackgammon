@@ -28,8 +28,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
 
-    private static boolean I_AM_CLIENT;
-    static boolean I_AM_SERVER;
+    private boolean I_AM_CLIENT = false;
+    private boolean I_AM_SERVER = false;
 
     public static final String VERSION = "v0.0.1";
     private static final boolean RELEASE_BUILD = false;
@@ -61,7 +61,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private GuiState state = GuiState.SPLASH_SCREEN;
     private int PANEL_WIDTH = 0;
 
-    static boolean NETWORK_GAME_IN_PROCESS;
+    private boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
     private Sound sfxDiceRoll, sfxDoubleRolled, sfxPutPieceInContainer, sfxKilled, sfxGameOver;
     private Sound sfxdouble, sfxResign;
@@ -2497,6 +2497,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         board.setCurrentPlayer(player);
         tellPlayers(String.format("%s won the roll off", playerStr));
         state = GAME_IN_PROGRESS;
+    }
+
+    void startNetworkGame() {
+        NETWORK_GAME_IN_PROCESS = true;
+        Bot.dead = true;
+        I_AM_SERVER = true;
+        NetworkChatClient.KEEP_LOBBY_GOING = false;
+        startGame();
     }
 
     static void playErrorSound() {

@@ -23,16 +23,11 @@ public class GameNetworkServer implements Runnable {
             while ((i++ < maxConnections) || (maxConnections == 0)) {
                 server = listener.accept();
                 log("connection accepted!");
-                CustomCanvas.NETWORK_GAME_IN_PROCESS = true;
                 Main.setTitle(Main.getTitle() + " Online game in progress. (You are server, client connected to you on port " + port + ")");
                 doComms conn_c = new doComms(server, canvas);
                 Thread t = new Thread(conn_c);
                 t.start();
-
-                Bot.dead = true;
-                CustomCanvas.I_AM_SERVER = true;
-                NetworkChatClient.KEEP_LOBBY_GOING = false;
-                this.canvas.startGame();
+                this.canvas.startNetworkGame();
             }
         } catch (IOException ioe) {
             System.out.println("IOException on socket listen: " + ioe);
