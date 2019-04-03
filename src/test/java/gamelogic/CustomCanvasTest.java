@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestableCanvas extends CustomCanvas {
 
@@ -70,5 +71,57 @@ class CustomCanvasTest {
         canvas.mouseClicked(new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false));
         assertEquals(GuiState.GAME_IN_PROGRESS, canvas.getState());
         canvas.paint(graphics);
+    }
+
+    @Test
+    @DisplayName("Infinite loop bug repro")
+    void test2() throws Exception {
+        GameConfig config = Mockito.mock(GameConfig.class);
+        Mockito.when(config.maxSplashCounter()).thenReturn(50);
+
+        JFrame frame = new JFrame();
+        CustomCanvas canvas = new TestableCanvas(frame, config);
+
+        assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
+        Graphics graphics = Mockito.mock(Graphics.class);
+        for (int i = 0; i <= config.maxSplashCounter(); ++i) {
+            canvas.paint(graphics);
+        }
+        assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_OR_NETWORK, canvas.getState());
+        canvas.paint(graphics);
+
+        Field buttonxA = makeCanvasFieldPublic("buttonxA");
+        Field buttonyA = makeCanvasFieldPublic("buttonyA");
+        Field buttonwA = makeCanvasFieldPublic("buttonwA");
+        Field buttonhA = makeCanvasFieldPublic("buttonhA");
+
+        int buttonX = (int)buttonxA.get(canvas) + (int)buttonwA.get(canvas) / 2;
+        int buttonY = (int)buttonyA.get(canvas) + (int)buttonhA.get(canvas) / 2;
+        canvas.mouseClicked(new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false));
+        assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN, canvas.getState());
+        canvas.paint(graphics);
+
+        canvas.mouseClicked(new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false));
+        assertEquals(GuiState.GAME_IN_PROGRESS, canvas.getState());
+        canvas.paint(graphics);
+
+        Board board = (Board)CustomCanvasTest.makeCanvasFieldPublic("board").get(canvas);
+
+        int[] whiteHome = {
+            0,5,5,5,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+
+        int[] blackHome = {
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,5,5,5,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.setCurrentPlayer(PlayerColor.WHITE);
+        assertTrue(CustomCanvas.showRollButton);
     }
 }
