@@ -23,6 +23,7 @@ public class GameConfigTest {
         assertFalse(config.soundOn());
         assertTrue(config.drawMousePointer());
         assertEquals(50, config.maxSplashCounter());
+        assertTrue(config.enableDoubleBuffering());
     }
 
     @Test

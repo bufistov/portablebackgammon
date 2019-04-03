@@ -17,4 +17,7 @@ public interface GameConfig extends Config {
 
     @Key("gui.drawMousePointer")
     boolean drawMousePointer();
+
+    @Key("gui.enableDoubleBuffering")
+    boolean enableDoubleBuffering();
 }
