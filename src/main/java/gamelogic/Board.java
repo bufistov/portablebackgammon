@@ -17,6 +17,8 @@ public class Board {
     private Color board_colour, bar_colour;
 
     // -- game variables
+    private final boolean alwaysRollDouble;
+
     public int matchPoints;
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
@@ -76,6 +78,7 @@ public class Board {
 
     public Board(CustomCanvas canvas, GameConfig config) {
         this.canvas = canvas;
+        this.alwaysRollDouble = config.alwaysRollDouble();
         sfxNoMove = new Sound("/nomove.wav");
         loadSounds(config.soundOn());
         whitePlayer = new Player(PlayerColor.WHITE,"Player1");
@@ -417,7 +420,7 @@ public class Board {
         getRidOfLittleDice(); // kind of intensive?
         detectIfPiecesAreHome(); // sets the right bools if pieces are home
 
-        if (CustomCanvas.showDice == false) {
+        if (!CustomCanvas.showDice) {
             return;
         }
 
@@ -1063,5 +1066,14 @@ public class Board {
 
     public ArrayList<Spike> getSpikes() {
         return spikes;
+    }
+
+    public void rollDies() {
+        die1.roll();
+        die2.roll();
+    }
+
+    public boolean rolledDouble() {
+        return die1.enabled() && die2.enabled() && (die1.getValue() == die2.getValue());
     }
 }

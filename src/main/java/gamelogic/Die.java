@@ -17,12 +17,11 @@ public class Die {
     private final int TINY_GAP = 5;
 
     private Utils utils = new Utils();
-    public int value = -1; // 1 to 6
+    private int value = -1; // 1 to 6
 
     //Update, this does get called when the player is putting their pieces away and they roll a value too high leaving them with
     //no options, in this special case we lower the value of the die to allow the algorithm to handle that there is options
     // we DO NOT want the player to see this tho so we flag a boolean in here to stop the dice painting different.
-    private boolean showOriginalValue;
     private int originalValue;
 
     public Die() {
@@ -43,11 +42,15 @@ public class Die {
         return dieHeight;
     }
 
-    // returns a random int between 1 and 6 to simulate a dice roll
     public int roll() {
-        showOriginalValue = false;
         value = Utils.getRand(1,6);
+        originalValue = value;
         return value;
+    }
+
+    public void setActualValue(int newValue) {
+        assert newValue >= 0 && newValue <= 6;
+        originalValue = value = newValue;
     }
 
     //returns the current value (ie what the die is showing now)
@@ -61,10 +64,6 @@ public class Die {
      * @param newValue smaller value to make a perfect match
      */
     void setValue(int newValue) {
-        if (!showOriginalValue) {//if its already true we dont want to update the oriignal val
-            showOriginalValue = true;
-            originalValue = value;
-        }
         log("WARNING, SETVALUE ON DICE CALLED");
         value = newValue;
         if (value < 0) {
@@ -75,6 +74,10 @@ public class Die {
     // disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
     void disable() {
         value = 0;
+    }
+
+    boolean enabled() {
+        return value > 0;
     }
 
     int miniDieWidth() {
@@ -122,10 +125,9 @@ public class Die {
     private void drawDots(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT,
                           int DOT_DIAMETER, int HALF_DOT_DIAMETER) {
         utils.setColor(g, dot_colour);
-        int dots = value;
-        if (showOriginalValue) {
+        int dots = originalValue;
+        if (value != originalValue) {
             utils.setColor(g, Color.RED);
-            dots = originalValue; // rarely we hide the real value form player, see above for why
         }
 
         switch(dots) {

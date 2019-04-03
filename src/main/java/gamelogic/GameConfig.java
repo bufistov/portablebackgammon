@@ -20,4 +20,7 @@ public interface GameConfig extends Config {
 
     @Key("gui.enableDoubleBuffering")
     boolean enableDoubleBuffering();
+
+    @Key("game.alwaysRollDouble")
+    boolean alwaysRollDouble();
 }

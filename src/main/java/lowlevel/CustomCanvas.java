@@ -77,7 +77,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int paraYoffset=0;
     int OUTLINE_FOR_CHAT_BOXES=0;
     Vector playerPositions;
-    boolean buttonPressed;
+
     //prefs button x,y width and height
     private static final int prefw = 20;
     private static final int prefh = 20;
@@ -107,7 +107,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     int rollButtonW;
     int rollButtonH;
 
-    public static boolean showRollButton=true;//false when not needed
+    public static boolean showRollButton = true;
 
     public static int D1lastDieRoll_toSendOverNetwork;
     public static int D2lastDieRoll_toSendOverNetwork;
@@ -890,8 +890,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // this deals with touching the 'virtual' buttons
     // a mouse event is passed in to grab the x,y values from
-    private boolean touchedButton(int x, int y) {
-        buttonPressed = false;
+    private void touchedButton(int x, int y) {
         switch (state) {
             ///////////////////////////////////////////
             case OPTIONS_SCREEN_LOCAL_OR_NETWORK:
@@ -907,16 +906,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 break;
             //////////////////////////////////////
             case GAME_IN_PROGRESS:
-                //CHECK IF ROLL DICE BUTTON WAS PRESSED AND DEAL WITH IT////////
                 if (showRollButton) {
                     checkAndDealWithRollDiceButton(x, y);
-                } else {
-                    //ROBOT LOOK FOR RELEVANT SPIKES..
                 }
-                //Other in game buttons go here, like double up, resign etc.
+                // Other in game buttons go here, like double up, resign etc.
                 break;
         }
-        return buttonPressed;
     }
 
     //works out if the bottom button is pressed (in this state the 'computer player' button)
@@ -925,7 +920,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
-                buttonPressed = true;
                 Board.HUMAN_VS_COMPUTER = true;
                 Bot.dead = false;
                 log("CPU OPPONENT PRIMED.");
@@ -941,7 +935,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxB && x <= buttonxB + buttonwB) {
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
-                buttonPressed = true;
                 startGame();
                 Board.HUMAN_VS_COMPUTER = false;
                 log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
@@ -956,7 +949,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxB && x <= buttonxB + buttonwB) {
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected NETWORK PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-                buttonPressed = true;
                 state = NETWORKING_ENTER_NAME;
             }
         }
@@ -968,7 +960,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected LOCAL PLAY on OPTIONS_SCREEN_LOCAL_OR_NETWORK");
-                buttonPressed = true;
                 state = OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN;
             }
         }
@@ -982,10 +973,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 log("Roll Dice button clicked.");
                 Board.die1HasBeenUsed = false;
                 Board.die2HasBeenUsed = false;
-                showDice = true; // show the die now theyve clicked roll.
                 sfxDiceRoll.playSound();
                 dealWithOrdinaryRolls();
-                buttonPressed = true; // just to print out to us it was pressed.
+                showDice = true;
+                showRollButton = false;
             }
         }
     }
@@ -1012,28 +1003,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
      // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
      // accessing the dice objects directly, since we really want them to roll simulatenously so to speak
     private void playerRolls(PlayerColor player) {
-        String playerStr = player == PlayerColor.WHITE ? "White" : "Black";
-        int val = board.die1.roll();
+        board.rollDies();
+        int val = Board.die1.getValue();
+        int val2 = Board.die2.getValue();
+
         D1lastDieRoll_toSendOverNetwork = val;
         GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true; // tells it to send a click over network
-        int val2 = board.die2.roll();
-        if (ALWAYS_ROLL_DOUBLE) {
-            val2 = val;
-            board.die2.value = val;
-        }
         D2lastDieRoll_toSendOverNetwork = val2;
         GameNetworkClient.SENDCLICK_AND_DIEVALUE2 = true; // tells it to send a click over network
+
+        String playerStr = player == PlayerColor.WHITE ? "White" : "Black";
         log(String.format("####################################%s rolled:%d, %d", playerStr, val, val2));
         tellPlayers(String.format("%s rolled:%d-%d", playerStr, val, val2));
 
-        if (val == val2) {
+        if (board.rolledDouble()) {
             log(String.format("%s Double!", playerStr));
             tellPlayers(String.format("%s rolled:%d-%d (Double)", playerStr, val, val2));
             someoneRolledADouble = true;
             doubleRollCounter = 0;
             sfxDoubleRolled.playSound();
         }
-        showRollButton = false; // dont show it now theyve just rolled.
     }
 
     //clears the potential spikes used for highlighting possible moves,
@@ -1056,9 +1045,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         clearPotentialSpikes();
 
-        //make sure roll button gets redrawn
         showRollButton = true;
-        showDice = false; // dont draw til the next player clicks roll.
+        showDice = false;
         someoneRolledADouble = false;
         doubleRollCounter = 0;
     }
@@ -1436,21 +1424,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 touchedButton(x, y);
                 if (showRollButton) {
                     log("respond to no clicks as the roll button is up");
-                    // only thing that will respond is the about window
-                    // brings up the about window.
                     checkIfPrefsButtonClickedOn(x, y);
                 } else {
-                    //Making a move//////////
-                    //to move a piece the player simply once clicks
-                    //on a piece they wish to move - then if it has valid moves -
-                    //it attaches to the mouse pointer and can be placed either
-                    //on one of the valid potential spikes- or returned to where it
-                    //was initially by right clicking (and no move has been used)
-                    checkIfPieceClickedOn(x, y); //detects what piece (if any was clicked on)
-
+                    checkIfPieceClickedOn(x, y);
                     //once a piece is stuck to the pointer, we place it on a spike
                     //IFF that spike is one of its valid moves.
-
                     checkIfSpikeClickedOn(x, y);//detects what spike (if any was clicked on)
                     checkIfPieceContainerClickedOn(x, y);
                     checkIfDoubleClickedOn(x, y);
@@ -1467,26 +1445,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     private void RESET_ENTIRE_GAME_VARS() {
         someoneRolledADouble = false;
-        doubleRollCounter = 0;//this tracks how many rolls a player has had after rolling a double,
-        showRollButton = true;//false when not needed
+        doubleRollCounter = 0; // this tracks how many rolls a player has had after rolling a double,
+        showRollButton = true;
         resetVarsTurn();
-        theBarWHITE = new Vector(4);//the bar holds pieces that get killed
-        theBarBLACK = new Vector(4);//the bar holds pieces that get killed
+        theBarWHITE = new Vector(4); // the bar holds pieces that get killed
+        theBarBLACK = new Vector(4); // the bar holds pieces that get killed
 
         whitePiecesSafelyInContainer.clear();
         blackPiecesSafelyInContainer.clear();
 
         originalSpikeForPieceSelected = null;
         barPieceStuckOnMouse = false;
-        pieceOnMouse = false; // is true when a piece is stuck to mouse
-        pieceStuckToMouse = null; // this is simply a copy of whatever piece (if any) is stuck to mouse
+        pieceOnMouse = false;
+        pieceStuckToMouse = null;
 
         message2Players = VERSION;
         gameComplete = false;
         whiteResigned = false;
         blackResigned = false;
 
-        //so it doesnt continuing playin on its own
+        // so it doesnt continuing playin on its own
         Board.HUMAN_VS_COMPUTER = false;
         Bot.dead = true;
         splashCounter = 0;
