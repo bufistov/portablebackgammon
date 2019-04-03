@@ -43,9 +43,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static final boolean ALWAYS_ROLL_DOUBLE = false;
 
     public static int TINY_GAP = 5; // when we need a tiny gap
-    private int typeOfPlay = -1;
-    private static final int NETWORK_PLAY = 1;
-    private static final int LOCAL_PLAY = 2;
 
     // -- constants
     private static int PANEL_COLOUR = 0x000000;
@@ -63,12 +60,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
     private int PANEL_WIDTH = 0;
-
-    /////j2se specific vars
-    // Acquiring the current Graphics Device and Graphics Configuration
-    private GraphicsEnvironment   graphEnv     = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    private GraphicsDevice        graphDevice  = graphEnv.getDefaultScreenDevice();
-    GraphicsConfiguration graphicConf  = graphDevice.getDefaultConfiguration();
 
     static boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
