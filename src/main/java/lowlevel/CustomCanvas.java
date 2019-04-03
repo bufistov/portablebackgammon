@@ -31,6 +31,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
     // properly.
 
+    private boolean HUMAN_VS_COMPUTER = false; // human is white, computer is black
     private boolean I_AM_CLIENT = false;
     private boolean I_AM_SERVER = false;
 
@@ -330,7 +331,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     private void handleMousePointer(Graphics g) {
         boolean botIsPlaying = Bot.getFullAutoPlay() ||
-            (Board.HUMAN_VS_COMPUTER && board.getCurrentPlayer().getColour() == PlayerColor.BLACK);
+            (HUMAN_VS_COMPUTER && board.getCurrentPlayer().getColour() == PlayerColor.BLACK);
 
         if (NETWORK_GAME_IN_PROCESS) {
             Board.mouseHoverX = pointerX;
@@ -835,7 +836,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.setColor(g, roll_button_colour);
             utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
 
-            if (Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK || Bot.getFullAutoPlay()) {
+            if (HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK || Bot.getFullAutoPlay()) {
                 if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
                     log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
                 } else {
@@ -928,8 +929,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= buttonxA && x <= buttonxA + buttonwA) {
             if (y >= buttonyA && y <= buttonyA + buttonhA) {
                 log("Selected COMPUTER on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
-                Board.HUMAN_VS_COMPUTER = true;
-                Bot.dead = false;
+                HUMAN_VS_COMPUTER = true;
                 log("CPU OPPONENT PRIMED.");
                 startGame();
             }
@@ -944,7 +944,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (y >= buttonyB && y <= buttonyB + buttonhB) {
                 log("Selected HUMAN on OPTIONS_SCREEN_LOCAL_COMPUTER_OR_HUMAN");
                 startGame();
-                Board.HUMAN_VS_COMPUTER = false;
+                HUMAN_VS_COMPUTER = false;
                 log("THE WEAKLING WOULD RATHER FACE A HUMAN.");
             }
         }
@@ -1403,8 +1403,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
         // so our mouse doesnt influence anything
-        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK) ) {
-            log("skip mouse clicked at " + e.getX() + " " + e.getY()+ " turn: " + Board.whoseTurnIsIt);
+        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK) ) {
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
             mouseClickedX(e.getX(), e.getY(), e.getButton());
@@ -1469,7 +1468,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         blackResigned = false;
 
         // so it doesnt continuing playin on its own
-        Board.HUMAN_VS_COMPUTER = false;
+        HUMAN_VS_COMPUTER = false;
         Bot.dead = true;
         splashCounter = 0;
         loadSounds(soundOn);
@@ -1484,6 +1483,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         if (!gameComplete()) {
             board.nextTurn();
+            Bot.dead = !Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER &&
+                (board.getCurrentPlayer().getColour() == PlayerColor.WHITE);
         }
         resetVarsTurn();
     }
@@ -1951,7 +1952,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     @Override
     public void mouseMoved(MouseEvent e) {
          //so our mouse doesnt influence anything
-        if (Bot.getFullAutoPlay() || (!Bot.dead && Board.HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==PlayerColor.BLACK) ) {
+        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==PlayerColor.BLACK) ) {
             //log("mouse wont respond");
         } else {
             if (NETWORK_GAME_IN_PROCESS) {
@@ -2008,7 +2009,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         if (e.getKeyChar() == 'f' || e.getKeyChar() == 'F') {//QUIT
             Bot.setFullAutoPlay(!Bot.getFullAutoPlay());
-            Board.HUMAN_VS_COMPUTER = !Board.HUMAN_VS_COMPUTER;
+            HUMAN_VS_COMPUTER = !HUMAN_VS_COMPUTER;
             Bot.dead = !Bot.getFullAutoPlay();
             log("Bot.dead:" + Bot.dead);
             paintRobotMessages = Bot.getFullAutoPlay();
@@ -2474,7 +2475,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (val >= 500_000) {
             player = PlayerColor.BLACK;
             playerStr = "Black";
-            if (Board.HUMAN_VS_COMPUTER) {
+            if (HUMAN_VS_COMPUTER) {
                 Bot.dead = false;
             }
         }
@@ -2497,5 +2498,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     public boolean gameComplete() {
         return this.gameComplete;
+    }
+
+    public boolean humanVsComputer() {
+        return HUMAN_VS_COMPUTER;
     }
 }

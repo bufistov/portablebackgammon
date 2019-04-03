@@ -16,18 +16,20 @@ public class Board {
     private Color board_colour, bar_colour;
     private GameColour gameColour;
 
-    // -- game variables
+    // game state variables
     public int matchPoints;
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
     private Player currentPlayer;
     public static Die die1, die2;
+
     private Utils utils = new Utils();
+
+    // Geometry
     public static int BORDER; // the gap around the board
     static int BAR;   // the bar in the middle of the board
     static int PIECE_CONTAINER; // piece contrainers are them things to the sides that hold the pieces
 
-    public static boolean HUMAN_VS_COMPUTER = false; // human is white, computer is black
     public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
     public static final int DIE1AND2 = 3;
@@ -280,7 +282,6 @@ public class Board {
     //vars are cleaned up properly
     public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
         loadSounds(soundOn);
-        HUMAN_VS_COMPUTER = false;
         whoseTurnIsIt = PlayerColor.WHITE;
         spikesAllowedToMoveToFromBar = new Vector(6);
         pickingPieceUpFromBar = false;
@@ -962,7 +963,7 @@ public class Board {
             thereAreOptions = false;
             return;
         }
-        if (!Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER && whoseTurnIsIt == PlayerColor.WHITE) {
+        if (!Bot.getFullAutoPlay() && whoseTurnIsIt == PlayerColor.WHITE) {
             return;
         }
         Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe; // gets the spike to drop pieces on
