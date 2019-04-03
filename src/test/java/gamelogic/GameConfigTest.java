@@ -1,6 +1,7 @@
 package gamelogic;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.Mutable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class GameConfigTest {
+
+class GameConfigTest {
 
     @Test
     @DisplayName("Default values are loaded from classpath props")
-    public void test1() {
+    void test1() {
         ConfigFactory.setProperty(
             "configFileName", "somenonexistingconfig.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
@@ -28,7 +30,7 @@ public class GameConfigTest {
 
     @Test
     @DisplayName("Config file takes precedence over classpath file")
-    public void test2() throws Exception {
+    void test2() throws Exception {
         File tempFile = File.createTempFile("testbackgammon-", ".properties");
         Files.write(tempFile.toPath(), "boardSize=101".getBytes());
         ConfigFactory.setProperty("configFileName", tempFile.getAbsolutePath());
