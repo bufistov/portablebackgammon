@@ -34,8 +34,6 @@ public class Board {
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
     public static final int DIE1AND2 = 3;
 
-    public static PlayerColor whoseTurnIsIt = WHITE;
-
     private Sound sfxNoMove;
 
     // Garbage
@@ -128,9 +126,9 @@ public class Board {
         // draw the potential moves for whoevers go it is
         if (gameInProgress) {
             // SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
-            if (whoseTurnIsIt == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) {
+            if (whoseTurnIsIt() == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) {
                 drawPotentialMovesFromBar(g);
-            } else if (whoseTurnIsIt == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0) {
+            } else if (whoseTurnIsIt() == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0) {
                 drawPotentialMovesFromBar(g);
             } else {
                 // if no piece is stuck to mouse then just show up the potential
@@ -236,7 +234,7 @@ public class Board {
         Spike destinationSpike = (Spike) spikesAllowedToMoveToFromBar.firstElement();
 
         // travel to piece on bar first
-        Vector theBarPieces = whoseTurnIsIt == PlayerColor.WHITE ? CustomCanvas.theBarWHITE : CustomCanvas.theBarBLACK;
+        Vector theBarPieces = whoseTurnIsIt() == PlayerColor.WHITE ? CustomCanvas.theBarWHITE : CustomCanvas.theBarBLACK;
         Enumeration weepingDonkey = theBarPieces.elements();
         while(weepingDonkey.hasMoreElements()) {
             log("White pieces on bar potential pick ups:");
@@ -263,10 +261,10 @@ public class Board {
     // given the die this method will add spikes to spikesAllowedToMoveToFromBar
     // for current player so that the spikes available will flash and be ready to have a piece added to them
     private boolean canWeGetOffTheBarWithThisDie(Die die, int whichDie) {
-        int destinationSpikeId = whoseTurnIsIt == PlayerColor.BLACK ? die.getValue() - 1 : 24 - die.getValue();
+        int destinationSpikeId = whoseTurnIsIt() == PlayerColor.BLACK ? die.getValue() - 1 : 24 - die.getValue();
         Spike destinationSpike = (Spike) spikes.get(destinationSpikeId);
         if (destinationSpike.pieces.size() <= 1 ||
-            doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt)) {
+            doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
             destinationSpike.flash(whichDie);
             if (!spikesAllowedToMoveToFromBar.contains(destinationSpike)) {
                 destinationSpike.store_this_die(die); // bit of a hack here : just so we have a record of which die it will use
@@ -282,7 +280,7 @@ public class Board {
     //vars are cleaned up properly
     public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
         loadSounds(soundOn);
-        whoseTurnIsIt = PlayerColor.WHITE;
+        currentPlayer = whitePlayer;
         spikesAllowedToMoveToFromBar = new Vector(6);
         pickingPieceUpFromBar = false;
         allowPieceToStickToMouse = false;
@@ -438,11 +436,11 @@ public class Board {
             boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
                 && !anybodyNotInHome(currentPlayer);
             if (highlightPieceContainerAsOption) { //<-- this can get set by checkValidPotentialMove when the situation is right
-                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt == PlayerColor.WHITE) {
+                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     pulsateWhiteContainer = true;
                     die1StillAnOption = true;
                     copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
-                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==PlayerColor.BLACK) {
+                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt() ==PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer = true;
                     die1StillAnOption = true;
@@ -489,13 +487,13 @@ public class Board {
                 && !anybodyNotInHome(currentPlayer);
               //only for the case when a piece can go into the piece container
             if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
-                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt==PlayerColor.WHITE)
+                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE)
                 {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     pulsateWhiteContainer=true;
                     die2StillAnOption=true;
                     copy_of_reachableFromDie2=null;//EXPERIMENT- YES IT WORKS
-                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt==PlayerColor.BLACK) {
+                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer=true;
                     die2StillAnOption=true;
@@ -546,11 +544,11 @@ public class Board {
                 !anybodyNotInHome(currentPlayer);
             // only for the case when a piece can go into the piece container
             if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
-                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt == PlayerColor.WHITE) {
+                if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     pulsateWhiteContainer = true;
                     bothDiceStillAnOption = true;
-                } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt==PlayerColor.BLACK) {
+                } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer = true;
                     bothDiceStillAnOption = true;
@@ -647,7 +645,7 @@ public class Board {
         }
         return (potentialSpike >= FIRST_SPIKE) && (potentialSpike <= LAST_SPIKE) &&
             (isThisSpikeEmpty(spikes.get(potentialSpike)) ||
-                doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt));
+                doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt()));
     }
 
     //returns the Spike the player has their mouse over currently IFF it
@@ -657,7 +655,7 @@ public class Board {
         Spike hoverSpike = grabSpikeHoveringOver();
         boolean containsOneOfTheirPieces = false;
         if (hoverSpike != null) {
-           containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike, whoseTurnIsIt);
+           containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike, whoseTurnIsIt());
         }
         if (containsOneOfTheirPieces) {
             return hoverSpike;
@@ -820,10 +818,10 @@ public class Board {
                     //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
                     //so what we do is sneaky, reduce die value number (hiding it from players of course)
                     //which makes optiosn become available in this case.
-                    if (whoseTurnIsIt == PlayerColor.WHITE && allWhitePiecesAreHome) {
+                    if (whoseTurnIsIt() == PlayerColor.WHITE && allWhitePiecesAreHome) {
                         log("WHITE LOWERING THEVALUE OF DIE 1");
                         die1.setValue(die1.getValue() - 1);
-                    } else if (whoseTurnIsIt == PlayerColor.BLACK && allBlackPiecesAreHome) {
+                    } else if (whoseTurnIsIt() == PlayerColor.BLACK && allBlackPiecesAreHome) {
                         log("BLACK LOWERING THEVALUE OF DIE 1");
                         die1.setValue(die1.getValue() - 1);
                     } else {
@@ -838,10 +836,10 @@ public class Board {
                     //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
                     //so what we do is sneaky, reduce die value number (hiding it from players of course)
                     //which makes optiosn become available in this case.
-                    if (whoseTurnIsIt == PlayerColor.WHITE && allWhitePiecesAreHome) {
+                    if (whoseTurnIsIt() == PlayerColor.WHITE && allWhitePiecesAreHome) {
                         log("WHITE LOWERING THEVALUE OF DIE 2");
                         die2.setValue(die2.getValue() - 1);
-                    } else if (whoseTurnIsIt == PlayerColor.BLACK && allBlackPiecesAreHome) {
+                    } else if (whoseTurnIsIt() == PlayerColor.BLACK && allBlackPiecesAreHome) {
                         log("BLACK LOWERING THEVALUE OF DIE 2");
                         die2.setValue(die2.getValue() - 1);
                     } else {
@@ -882,14 +880,14 @@ public class Board {
             log("using DIE2 value " + diceRoll);
         }
         // blacks pieces move anticlockwise, white clockwise
-        boolean clockwise = whoseTurnIsIt == PlayerColor.WHITE;
+        boolean clockwise = whoseTurnIsIt() == PlayerColor.WHITE;
         //this gets set according to whose go it is
         boolean checkAbleToGetIntoPieceContainer = clockwise ? allWhitePiecesAreHome : allBlackPiecesAreHome;
 
         if (diceRoll > 0) {
             for (Spike spike: spikes) {
                 // check if we own it already (ie we have parts on it)
-                if (doesThisSpikeBelongToPlayer(spike, whoseTurnIsIt) && spike.pieces.size() > 0) {
+                if (doesThisSpikeBelongToPlayer(spike, whoseTurnIsIt()) && spike.pieces.size() > 0) {
                     // so we have a spike that belongs to us for sure and has our pieces  on it
                     // now check if we were to take one of those pieces, would we be able to place it?
                     int potentialSpike = clockwise ? spike.getSpikeNumber() - diceRoll :
@@ -930,7 +928,7 @@ public class Board {
                         Spike destinationSpike = spikes.get(potentialSpike);
                         //if its empty or we own it, we can move to it (ADD IN HERE KILLING OTHER PLAYER)
                         if (destinationSpike.pieces.size() <= 1 ||
-                            doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt)) {
+                            doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
                             spikePairs.add(new SpikePair(spike, destinationSpike));
                         }
                     }
@@ -963,7 +961,7 @@ public class Board {
             thereAreOptions = false;
             return;
         }
-        if (!Bot.getFullAutoPlay() && whoseTurnIsIt == PlayerColor.WHITE) {
+        if (!Bot.getFullAutoPlay() && whoseTurnIsIt() == PlayerColor.WHITE) {
             return;
         }
         Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe; // gets the spike to drop pieces on
@@ -974,12 +972,12 @@ public class Board {
                 int pieceContainerY = 0;
                 int pieceContainerWidth = 0;
                 int pieceContainerHeight = 0;
-                if (whoseTurnIsIt == PlayerColor.WHITE) {
+                if (whoseTurnIsIt() == PlayerColor.WHITE) {
                     pieceContainerX = CustomCanvas.whiteContainerX;
                     pieceContainerY = CustomCanvas.whiteContainerY;
                     pieceContainerWidth = CustomCanvas.whiteContainerWidth;
                     pieceContainerHeight = CustomCanvas.whiteContainerHeight;
-                } else if (whoseTurnIsIt == PlayerColor.BLACK) {
+                } else if (whoseTurnIsIt() == PlayerColor.BLACK) {
                     pieceContainerX = CustomCanvas.blackContainerX;
                     pieceContainerY = CustomCanvas.blackContainerY;
                     pieceContainerWidth = CustomCanvas.blackContainerWidth;
@@ -1013,7 +1011,6 @@ public class Board {
         } else {
             currentPlayer = blackPlayer;
         }
-        whoseTurnIsIt = currentPlayer.getColour();
     }
 
     public void nextTurn() {
@@ -1024,7 +1021,6 @@ public class Board {
             currentPlayer = whitePlayer;
             log("WHITES TURN");
         }
-        whoseTurnIsIt = currentPlayer.getColour();
     }
 
     // returns the current pip count of the given player.
@@ -1065,5 +1061,9 @@ public class Board {
 
     public boolean rolledDouble() {
         return die1.enabled() && die2.enabled() && (die1.getValue() == die2.getValue());
+    }
+    
+    public PlayerColor whoseTurnIsIt() {
+        return currentPlayer.getColour();
     }
 }

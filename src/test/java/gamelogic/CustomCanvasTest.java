@@ -95,7 +95,6 @@ class CustomCanvasTest {
         }
         assertEquals(GuiState.OPTIONS_SCREEN_LOCAL_OR_NETWORK, canvas.getState());
         canvas.paint(graphics);
-        System.err.println("Turn: " + Board.whoseTurnIsIt);
         Field buttonxA = makeCanvasFieldPublic("buttonxA");
         Field buttonyA = makeCanvasFieldPublic("buttonyA");
         Field buttonwA = makeCanvasFieldPublic("buttonwA");

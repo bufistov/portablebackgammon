@@ -699,7 +699,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             gameComplete = true;
             showRollButton = false;
         }
-        if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+        if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             gameCompleteString = "Black has won the game!";
         }
 
@@ -769,7 +769,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int ypos = Board.BORDER + TINY_GAP;
         //draw black players score at top
         String printme = "White (" + board.getWhitePlayer().getName() + ")";
-        if (board.whoseTurnIsIt == PlayerColor.WHITE) {
+        if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
             printme += "*";
         }
         fontwhite.drawString(g, printme, xpos, ypos, 0);
@@ -784,7 +784,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //draw white players score at bot
         ypos = HEIGHT - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
         printme = "Brown (" + board.getBlackPlayer().getName() + ")";
-        if (board.whoseTurnIsIt == PlayerColor.BLACK) {
+        if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             printme += "*";
         }
         fontwhite.drawString(g, printme, xpos, ypos, 0);
@@ -836,7 +836,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.setColor(g, roll_button_colour);
             utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
 
-            if (HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK || Bot.getFullAutoPlay()) {
+            if (HUMAN_VS_COMPUTER && board.whoseTurnIsIt() == PlayerColor.BLACK || Bot.getFullAutoPlay()) {
                 if (Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER && !RemotePlayer.clickRoll) {
                     log("WAITING FOR USER TO CLICK ROLL DICE REMOTELY");
                 } else {
@@ -992,11 +992,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     //deals with an ordinary roll, that is sets the 2 die values to new random ones
     private void dealWithOrdinaryRolls() {
         log("----------- dealWithOrdinaryRolls -----------");
-        if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+        if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
             log("white will roll both die now.");
             // note we pass in null in here which tells it to roll both die for us directly
             playerRolls(PlayerColor.WHITE);
-        } else if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+        } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             log("black will roll both die now.");
             // note we pass in null in here which tells it to roll both die for us directly
             playerRolls(PlayerColor.BLACK);
@@ -1403,7 +1403,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
         // so our mouse doesnt influence anything
-        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && Board.whoseTurnIsIt == PlayerColor.BLACK) ) {
+        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && board.whoseTurnIsIt() == PlayerColor.BLACK) ) {
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
             mouseClickedX(e.getX(), e.getY(), e.getButton());
@@ -1532,7 +1532,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             if (y > myY && y < (myY + myHeight)) {
                 log("DOUBLE CLICKED ON!");
                 sfxdouble.playSound();
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     tellPlayers("White just doubled.");
                 } else {
                     tellPlayers("Black just doubled.");
@@ -1551,7 +1551,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 log("RESIGN CLICKED ON!");
                 sfxResign.playSound();
                 gameComplete = true;
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whiteResigned = true;
                 } else {
                     blackResigned = true;
@@ -1566,13 +1566,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int myWidth = 0;
         int myHeight = 0;
         String clickedOnText = "NONE";
-        if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+        if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
             myX = whiteContainerX;
             myY = whiteContainerY;
             myWidth = whiteContainerWidth;
             myHeight = whiteContainerHeight;
             clickedOnText = "WHITE CONTAINER CLICKED ON";
-        } else if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+        } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             myX = blackContainerX;
             myY = blackContainerY;
             myWidth = blackContainerWidth;
@@ -1587,11 +1587,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 log("" + clickedOnText);
                 // if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
                 // then we simply let it go into the piece container.
-                if (Board.pulsateWhiteContainer && pieceOnMouse && Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (Board.pulsateWhiteContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("WHITE put in container");
                     int correctDie = Board.whichDieGetsUsToPieceContainer;
                     placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
-                } else if (Board.pulsateBlackContainer && pieceOnMouse && Board.whoseTurnIsIt == PlayerColor.BLACK) {
+                } else if (Board.pulsateBlackContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.BLACK) {
                     //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
                     //then we simply let it go into the piece container.
                     log("BLACK put in container");
@@ -1617,7 +1617,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                         if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
                             log("YES WE CAN DROP OFF AT THIS SPIKE " + sp.getSpikeNumber());
                             //remove piece from bar
-                            if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                            if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                                 log("WHITE PIECE REMOVED FROM BAR");
                                 theBarWHITE.remove(pieceStuckToMouse);
                                 // IF this spike contains an enemy piece Kill it
@@ -1629,7 +1629,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                                     sfxKilled.playSound();
                                 }
                             }
-                            if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+                            if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
                                 log("BLACK PIECE REMOVED FROM BAR");
                                 theBarBLACK.remove(pieceStuckToMouse);
                                 //IF this spike contains an enemy piece Kill it
@@ -1707,11 +1707,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         originalSpikeForPieceSelected.removePiece(pieceStuckToMouse);
         if (dieToSetUnused == 1) {
             if (pieceWillGoToContainer) {
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
@@ -1720,14 +1720,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 }
             } else {
                 //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE && board.copy_of_reachableFromDie1.getAmountOfPieces(PlayerColor.BLACK) > 0) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE && board.copy_of_reachableFromDie1.getAmountOfPieces(PlayerColor.BLACK) > 0) {
                     log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromDie1.pieces.firstElement();
                     board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
                     board.copy_of_reachableFromDie1.addPiece(pieceStuckToMouse);
                     theBarBLACK.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK && board.copy_of_reachableFromDie1.getAmountOfPieces(PlayerColor.WHITE) > 0) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK && board.copy_of_reachableFromDie1.getAmountOfPieces(PlayerColor.WHITE) > 0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromDie1.pieces.firstElement();
                     board.copy_of_reachableFromDie1.removePiece(firstPiece);//remove that piece and
@@ -1746,11 +1746,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("die1HasBeenUsed A.");
         } else if (dieToSetUnused == 2) {
             if (pieceWillGoToContainer) {
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
@@ -1759,7 +1759,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 }
             } else {
                 //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE && board.copy_of_reachableFromDie2.getAmountOfPieces(PlayerColor.BLACK) > 0) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE && board.copy_of_reachableFromDie2.getAmountOfPieces(PlayerColor.BLACK) > 0) {
                     log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
@@ -1767,7 +1767,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     theBarBLACK.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK && board.copy_of_reachableFromDie2.getAmountOfPieces(PlayerColor.WHITE) > 0) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK && board.copy_of_reachableFromDie2.getAmountOfPieces(PlayerColor.WHITE) > 0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromDie2.pieces.firstElement();
                     board.copy_of_reachableFromDie2.removePiece(firstPiece);//remove that piece and
@@ -1786,11 +1786,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("die2HasBeenUsed AA.");
         } else if (dieToSetUnused == 3) {
             if (pieceWillGoToContainer) {
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + whitePiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
                     blackPiecesSafelyInContainer.add(pieceStuckToMouse);
                     log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" + blackPiecesSafelyInContainer.size());
                     sfxPutPieceInContainer.playSound();
@@ -1799,7 +1799,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 }
             } else {
                 //// SPECIAL CONDITION - WAS A PIECE KILLED?////////////////////
-                if (Board.whoseTurnIsIt == PlayerColor.WHITE && board.copy_of_reachableFromBothDice.getAmountOfPieces(PlayerColor.BLACK) > 0) {
+                if (board.whoseTurnIsIt() == PlayerColor.WHITE && board.copy_of_reachableFromBothDice.getAmountOfPieces(PlayerColor.BLACK) > 0) {
                     log("WHITE KILLED A BLACK");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
@@ -1807,7 +1807,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     theBarBLACK.add(firstPiece); // add it to the BAR
                     sfxKilled.playSound();
 
-                } else if (Board.whoseTurnIsIt == PlayerColor.BLACK && board.copy_of_reachableFromBothDice.getAmountOfPieces(PlayerColor.WHITE) > 0) {
+                } else if (board.whoseTurnIsIt() == PlayerColor.BLACK && board.copy_of_reachableFromBothDice.getAmountOfPieces(PlayerColor.WHITE) > 0) {
                     log("BLACK KILLED A WHITE");
                     Piece firstPiece = (Piece) board.copy_of_reachableFromBothDice.pieces.firstElement();
                     board.copy_of_reachableFromBothDice.removePiece(firstPiece);//remove that piece and
@@ -1894,7 +1894,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         // check pieces on bar
         if (Board.pickingPieceUpFromBar) {
-            Vector piecesOnTheBar = (Board.whoseTurnIsIt == PlayerColor.WHITE) ? theBarWHITE : theBarBLACK;
+            Vector piecesOnTheBar = (board.whoseTurnIsIt() == PlayerColor.WHITE) ? theBarWHITE : theBarBLACK;
             Enumeration e = piecesOnTheBar.elements();
             while (e.hasMoreElements()) {
                 Piece p = (Piece) e.nextElement();
@@ -1916,7 +1916,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 while (pieces_e.hasMoreElements()) {
                     Piece piece = (Piece) pieces_e.nextElement();
                     if (piece.userClickedOnThis(x, y)) {
-                        if (piece.getColour() == Board.whoseTurnIsIt) {
+                        if (piece.getColour() == board.whoseTurnIsIt()) {
                             log("PICKED UP PIECE: " + piece.getColour());
                             piece.stickToMouse();
                             pieceOnMouse = true;
@@ -1924,7 +1924,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                             originalSpikeForPieceSelected = spike; // keep a copy of this piece's original Spike (for removing the piece later if need be)
                         }
                         log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse: true " +
-                            "board.whoseTurnIsIt:" + board.whoseTurnIsIt);
+                            "board.whoseTurnIsIt:" + board.whoseTurnIsIt());
                         // At most one piece can be sticked to the mouse!
                         return;
                     }
@@ -1952,12 +1952,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     @Override
     public void mouseMoved(MouseEvent e) {
          //so our mouse doesnt influence anything
-        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && Board.whoseTurnIsIt==PlayerColor.BLACK) ) {
+        if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && board.whoseTurnIsIt()==PlayerColor.BLACK) ) {
             //log("mouse wont respond");
         } else {
             if (NETWORK_GAME_IN_PROCESS) {
-                if ((I_AM_CLIENT && Board.whoseTurnIsIt == PlayerColor.WHITE) ||
-                    (I_AM_SERVER && Board.whoseTurnIsIt == PlayerColor.BLACK)) {
+                if ((I_AM_CLIENT && board.whoseTurnIsIt() == PlayerColor.WHITE) ||
+                    (I_AM_SERVER && board.whoseTurnIsIt() == PlayerColor.BLACK)) {
                     pointerX = e.getX();
                     pointerY = e.getY();
                 }
