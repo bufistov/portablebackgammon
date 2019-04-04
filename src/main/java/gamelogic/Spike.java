@@ -88,20 +88,14 @@ public class Spike {
         return pieces.size();
     }
 
-    public void paint(Graphics g, int WIDTH, int HEIGHT) {
-        //compute the vals we need
-        TRIANGLE_WIDTH            = (WIDTH-((Board.BORDER*2)+Board.BAR) ) /12;
-        TRIANGLE_HEIGHT           = ((HEIGHT-(Board.BORDER*2))/2);
-        TRIANGLE_HEIGHT_MINUS_VAL = TRIANGLE_HEIGHT/10;
+    void paint(Graphics g, int WIDTH, int HEIGHT) {
+        TRIANGLE_WIDTH            = (WIDTH - ((Board.BORDER*2)+Board.BAR) ) / 12;
+        TRIANGLE_HEIGHT           = (HEIGHT - (Board.BORDER*2)) / 2;
+        TRIANGLE_HEIGHT_MINUS_VAL = TRIANGLE_HEIGHT / 10;
 
-        drawSpike(g, spikeName);
-        drawPieces(g,spikeName);
+        drawSpike(g);
+        drawPieces(g, spikeName);
         drawPotentialDieMoves(g);
-
-        if (CustomCanvas.pieceStuckToMouse != null) {
-            //draw piece on mouse again ontop
-            CustomCanvas.pieceStuckToMouse.drawPieceOnMouse(g, x1, y1);
-        }
     }
 
     public int getSpikeNumber() {
@@ -113,16 +107,15 @@ public class Spike {
     }
 
     private void drawPieces(Graphics g, String spikeName) {
-        //draw its pieces
         Enumeration e = pieces.elements();
-        int yPosForPieces=y1-Piece.PIECE_DIAMETER;
+        int yPosForPieces = y1 - Piece.PIECE_DIAMETER;
 
         //adjust the starting point of the pieces pending on type of spike:
         /////////////////////////////////////////////
-        if(getType()==STALECTITE) {
-           yPosForPieces=y1-Piece.PIECE_DIAMETER;
-        } else if(getType()==STALECMITE) {
-           yPosForPieces=y1; // -Piece.PIECE_DIAMETER;
+        if(getType() == STALECTITE) {
+           yPosForPieces = y1 - Piece.PIECE_DIAMETER;
+        } else if(getType() == STALECMITE) {
+           yPosForPieces = y1; // -Piece.PIECE_DIAMETER;
         } else {
             Utils._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
         }
@@ -131,36 +124,36 @@ public class Spike {
         int overlapOnPieces = 0;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
-            int piecex=x2-(Piece.PIECE_DIAMETER/2);
-            int piecey=-1;
+            int piecex = x2 - Piece.PIECE_DIAMETER / 2;
+            int piecey = -1;
 
             //caters for overlappin pieces when manny are added.
-            if (pieces.size() <= 5){
-                overlapOnPieces=0;//Piece.PIECE_DIAMETER;
+            if (pieces.size() <= 5) {
+                overlapOnPieces = 0;
             } 
             if (pieces.size() > 5) {
-                overlapOnPieces=Piece.PIECE_DIAMETER / 3;
+                overlapOnPieces = Piece.PIECE_DIAMETER / 3;
             } 
             if (pieces.size() > 7) {
-                overlapOnPieces=Piece.PIECE_DIAMETER / 2;
+                overlapOnPieces = Piece.PIECE_DIAMETER / 2;
             } 
             if (pieces.size() > 9) {
-                overlapOnPieces=(Piece.PIECE_DIAMETER / 2)+pieces.size()/3;
+                overlapOnPieces = (Piece.PIECE_DIAMETER / 2) + pieces.size() / 3;
             }
             // we need a different y value for top and bottom spikes
             // so that on top spikes the pieces move down
             // and on bottom spikes the pieces move up
-            if(getType()==STALECTITE) {
-               piecey=yPosForPieces+=(Piece.PIECE_DIAMETER-overlapOnPieces);
-            } else if(getType()==STALECMITE) {
-                piecey=yPosForPieces-=(Piece.PIECE_DIAMETER-overlapOnPieces);
+            if(getType() == STALECTITE) {
+               piecey = yPosForPieces += (Piece.PIECE_DIAMETER-overlapOnPieces);
+            } else if(getType() == STALECMITE) {
+                piecey = yPosForPieces -= (Piece.PIECE_DIAMETER-overlapOnPieces);
             } else {
                 Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
             }
-            if(getType()==STALECTITE) {   //overlap here just squares them up to the bottom/top of spike if there overlapping
-                 p.paint(g,piecex,piecey+overlapOnPieces);
+            if(getType() == STALECTITE) {  // overlap here just squares them up to the bottom/top of spike if there overlapping
+                 p.paint(g,piecex,piecey + overlapOnPieces);
             } else {
-                 p.paint(g,piecex,piecey-overlapOnPieces);
+                 p.paint(g,piecex,piecey - overlapOnPieces);
             }
         }
     }
@@ -174,7 +167,7 @@ public class Spike {
     }
 
     // draw this spike
-    private void drawSpike(Graphics g, String spikeName) {
+    private void drawSpike(Graphics g) {
         if (position == -NOT_A_REAL_SPIKE_MINUS_99) {
             return;
         }

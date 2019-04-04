@@ -679,6 +679,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
         }
         drawHUDtext(g, xpos);
+        if (pieceStuckToMouse != null) {
+            pieceStuckToMouse.drawPieceOnMouse(g);
+        }
         if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
             log("GO TO NEW TURN AA");
             turnOver();
@@ -1400,9 +1403,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (buttonPressed == RIGHT_MOUSE_BUTTON) {
             log("RIGHT BUTTON PRESSED");
             unstickPieceFromMouse();
-            if (board != null) {
-                board.thereAreOptions = false;
-            }
+            board.thereAreOptions = false;
             return;
         }
 

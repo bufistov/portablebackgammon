@@ -47,9 +47,8 @@ public class Piece {
         return colour;
     }
 
-    void drawPieceOnMouse(Graphics g, int x, int y)
-    {
-        paint( g,  x,  y);
+    public void drawPieceOnMouse(Graphics g) {
+        paint( g, 0, 0);
     }
 
     public void paint(Graphics g, int x, int y) {
