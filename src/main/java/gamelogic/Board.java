@@ -99,29 +99,29 @@ public class Board {
         }
     }
     
-    public void paint(Graphics g, int WIDTH, int HEIGHT, boolean gameInProgress) {
+    public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress) {
         utils.setColor(g, Color.BLACK);
-        BORDER = WIDTH / 64;
+        BORDER = boardWidth / 64;
         BAR = BORDER * 2;
-        int widthMinusBorder = WIDTH - BAR;
+        int widthMinusBorder = boardWidth - BAR;
 
         //draw the board:
         // outline:
         utils.setColor(g, board_colour);
-        utils.fillRect(g,BORDER,BORDER,widthMinusBorder,HEIGHT-BORDER*2);
+        utils.fillRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,BORDER,BORDER,widthMinusBorder,HEIGHT-BORDER*2);
+        utils.drawRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
         // bar between 2 halves
         utils.setColor(g, bar_colour);
-        utils.fillRect(g,(BORDER + widthMinusBorder/2) - BAR/2, BORDER,BAR,HEIGHT - BORDER*2);
+        utils.fillRect(g,(BORDER + widthMinusBorder/2) - BAR/2, BORDER,BAR,boardHeight - BORDER*2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,HEIGHT-BORDER*2);
+        utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,boardHeight-BORDER*2);
 
         for (Spike spike: spikes) {
-           spike.paint(g, WIDTH, HEIGHT);
+           spike.paint(g, boardWidth, boardHeight);
         }
 
-        paintDice(g,WIDTH,HEIGHT);
+        paintDice(g,boardWidth,boardHeight);
 
         // draw the potential moves for whoevers go it is
         if (gameInProgress) {
@@ -767,11 +767,7 @@ public class Board {
                     Enumeration ee = spikePairs.elements();
                     while (ee.hasMoreElements()) {
                         SpikePair sp = (SpikePair) ee.nextElement();
-                        if (sp.dropPiecesOnMe.isContainer()){
-                            botOptions += "->" + sp.pickMyPiece.spikeName + "->Container";
-                        } else {
-                            botOptions += "->" + sp.pickMyPiece.spikeName + "->" + sp.dropPiecesOnMe.spikeName + " ";
-                        }
+                        botOptions += "->" + sp.pickMyPiece.getName() + "->" + sp.dropPiecesOnMe.getName() + " ";
                     }
                     log("valid options: " + botOptions);
                 }
@@ -780,15 +776,21 @@ public class Board {
 
                 if (SPtheMoveToMake.dropPiecesOnMe.isContainer()) {
                     //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
-                    log("SPECIAL CASE randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at CONTAINER");
-                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.spikeName + "->Container");
+                    log("SPECIAL CASE randomly chose to go to spike:" +
+                        SPtheMoveToMake.pickMyPiece.getName() + " and drop off at CONTAINER");
+                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.getName() + "->Container");
                     Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                     Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    setBotDestination(firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2, firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2, "TAKE A PIECE TO CONTAINER");
+                    setBotDestination(firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2,
+                        firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2,
+                        "TAKE A PIECE TO CONTAINER");
                 } else {
                     //NORMAL CONDITION
-                    log("-randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at spike:" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
-                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.spikeName + "->" + SPtheMoveToMake.dropPiecesOnMe.spikeName);
+                    log("-randomly chose to go to spike:" +
+                        SPtheMoveToMake.pickMyPiece + " and drop off at spike:" +
+                        SPtheMoveToMake.dropPiecesOnMe);
+                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece +
+                        "->" + SPtheMoveToMake.dropPiecesOnMe);
                     Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                     Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
                     int goToX = firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2;
@@ -897,7 +899,7 @@ public class Board {
                                 log("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is " + potentialSpike);
                                 // pass in -99 to make spike a very special one which is basically a piece container (see Spike constructor)
                                 Spike destinationSpike = new Spike(-1);
-                                log("yes " + destinationSpike.spikeName + " IS A PIECE CONTAINER we can move to");
+                                log("yes " + destinationSpike + " IS A PIECE CONTAINER we can move to");
                                 spikePairs.add(new SpikePair(spike, destinationSpike));
 
                             }

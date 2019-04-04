@@ -2,10 +2,14 @@ package gamelogic;
 import java.awt.*;
 
 import data.PlayerColor;
+import data.SpikeType;
 import lowlevel.*;
 
 import java.util.Enumeration;
 import java.util.Vector;
+
+import static data.SpikeType.STALECMITE;
+import static data.SpikeType.STALECTITE;
 
 /**
  * Board triangle that can store up to 15 checkers.
@@ -19,15 +23,12 @@ public class Spike {
 
     public  Vector pieces = new Vector();
     private int position; // 1 to 24
-    private final int type;
+    private final SpikeType type;
+    private final String spikeName;
     private Utils utils = new Utils();
 
     private int TRIANGLE_WIDTH = 0;
     private int TRIANGLE_HEIGHT = 0;
-    String spikeName;
-
-    private static final int STALECTITE = 1; //spike going down
-    private static final int STALECMITE = 2; //spike going up
 
     // these variables (along with TRIANGLE_WIDTH & TRIANGLE_HEIGHT) are used to work out if the player has clicked on the piece
     private int collision_x;
@@ -38,23 +39,38 @@ public class Spike {
     int whichDiei = -1; // the die combination that brings piece at mouse to given spike
     private boolean flash = false;
 
-    // these are used for drawing the spike (3 points, each with x,y)
     private int x1 = 0, y1 = 0; // left most point
     private int x2 = 0, y2 = 0; // middle point, can go up or down depending on type
     private int x3 = 0, y3 = 0; // right most point
 
     Spike(int position) {
         this.position = position;
-        this.type = position <= 12 ? STALECTITE : STALECMITE;
-        log("Spike made "+ position);
+        assert position != 0;
         if (position < 0) {
             log("Special spike made, this isnt a spike at all, its a piece container");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
-            spikeName = Integer.toString(NOT_A_REAL_SPIKE_MINUS_99);
+            this.spikeName = "Container";
+            this.type = SpikeType.CONTAINER;
         } else {
             spikeName = Integer.toString(position - 1);
+            this.type = position <= 12 ? STALECTITE : STALECMITE;
         }
+        log("Spike made "+ position);
         makeColourObjects();
+    }
+
+    String getName() {
+        return spikeName;
+    }
+
+    @Override
+    public String toString() {
+        return spikeName;
+    }
+
+    public boolean userClickedOnThis(int mouseX, int mouseY) {
+        return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
+            (mouseY >= collision_y && mouseY <= collision_y + height());
     }
 
     // add a piece to this spike
@@ -84,9 +100,9 @@ public class Spike {
         return pieces.size();
     }
 
-    void paint(Graphics g, int WIDTH, int HEIGHT) {
-        int boardHeight = HEIGHT - Board.BORDER * 2;
-        TRIANGLE_WIDTH            = (WIDTH - ((Board.BORDER * 2) + Board.BAR) ) / 12;
+    void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
+        int boardHeight = boardHeightWithBorder - Board.BORDER * 2;
+        TRIANGLE_WIDTH            = (boardWidth - ((Board.BORDER * 2) + Board.BAR) ) / 12;
         TRIANGLE_HEIGHT           = boardHeight / 2;
 
         workOutPositionsOfSpike(boardHeight, TRIANGLE_WIDTH);
@@ -164,7 +180,7 @@ public class Spike {
     }
 
     private void drawSpike(Graphics g) {
-        if (position == -NOT_A_REAL_SPIKE_MINUS_99) {
+        if (isContainer()) {
             assert false;
             return;
         }
@@ -190,8 +206,8 @@ public class Spike {
     }
 
     private void drawPotentialDieMoves(Graphics g) {
-        final int miniDieX = x2 - Board.die1.miniDieWidth() / 2;
-        final int miniDieHeight = Board.die1.miniDieHeight();
+        final int miniDieX = x2 - Die.miniDieWidth() / 2;
+        final int miniDieHeight = Die.miniDieHeight();
         if (whichDiei == Board.DIE1) {
             if (getType() == STALECMITE) {
                 Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
@@ -231,13 +247,7 @@ public class Spike {
         }
     }
 
-    private int getType() {
-        if (position == NOT_A_REAL_SPIKE_MINUS_99) {
-            return NOT_A_REAL_SPIKE_MINUS_99;
-        }
-        if (type == -1) {
-            Utils._E(spikeName + ": returned no type tite nor mite!");
-        }
+    SpikeType getType() {
         return type;
     }
 
@@ -285,11 +295,6 @@ public class Spike {
         white_spike_colour = new Color(WHITE_SPIKE_COLOUR);
     }
 
-    public boolean userClickedOnThis(int mouseX, int mouseY) {
-        return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
-            (mouseY >= collision_y && mouseY <= collision_y + height());
-    }
-
     /*
      * when a piece is on the bar,and we are checking which spikes it can go to, and this spike is a valid option
      * for ease we store the die which would get it there in this spike, and grab it later, this is the only instance in which this
@@ -304,7 +309,7 @@ public class Spike {
     }
 
     boolean isContainer() {
-        return position == NOT_A_REAL_SPIKE_MINUS_99;
+        return type == SpikeType.CONTAINER;
     }
 
     Point getMiddlePoint() {

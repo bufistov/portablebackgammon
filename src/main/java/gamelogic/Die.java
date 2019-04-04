@@ -79,11 +79,11 @@ public class Die {
         return value > 0;
     }
 
-    int miniDieWidth() {
+    static int miniDieWidth() {
         return Piece.PIECE_DIAMETER-6;
     }
 
-    int miniDieHeight() {
+    static int miniDieHeight() {
         return Piece.PIECE_DIAMETER-6;
     }
 
