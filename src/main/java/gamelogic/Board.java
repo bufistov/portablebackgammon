@@ -1,11 +1,10 @@
 package gamelogic;
+import java.awt.*;
 import java.util.*;
 
 import data.PlayerColor;
 import graphics.GameColour;
 import lowlevel.*;
-import java.awt.Color;
-import java.awt.Graphics;
 
 import static data.PlayerColor.BLACK;
 import static data.PlayerColor.WHITE;
@@ -95,6 +94,9 @@ public class Board {
     public void makeColourObjects() {
         board_colour = new Color(gameColour.getBoardColor());
         bar_colour = new Color(gameColour.getBarColor());
+        for (Spike spike: spikes) {
+            spike.makeColourObjects();
+        }
     }
     
     public void paint(Graphics g, int WIDTH, int HEIGHT, boolean gameInProgress) {
@@ -241,13 +243,8 @@ public class Board {
         }
         if (CustomCanvas.pieceOnMouse) {
             log("Destination PLACE ON AVAIL SPIKE:" + destinationSpike.getSpikeNumber());
-            if (destinationSpike.getType() == Spike.STALECTITE) {
-                 setBotDestination(destinationSpike.x3 - destinationSpike.TRIANGLE_WIDTH/2,
-                     destinationSpike.y2 - destinationSpike.TRIANGLE_HEIGHT/2,"PLACE FROM BAR ONTO AVAIL SPIKES A");
-            } else if (destinationSpike.getType() == Spike.STALECMITE) {
-                setBotDestination(destinationSpike.x3 - destinationSpike.TRIANGLE_WIDTH/2,
-                    destinationSpike.y2 + destinationSpike.TRIANGLE_HEIGHT/2,"PLACE FROM BAR ONTO AVAIL SPIKES B");
-            }
+            Point spikeMiddle = destinationSpike.getMiddlePoint();
+            setBotDestination(spikeMiddle.x, spikeMiddle.y, "PLACE FROM BAR ONTO AVAIL SPIKES");
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
             Piece p = (Piece) theBarPieces.firstElement();
@@ -667,10 +664,8 @@ public class Board {
     // it returns null
     private Spike grabSpikeHoveringOver() {
        for (Spike currentSpike: spikes) {
-           if (mouseHoverX > currentSpike.collision_x && mouseHoverX < currentSpike.collision_x + currentSpike.TRIANGLE_WIDTH ) {
-               if (mouseHoverY > currentSpike.collision_y && mouseHoverY < currentSpike.collision_y + currentSpike.TRIANGLE_HEIGHT) {
-                    return currentSpike;
-               }
+           if (currentSpike.userClickedOnThis(mouseHoverX, mouseHoverY)) {
+               return currentSpike;
            }
         }
         return null;
@@ -772,15 +767,7 @@ public class Board {
                     Enumeration ee = spikePairs.elements();
                     while (ee.hasMoreElements()) {
                         SpikePair sp = (SpikePair) ee.nextElement();
-                        if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR) &&
-                            sp.pickMyPiece.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)
-                        ) {
-                            log("super special spike found ");
-                                    /*this is when the die roll is too big to be exact but theyre putting pieces on container
-                                     and it should be allowed.*/
-                        }
-
-                        if (sp.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)){//ie its a fake spike, since its a piece container option
+                        if (sp.dropPiecesOnMe.isContainer()){
                             botOptions += "->" + sp.pickMyPiece.spikeName + "->Container";
                         } else {
                             botOptions += "->" + sp.pickMyPiece.spikeName + "->" + sp.dropPiecesOnMe.spikeName + " ";
@@ -791,7 +778,7 @@ public class Board {
                 //PICK ONE AT RANDOM
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
 
-                if (SPtheMoveToMake.dropPiecesOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)) {//ie its a fake spike, since its a piece container option
+                if (SPtheMoveToMake.dropPiecesOnMe.isContainer()) {
                     //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
                     log("SPECIAL CASE randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece.spikeName + " and drop off at CONTAINER");
                     CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.spikeName + "->Container");
@@ -909,7 +896,7 @@ public class Board {
                             if (potentialSpike == LAST_SPIKE + 1 || potentialSpike == FIRST_SPIKE - 1) {//so we know for sure its destined for piece container
                                 log("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is " + potentialSpike);
                                 // pass in -99 to make spike a very special one which is basically a piece container (see Spike constructor)
-                                Spike destinationSpike = new Spike(Spike.NOT_A_REAL_SPIKE_MINUS_99);
+                                Spike destinationSpike = new Spike(-1);
                                 log("yes " + destinationSpike.spikeName + " IS A PIECE CONTAINER we can move to");
                                 spikePairs.add(new SpikePair(spike, destinationSpike));
 
@@ -962,10 +949,9 @@ public class Board {
         if (!Bot.getFullAutoPlay() && whoseTurnIsIt() == PlayerColor.WHITE) {
             return;
         }
-        Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe; // gets the spike to drop pieces on
+        Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe;
         if (dropOnMe != null) {
-            if (dropOnMe.spikeName.equals(Spike.NOT_A_REAL_SPIKE_MINUS_99_STR)) {
-                // SPECIAL CASE DROP ON CONTAINER
+            if (dropOnMe.isContainer()) {
                 int pieceContainerX = 0;
                 int pieceContainerY = 0;
                 int pieceContainerWidth = 0;
@@ -986,13 +972,8 @@ public class Board {
                 setBotDestination(pieceContainerX + pieceContainerWidth / 2,
                     pieceContainerY + pieceContainerHeight / 2,"PIECE CONTAINER DESTINATION");
             } else {
-                if (dropOnMe.getType() == Spike.STALECTITE) {
-                    setBotDestination(dropOnMe.x3 - dropOnMe.TRIANGLE_WIDTH / 2,
-                        dropOnMe.y2 - dropOnMe.TRIANGLE_HEIGHT / 2,"NORMAL CASE DROP ON SPIKE A");
-                } else if (dropOnMe.getType()==Spike.STALECMITE) {
-                     setBotDestination(dropOnMe.x3 - dropOnMe.TRIANGLE_WIDTH/2,
-                         dropOnMe.y2 + dropOnMe.TRIANGLE_HEIGHT / 2,"NORMAL CASE DROP ON SPIKE B");
-                }
+                Point middlePoint = dropOnMe.getMiddlePoint();
+                setBotDestination(middlePoint.x, middlePoint.y, "NORMAL CASE DROP ON SPIKE A");
             }
         } else {
             Utils._E("DROP ON ME IS NULL.");
@@ -1064,5 +1045,9 @@ public class Board {
     
     public PlayerColor whoseTurnIsIt() {
         return currentPlayer.getColour();
+    }
+
+    public static int boardHeight() {
+        return CustomCanvas.HEIGHT - 2 * Board.BORDER;
     }
 }

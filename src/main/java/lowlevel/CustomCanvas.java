@@ -2157,12 +2157,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                         Utils._E("theme state error, should not exceed 12!");
             }
         }
-        //force recreation of colour objects
-        //we pass true into makeColourObjects to force them to remake themselves
-        //with the new colour values and thus repaint with new theme
         makeColourObjects();
         board.makeColourObjects();
-        Spike.makeColourObjects(true);
         Piece.makeColourObjects(true);
         Die.makeColourObjects();
         log("Theme is loaded now and working.");

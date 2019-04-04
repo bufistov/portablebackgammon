@@ -137,6 +137,5 @@ class CustomCanvasTest {
         assertTrue(board.rolledDouble());
         canvas.paint(graphics);
         canvas.paint(graphics);
-        canvas.paint(graphics);
     }
 }

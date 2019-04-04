@@ -52,7 +52,7 @@ public class Piece {
     }
 
     public void paint(Graphics g, int x, int y) {
-        PIECE_DIAMETER = Spike.TRIANGLE_HEIGHT/7;
+        PIECE_DIAMETER = (Board.boardHeight() / 2) / 7;
         if (colour == PlayerColor.WHITE) {
             utils.setColor(g, white_piece_color);
         } else if (colour == PlayerColor.BLACK) {
@@ -65,9 +65,9 @@ public class Piece {
             x = Board.mouseHoverX;
             y = Board.mouseHoverY;
         }
-        utils.fillCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
-        utils.setColor(g,Color.BLACK);
-        utils.drawCircle(g,x, y,PIECE_DIAMETER, PIECE_DIAMETER);
+        utils.fillCircle(g, x, y, PIECE_DIAMETER, PIECE_DIAMETER);
+        utils.setColor(g, Color.BLACK);
+        utils.drawCircle(g, x, y, PIECE_DIAMETER, PIECE_DIAMETER);
 
         collision_x = x;
         collision_y = y;
@@ -88,8 +88,7 @@ public class Piece {
         stickToMouse = false;
     }
 
-    //returns true if the x,y passed in (from a mouse click) are within the
-    //boundaries of this piece, ie user clicked on this piece
+
     public boolean userClickedOnThis(int mouseX, int mouseY) {
        return (mouseX >= collision_x && mouseX <= collision_x + PIECE_DIAMETER)
         && (mouseY >= collision_y && mouseY <= collision_y + PIECE_DIAMETER);
