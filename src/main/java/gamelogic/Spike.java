@@ -90,7 +90,7 @@ public class Spike {
 
     public void paint(Graphics g, int WIDTH, int HEIGHT) {
         //compute the vals we need
-        TRIANGLE_WIDTH            = (WIDTH-((Board.BORDER*2)+Board.BAR+Board.PIECE_CONTAINER*2) ) /12;
+        TRIANGLE_WIDTH            = (WIDTH-((Board.BORDER*2)+Board.BAR) ) /12;
         TRIANGLE_HEIGHT           = ((HEIGHT-(Board.BORDER*2))/2);
         TRIANGLE_HEIGHT_MINUS_VAL = TRIANGLE_HEIGHT/10;
 
@@ -272,7 +272,7 @@ public class Spike {
         boolean stalectite = false; //indicates spikes that look like staletites (for drawing)
         boolean stalecmite = false; // as above but for stalecmites.
 
-        int widthMinusBorderAndPieceComponent=(CustomCanvas.WIDTH-Board.BORDER-Board.PIECE_CONTAINER);
+        int widthMinusBorderAndPieceComponent = CustomCanvas.WIDTH - Board.BORDER;
 
         //work out the initial x,y positions based on
         //which spike this is, baring in mind it starts at

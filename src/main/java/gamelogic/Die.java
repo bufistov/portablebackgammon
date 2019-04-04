@@ -6,7 +6,6 @@ import lowlevel.*;
 public class Die {
     public static int DIE_COLOUR = 0xFFFFFF;
     public static int DOT_COLOUR = 0x000000;
-    public static String rollString = "Roll";
 
     private static Color die_colour, dot_colour;
 

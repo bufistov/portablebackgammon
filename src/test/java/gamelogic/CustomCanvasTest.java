@@ -136,8 +136,7 @@ class CustomCanvasTest {
         canvas.mouseClicked(clickRollButton);
         assertTrue(board.rolledDouble());
         canvas.paint(graphics);
-        for (int i = 0; i < 10; ++i) {
-            canvas.paint(graphics);
-        }
+        canvas.paint(graphics);
+        canvas.paint(graphics);
     }
 }

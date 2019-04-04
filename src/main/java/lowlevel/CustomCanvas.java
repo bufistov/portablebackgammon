@@ -604,7 +604,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.backGround(g, background_colour, getWidth(), getHeight()); // paint entire background
         utils.setColor(g, Color.WHITE);
 
-        //paint board and its containing parts
         int boardWidth = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
         int boardHeight = getHeight();
         board.paint(g, boardWidth, boardHeight, !gameComplete());
@@ -644,12 +643,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Board.allBlackPiecesAreHome) {
             utils.setColor(g, Color.GREEN);
             if (Board.pulsateBlackContainer) {
-                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+                utils.setColor(g, Color.YELLOW);
             }
         } else {
             utils.setColor(g, Color.WHITE);
         }
-        //draw black players piece container
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.BLACK);
 
@@ -664,7 +662,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             utils.setColor(g, Color.WHITE);
         }
-        // draw white players piece container
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.WHITE);
 
@@ -759,7 +756,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //draw all of the text on the panel
+    // draw all of the text on the panel
     private void drawHUDtext(Graphics g, int xpos) {
         int ypos = Board.BORDER + TINY_GAP;
         //draw black players score at top
@@ -818,9 +815,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
         }
 
-        //draw the 'Roll' button
-        ///////// roll button (on board itself (could be either side)
-        printme = "" + Die.rollString; //either says roll or 'roll to see who goes first' ..
+        // draw the 'Roll' button
+        printme = "Roll";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
 
         //only show roll button when required
@@ -840,12 +836,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 }
             }
 
-            /////for collisions
             rollButtonX = xposTmp - 10;
             rollButtonY = ypos;
             rollButtonW = widthOfPrintMe + 20;
             rollButtonH = (fontwhite.getHeight());
-            //////////
             if (showBoundaryBoxes) {
                 utils.setColor(g, Color.RED);
                 utils.drawRect(g, rollButtonX, rollButtonY, rollButtonW, rollButtonH);
@@ -854,7 +848,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             ypos += fontwhite.getHeight();
 
         } else {
-            //still knock y down so other buttons draw inline.
+            // still knock y down so other buttons draw inline.
             ypos += fontwhite.getHeight();
         }
 

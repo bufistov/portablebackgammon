@@ -28,7 +28,6 @@ public class Board {
     // Geometry
     public static int BORDER; // the gap around the board
     static int BAR;   // the bar in the middle of the board
-    static int PIECE_CONTAINER; // piece contrainers are them things to the sides that hold the pieces
 
     public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
@@ -102,7 +101,6 @@ public class Board {
         utils.setColor(g, Color.BLACK);
         BORDER = WIDTH / 64;
         BAR = BORDER * 2;
-        PIECE_CONTAINER = 0; // turn off piece containers -theyre drawn on panel now.
         int widthMinusBorder = WIDTH - BAR;
 
         //draw the board:
