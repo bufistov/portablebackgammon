@@ -1862,11 +1862,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    // indicates if this mouse click has been on a piece
     private void checkIfPieceClickedOn(int x,int y) {
         if (pieceOnMouse) {
-            //special case, if the player already has a piece stuck on the mouse dont let another
-            //one go on
             log("pieceOnMouse special case ignore this piece click");
             return;
         }

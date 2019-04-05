@@ -121,20 +121,13 @@ public class Board {
         // draw the potential moves for whoevers go it is
         if (gameInProgress) {
             // SPECIAL CASE: PIECES ON THE BAR NEED TO BE MOVED FIRST/////
-            if (whoseTurnIsIt() == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) {
-                drawPotentialMovesFromBar(g);
-            } else if (whoseTurnIsIt() == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0) {
+            if ((whoseTurnIsIt() == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) ||
+                (whoseTurnIsIt() == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0)) {
                 drawPotentialMovesFromBar(g);
             } else {
-                // if no piece is stuck to mouse then just show up the potential
-                // moves as the mouse is hovered over each spike
                 if (!CustomCanvas.pieceOnMouse) {
                     drawPotentialMoves(g);
                 } else {
-                    //if there is a piece stuck on the mouse then pulsate the copied
-                    //versions of the potential moves from before it was stuck on,
-                    //this simply allows the player to move the piece around and still
-                    //see the potential moves for the piece they are "holding" currently
                     keepPotentialSpikesPulsing();
                 }
             }
@@ -194,15 +187,10 @@ public class Board {
         }
         if (!die2HasBeenUsed) {
             if (!canWeGetOffTheBarWithThisDie(die2,DieType.DIE2)){//this tells us if there are optiosn (and stores in spikesAllowedToMoveToFromBar)and draws them graphically to player if so
-                //dont set this yet as they might have optiosn when they get off the bar  die2HasBeenUsed=true;
-                //leaving it unset results in correct behaviour
-                //however if they cant get off the bar at all then we set both dies to used since they #d be stuck on the bar otherwise
-                //so we keep a flag of it til bottom
                 cantGetOfBarWithDie2 = true;
                 log("NO OPTIONS FOR GETTING OFF BAR WITH DIE2");
             } else {
                 log("DIE2:");
-                //there are optiosn for getting off generation in here for the cpu player
                 getOffTheBarOptions();
             }
         } else {
@@ -251,7 +239,7 @@ public class Board {
     // for current player so that the spikes available will flash and be ready to have a piece added to them
     private boolean canWeGetOffTheBarWithThisDie(Die die, DieType whichDie) {
         int destinationSpikeId = whoseTurnIsIt() == PlayerColor.BLACK ? die.getValue() - 1 : 24 - die.getValue();
-        Spike destinationSpike = (Spike) spikes.get(destinationSpikeId);
+        Spike destinationSpike = spikes.get(destinationSpikeId);
         if (destinationSpike.pieces.size() <= 1 ||
             doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
             destinationSpike.flash(whichDie);
@@ -417,7 +405,7 @@ public class Board {
                     pulsateWhiteContainer = true;
                     die1StillAnOption = true;
                     copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
-                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt() ==PlayerColor.BLACK) {
+                } else if (potentialSpikeIndex == LAST_SPIKE+1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
                     pulsateBlackContainer = true;
                     die1StillAnOption = true;
@@ -549,15 +537,6 @@ public class Board {
             //make this null if we know for certain its not a potential move or ot gets remembered
             copy_of_reachableFromBothDice=null;
         }
-
-        //by this point we know whether we have our options (decided above for pulsating the correct
-        //spikes, so we also know whether we should allow a piece to stick to the mouse, ie only if that
-        //piece is relevant and can be moved etc
-
-        //the spike they are currently hovering over has options, thus if
-        //the player clicks on a piece on this spike it will stick to the mouse
-        //point and move with it, until its either placed back or placed
-        //somewhere new
         allowPieceToStickToMouse = die1StillAnOption || die2StillAnOption || bothDiceStillAnOption;
     }
 
