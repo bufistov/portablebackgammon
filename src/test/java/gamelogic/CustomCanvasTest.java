@@ -3,6 +3,7 @@ package gamelogic;
 import data.GuiState;
 import data.PlayerColor;
 import graphics.GameColour;
+import graphics.Geometry;
 import lowlevel.CustomCanvas;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestableCanvas extends CustomCanvas {
 
-    TestableCanvas(JFrame frame, Board board, GameConfig config) {
-        super(frame, new GameColour(), board, config);
+    TestableCanvas(JFrame frame, Geometry geometry, Board board, GameConfig config) {
+        super(frame, new GameColour(), geometry, board, config);
     }
 
     @Override
@@ -48,8 +49,9 @@ class CustomCanvasTest {
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
-        Board board = new Board(new GameColour(), config);
-        CustomCanvas canvas = new TestableCanvas(frame, board, config);
+        Geometry geometry = new Geometry(810, 510);
+        Board board = new Board(new GameColour(), geometry, config);
+        CustomCanvas canvas = new TestableCanvas(frame, geometry, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -82,8 +84,9 @@ class CustomCanvasTest {
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
-        TestableBoard board = new TestableBoard(new GameColour(), config, 1);
-        CustomCanvas canvas = new TestableCanvas(frame, board, config);
+        Geometry geometry = new Geometry(0, 0);
+        TestableBoard board = new TestableBoard(new GameColour(), geometry, config, 1);
+        CustomCanvas canvas = new TestableCanvas(frame, geometry, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
         Graphics graphics = Mockito.mock(Graphics.class);

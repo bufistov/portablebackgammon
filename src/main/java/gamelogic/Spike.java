@@ -3,6 +3,7 @@ import java.awt.*;
 
 import data.PlayerColor;
 import data.SpikeType;
+import graphics.Geometry;
 import lowlevel.*;
 
 import java.util.Enumeration;
@@ -25,6 +26,7 @@ public class Spike {
     private int position; // 1 to 24
     private final SpikeType type;
     private final String spikeName;
+    private Geometry geometry;
     private Utils utils = new Utils();
 
     private int TRIANGLE_WIDTH = 0;
@@ -43,7 +45,8 @@ public class Spike {
     private int x2 = 0, y2 = 0; // middle point, can go up or down depending on type
     private int x3 = 0, y3 = 0; // right most point
 
-    Spike(int position) {
+    Spike(Geometry geometry, int position) {
+        this.geometry = geometry;
         this.position = position;
         assert position != 0;
         if (position < 0) {
@@ -102,7 +105,8 @@ public class Spike {
 
     void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
         int boardHeight = boardHeightWithBorder - Board.BORDER * 2;
-        TRIANGLE_WIDTH            = (boardWidth - ((Board.BORDER * 2) + Board.BAR) ) / 12;
+        int spikesTotalWidth = boardWidth - ((Board.BORDER * 2) + Board.BAR);
+        TRIANGLE_WIDTH            = (spikesTotalWidth + 6) / 12;
         TRIANGLE_HEIGHT           = boardHeight / 2;
 
         workOutPositionsOfSpike(boardHeight, TRIANGLE_WIDTH);

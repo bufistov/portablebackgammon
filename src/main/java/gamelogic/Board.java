@@ -4,6 +4,7 @@ import java.util.*;
 
 import data.PlayerColor;
 import graphics.GameColour;
+import graphics.Geometry;
 import lowlevel.*;
 
 import static data.PlayerColor.BLACK;
@@ -11,9 +12,9 @@ import static data.PlayerColor.WHITE;
 
 public class Board {
 
-    // Colour constants
     private Color board_colour, bar_colour;
     private GameColour gameColour;
+    private Geometry geometry;
 
     // game state variables
     public int matchPoints;
@@ -69,8 +70,9 @@ public class Board {
         }
     }
 
-    public Board(GameColour gameColour, GameConfig config) {
+    public Board(GameColour gameColour, Geometry geometry, GameConfig config) {
         this.gameColour = gameColour;
+        this.geometry = geometry;
         sfxNoMove = new Sound("/nomove.wav");
         loadSounds(config.soundOn());
         whitePlayer = new Player(PlayerColor.WHITE,"Player1");
@@ -78,7 +80,7 @@ public class Board {
         currentPlayer = whitePlayer;
         spikes = new ArrayList<>();
         for (int i = 1; i <= 24; i++) {
-            spikes.add(new Spike(i));
+            spikes.add(new Spike(geometry, i));
         }
         die1 = new Die();
         die2 = new Die();
@@ -113,9 +115,9 @@ public class Board {
         utils.drawRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
         // bar between 2 halves
         utils.setColor(g, bar_colour);
-        utils.fillRect(g,(BORDER + widthMinusBorder/2) - BAR/2, BORDER,BAR,boardHeight - BORDER*2);
+        utils.fillRect(g,boardWidth / 2 - BAR / 2, BORDER, BAR,boardHeight - BORDER * 2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,(BORDER+widthMinusBorder/2)-BAR/2,BORDER,BAR,boardHeight-BORDER*2);
+        utils.drawRect(g,boardWidth / 2 - BAR / 2, BORDER, BAR,boardHeight - BORDER * 2);
 
         for (Spike spike: spikes) {
            spike.paint(g, boardWidth, boardHeight);
@@ -159,7 +161,7 @@ public class Board {
                 die1.disable();
             }
 
-            diex += Die.getWidth() + CustomCanvas.TINY_GAP; // gap between dice
+            diex += Die.getWidth() + geometry.tinyGap();
             if (!die2HasBeenUsed) {
                 die2.paint(g, diex, diey);
             } else {
@@ -898,7 +900,7 @@ public class Board {
                             if (potentialSpike == LAST_SPIKE + 1 || potentialSpike == FIRST_SPIKE - 1) {//so we know for sure its destined for piece container
                                 log("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is " + potentialSpike);
                                 // pass in -99 to make spike a very special one which is basically a piece container (see Spike constructor)
-                                Spike destinationSpike = new Spike(-1);
+                                Spike destinationSpike = new Spike(geometry,-1);
                                 log("yes " + destinationSpike + " IS A PIECE CONTAINER we can move to");
                                 spikePairs.add(new SpikePair(spike, destinationSpike));
 

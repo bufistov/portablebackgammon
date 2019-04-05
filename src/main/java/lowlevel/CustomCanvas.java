@@ -7,6 +7,7 @@ import data.GuiState;
 import data.PlayerColor;
 import gamelogic.*;
 import graphics.GameColour;
+import graphics.Geometry;
 
 import java.awt.image.BufferStrategy;
 import java.awt.image.MemoryImageSource;
@@ -41,6 +42,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static final boolean RELEASE_BUILD = false;
 
     private GameColour gameColour;
+    private Geometry geometry;
     private JFrame mainWindow;
     private Board board;
 
@@ -54,18 +56,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static boolean PAINT_STATE = false;
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
 
-    public static int TINY_GAP = 5; // when we need a tiny gap
-
     // -- constants
     private Color panel_colour, background_colour, roll_button_colour;
-
-    private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
 
     private CustomFont fontwhite, fontblack;
     private boolean INFO = false;    // 'about box' toggle
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
-    private int PANEL_WIDTH = 0;
 
     private boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
@@ -200,7 +197,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int DEBUGLEFT = 1;
     public static final int DEBUGRIGHT = 2;
 
-    public CustomCanvas(JFrame mainWindow, GameColour gameColour, Board board, GameConfig config) {
+    public CustomCanvas(JFrame mainWindow, GameColour gameColour, Geometry geometry,
+                        Board board, GameConfig config) {
         log("CustomCanvas made.");
         this.maxSplashCounter = config.maxSplashCounter();
         this.drawMousePointer = config.drawMousePointer();
@@ -208,6 +206,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         this.mainWindow = mainWindow;
         this.board = board;
         this.gameColour = gameColour;
+        this.geometry = geometry;
 
         sfxDiceRoll = new Sound("/diceroll.wav");
         sfxDoubleRolled = new Sound("/whoosh.wav");
@@ -260,9 +259,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             graphics = g;
         }
+        geometry.setCanvasWidth(getWidth());
+        geometry.setCanvasHeight(getHeight());
 
-        WIDTH = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
-        PANEL_WIDTH = (getWidth() / PANEL_SIZE_FRACTION) - Board.BORDER;
+        WIDTH = (getWidth() / geometry.panelSizeFraction()) * (geometry.panelSizeFraction() - 1);
+        // geometry.panelWidth() = (getWidth() / geometry.panelSizeFraction()) - Board.BORDER;
         HEIGHT = getHeight();
         paintSwitch(graphics);
         handleMousePointer(graphics);
@@ -392,8 +393,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, Color.white);
         utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
 
-        int xabout=WIDTH/2;
-        int yabout=(HEIGHT/4)+TINY_GAP;
+        int xabout = WIDTH / 2;
+        int yabout = (HEIGHT/4) + geometry.tinyGap();
 
         //paint the about box
         String printme="Forumosa Backgammon ("+VERSION+")";
@@ -428,7 +429,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.drawRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
 
         x += 5;
-        y += TINY_GAP;
+        y += geometry.tinyGap();
         //paint the about box
         String printme = "Backgammon (" + VERSION + ") DEBUG CONSOLE";
         fontwhite.drawString(g, printme, x, y, 0);
@@ -600,7 +601,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.backGround(g, background_colour, getWidth(), getHeight()); // paint entire background
         utils.setColor(g, Color.WHITE);
 
-        int boardWidth = (getWidth() / PANEL_SIZE_FRACTION) * (PANEL_SIZE_FRACTION - 1);
+        int boardWidth = (getWidth() / geometry.panelSizeFraction()) * (geometry.panelSizeFraction() - 1);
         int boardHeight = getHeight();
         board.paint(g, boardWidth, boardHeight, !gameComplete());
 
@@ -609,7 +610,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         //paint the message panel to the right with players name etc
         utils.setColor(g, panel_colour);
-        utils.fillRect(g, boardWidth, Board.BORDER, PANEL_WIDTH, boardHeight - (Board.BORDER * 2));
+        utils.fillRect(g, boardWidth, Board.BORDER, geometry.panelWidth(), boardHeight - (Board.BORDER * 2));
 
         //draw the preferences button
         final int prefx = preferencesButtonX();
@@ -628,12 +629,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
 
         // draw panel text:
-        int xpos = boardWidth + TINY_GAP;
+        int xpos = boardWidth + geometry.tinyGap();
 
         // draw the piece container
-        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (Board.BORDER * 2) + TINY_GAP;
+        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (Board.BORDER * 2) + geometry.tinyGap();
         int containerSubSize = boardHeight / 70;
-        int containerWidth = PANEL_WIDTH / 3;
+        int containerWidth = geometry.panelWidth() / 3;
         int topOfPieceContainer = boardHeight - ((containerSubSize * 15) + heightOf3LinesOfText);
 
         if (Board.allBlackPiecesAreHome) {
@@ -647,7 +648,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.BLACK);
 
-        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + Board.BORDER + TINY_GAP;
+        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + Board.BORDER + geometry.tinyGap();
         topOfPieceContainer = heightOf3LinesOfText;
 
         if (Board.allWhitePiecesAreHome) {
@@ -717,7 +718,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else if (player == PlayerColor.BLACK) {
             piecesOnContainer = blackPiecesSafelyInContainer.size();
         }
-        int myX = WIDTH + ((PANEL_WIDTH / 4) - (containerWidth / 2));
+        int myX = WIDTH + ((geometry.panelWidth() / 4) - (containerWidth / 2));
         int myY = topOfPieceContainer;
         for (int i = 0; i < 15; i++) {
             //simply draws the containers green if players have all their pieces in the home section
@@ -757,7 +758,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // draw all of the text on the panel
     private void drawHUDtext(Graphics g, int xpos) {
-        int ypos = Board.BORDER + TINY_GAP;
+        int ypos = Board.BORDER + geometry.tinyGap();
         //draw black players score at top
         String printme = "White (" + board.getWhitePlayer().getName() + ")";
         if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
@@ -790,7 +791,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ypos = (HEIGHT / 2) - ((fontwhite.getHeight() * 4) / 2);
         printme = "Match Points: " + board.matchPoints;
         int widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         fontwhite.drawString(g, printme, xposTmp, ypos, 0);
         ypos += fontwhite.getHeight();
         utils.setColor(g, roll_button_colour);
@@ -799,7 +800,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ///////// double button
         printme = "Double";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         utils.setColor(g, roll_button_colour);
         ypos += 10;
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
@@ -854,7 +855,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ///////// resign button
         printme = "Resign";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + PANEL_WIDTH / 2) - ((widthOfPrintMe / 2) + TINY_GAP);
+        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         utils.setColor(g, roll_button_colour);
         ypos += 10;
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
@@ -1318,7 +1319,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRoundRect(g, WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2);
 
             int xabout = WIDTH / 2;
-            int yabout = (HEIGHT / 4) + TINY_GAP;
+            int yabout = (HEIGHT / 4) + geometry.tinyGap();
 
             //paint the about box
             printme = "Challenge this player?";
@@ -2227,7 +2228,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
             messagex = 10;
-            messagey = HEIGHT - (fontwhite.getHeight() + TINY_GAP);
+            messagey = HEIGHT - (fontwhite.getHeight() + geometry.tinyGap());
             messageHeight = fontwhite.getHeight();
             utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
             utils.setColor(g, Color.WHITE);
@@ -2241,7 +2242,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
         messageWidth = fontwhite.stringWidth(robotMoveDesc + "  ");
         messagex = WIDTH - (messageWidth + 10);
-        messagey = 10;//(fontwhite.getHeight()+TINY_GAP);
+        messagey = 10;//(fontwhite.getHeight()+geometry.tinyGap());
         messageHeight = fontwhite.getHeight();
 
         utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
@@ -2430,7 +2431,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private int preferencesButtonX() {
-        return getWidth() - (Board.BORDER + prefw + TINY_GAP / 2);
+        return getWidth() - (Board.BORDER + prefw + geometry.tinyGap() / 2);
     }
 
     private int preferencesButtonY() {

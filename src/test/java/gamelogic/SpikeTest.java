@@ -18,7 +18,10 @@ public class SpikeTest {
     @Test
     @DisplayName("Spike can be constructed")
     void test1() {
-        Spike spike = new Spike(2);
+        int canvasWidth = 810;
+        int canvasHeight = 500;
+        Geometry geometry = new Geometry(canvasWidth, canvasHeight);
+        Spike spike = new Spike(geometry,2);
         assertEquals(2, spike.getPosition());
         assertEquals(1, spike.getSpikeNumber());
         assertEquals(0, spike.getAmountOfPieces(PlayerColor.WHITE));
@@ -26,9 +29,7 @@ public class SpikeTest {
         assertEquals("1", spike.getName());
         assertEquals(SpikeType.STALECTITE, spike.getType());
         Graphics graphics = Mockito.mock(Graphics.class);
-        int canvasWidth = 810;
-        int canvasHeight = 500;
-        Geometry geometry = new Geometry(canvasWidth, canvasHeight);
+
         CustomCanvas.WIDTH = geometry.boardWidth();
         CustomCanvas.HEIGHT = canvasHeight;
         Board.BORDER = geometry.borderWidth();

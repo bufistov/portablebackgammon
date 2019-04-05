@@ -52,7 +52,7 @@ public class Geometry {
     }
 
     public int spikeWidth() {
-        return (boardWidth() - (borderWidth() * 4)) / 12;
+        return (boardWidth() - (borderWidth() * 4) + 6) / 12;
     }
 
     public int spikeHeight() {

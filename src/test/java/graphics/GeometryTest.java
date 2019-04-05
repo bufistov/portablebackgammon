@@ -18,7 +18,7 @@ public class GeometryTest {
         assertEquals(152, geometry.panelWidth());
         assertEquals(10, geometry.borderWidth());
         assertEquals(20, geometry.centralBarWidth());
-        assertEquals(50, geometry.spikeWidth());
+        assertEquals(51, geometry.spikeWidth());
         assertEquals(207, geometry.spikeHeight());
         assertEquals(32, geometry.pieceDiameter());
         assertEquals(32, geometry.dieSize());
