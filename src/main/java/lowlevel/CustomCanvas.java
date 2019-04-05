@@ -3,6 +3,7 @@ package lowlevel;
 import java.awt.*;
 import java.awt.event.*;
 
+import data.DieType;
 import data.GuiState;
 import data.PlayerColor;
 import gamelogic.*;
@@ -1566,17 +1567,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (x >= myX && x < (myX + myWidth)) {
             if (y > myY && y < (myY + myHeight)) {
                 log("" + clickedOnText);
-                // if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
-                // then we simply let it go into the piece container.
+                DieType correctDie = Board.whichDieGetsUsToPieceContainer;
                 if (Board.pulsateWhiteContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("WHITE put in container");
-                    int correctDie = Board.whichDieGetsUsToPieceContainer;
                     placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
                 } else if (Board.pulsateBlackContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.BLACK) {
                     //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
                     //then we simply let it go into the piece container.
                     log("BLACK put in container");
-                    int correctDie = Board.whichDieGetsUsToPieceContainer;
                     placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
                 }
             }
@@ -1656,21 +1654,21 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 // DIE1 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie1 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie1.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1)");
-                    placePieceRemoveOldOneAndSetDieToUsed(1, false);
+                    placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE1, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
                 // DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie2 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie2.getSpikeNumber()) {
                     log("clicked on valid potential spike (die2)");
-                    placePieceRemoveOldOneAndSetDieToUsed(2, false);
+                    placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE2, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
                 // DIE1 + DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromBothDice != null && spike.getSpikeNumber() == board.copy_of_reachableFromBothDice.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1+die2)");
-                    placePieceRemoveOldOneAndSetDieToUsed(3, false);
+                    placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE1AND2, false);
                 }
             }
         }
@@ -1680,13 +1678,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     // dieToSetUnused requires 1 or 2 (representing die 1 or die 2), OR 3 (3 IS BOTH DICE)
     // pieceWillGoToContainer is used ONLY when we are removing a piece from a spike and then adding it to the PIECE CONTAINER, in all other
     // situations its simply removing from one spike and adding to another
-    private void placePieceRemoveOldOneAndSetDieToUsed(int dieToSetUnused, boolean pieceWillGoToContainer) {
+    private void placePieceRemoveOldOneAndSetDieToUsed(DieType dieToSetUnused, boolean pieceWillGoToContainer) {
         log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:" + dieToSetUnused);
         if (pieceStuckToMouse == null) {
             Utils._E("pieceStuckToMouse was null somehow");
         }
         originalSpikeForPieceSelected.removePiece(pieceStuckToMouse);
-        if (dieToSetUnused == 1) {
+        if (dieToSetUnused == DieType.DIE1) {
             if (pieceWillGoToContainer) {
                 if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
@@ -1725,7 +1723,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             //(and it wont come up as a potential valid option)
             Board.die1HasBeenUsed = true;
             log("die1HasBeenUsed A.");
-        } else if (dieToSetUnused == 2) {
+        } else if (dieToSetUnused == DieType.DIE2) {
             if (pieceWillGoToContainer) {
                 if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
@@ -1765,7 +1763,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             //(and it wont come up as a potential valid option)
             Board.die2HasBeenUsed = true;
             log("die2HasBeenUsed AA.");
-        } else if (dieToSetUnused == 3) {
+        } else if (dieToSetUnused == DieType.DIE1AND2) {
             if (pieceWillGoToContainer) {
                 if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     whitePiecesSafelyInContainer.add(pieceStuckToMouse);
@@ -1813,7 +1811,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (someoneRolledADouble) {
             // this logic was hard to understand when mixed so i duplicated it here due to the subtle diffs
             switch (dieToSetUnused) {
-                case 1:
+                case DIE1:
                     doubleRollCounter++;
                     log("someoneRolledADouble DIE 1 doubleRollCounter:" + doubleRollCounter);
                     if (doubleRollCounter <= 1) {
@@ -1827,7 +1825,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                         someoneRolledADouble = false;
                     }
                     break;
-                case 2:
+                case DIE2:
                     doubleRollCounter++;
                     log("someoneRolledADouble DIE2 doubleRollCounter:" + doubleRollCounter);
                     if (doubleRollCounter <= 3) {
@@ -1842,7 +1840,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                         someoneRolledADouble = false;
                     }
                     break;
-                case 3:
+                case DIE1AND2:
                     doubleRollCounter++;
                     doubleRollCounter++; // 2 dice used in a roll like this
                     log("someoneRolledADouble BOTH DIE doubleRollCounter:" + doubleRollCounter);

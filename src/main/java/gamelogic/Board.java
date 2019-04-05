@@ -2,6 +2,7 @@ package gamelogic;
 import java.awt.*;
 import java.util.*;
 
+import data.DieType;
 import data.PlayerColor;
 import graphics.GameColour;
 import graphics.Geometry;
@@ -20,11 +21,6 @@ public class Board {
     public static Die die1, die2;
 
     private Utils utils = new Utils();
-
-    public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
-    public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
-    public static final int DIE1AND2 = 3;
-
     private Sound sfxNoMove;
 
     // Garbage
@@ -61,6 +57,11 @@ public class Board {
             blackInitPositioin[blackIdx] = whiteInitPositions[i];
         }
     }
+
+    // takes in spike the player is currently hovering over with mouse
+    // and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
+    // is able to be moved to. TODO: this variable is only needed if active player wants to put piece into container.
+    public static DieType whichDieGetsUsToPieceContainer;
 
     public Board(GameColour gameColour, Geometry geometry, GameConfig config) {
         this.gameColour = gameColour;
@@ -166,7 +167,6 @@ public class Board {
     private void drawPotentialMovesFromBar(Graphics g) {
         // this was copied from drawPotentialMoves/////////
         allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
-        getRidOfLittleDice(); // kind of intensive?
         detectIfPiecesAreHome(); // sets the right bools if pieces are home
 
         boolean cantGetOfBarWithDie1 = false;
@@ -177,7 +177,7 @@ public class Board {
         }
 
         if (!die1HasBeenUsed) {
-            if (!canWeGetOffTheBarWithThisDie(die1,1)) { // this tells us if there are options (and stores in spikesAllowedToMoveToFromBar)and draws them graphically to player if so
+            if (!canWeGetOffTheBarWithThisDie(die1, DieType.DIE1)) { // this tells us if there are options (and stores in spikesAllowedToMoveToFromBar)and draws them graphically to player if so
                 ///dont set this yet as they might have options when they get off the bar die1HasBeenUsed=true;
                 //leaving it unset results in correct behaviour
                 //however if they cant get off the bar at all then we set both dies to used since they #d be stuck on the bar otherwise
@@ -193,7 +193,7 @@ public class Board {
             cantGetOfBarWithDie1 = true;
         }
         if (!die2HasBeenUsed) {
-            if (!canWeGetOffTheBarWithThisDie(die2,2)){//this tells us if there are optiosn (and stores in spikesAllowedToMoveToFromBar)and draws them graphically to player if so
+            if (!canWeGetOffTheBarWithThisDie(die2,DieType.DIE2)){//this tells us if there are optiosn (and stores in spikesAllowedToMoveToFromBar)and draws them graphically to player if so
                 //dont set this yet as they might have optiosn when they get off the bar  die2HasBeenUsed=true;
                 //leaving it unset results in correct behaviour
                 //however if they cant get off the bar at all then we set both dies to used since they #d be stuck on the bar otherwise
@@ -249,7 +249,7 @@ public class Board {
 
     // given the die this method will add spikes to spikesAllowedToMoveToFromBar
     // for current player so that the spikes available will flash and be ready to have a piece added to them
-    private boolean canWeGetOffTheBarWithThisDie(Die die, int whichDie) {
+    private boolean canWeGetOffTheBarWithThisDie(Die die, DieType whichDie) {
         int destinationSpikeId = whoseTurnIsIt() == PlayerColor.BLACK ? die.getValue() - 1 : 24 - die.getValue();
         Spike destinationSpike = (Spike) spikes.get(destinationSpikeId);
         if (destinationSpike.pieces.size() <= 1 ||
@@ -283,8 +283,6 @@ public class Board {
         die1HasBeenUsed = false;
         die2HasBeenUsed = false;
 
-        whichDieGetsUsToPieceContainer = -1;
-
         listBotsOptions = false;
         botOptions = "<<NONE YET>>";
         thereAreOptions = false;
@@ -302,16 +300,16 @@ public class Board {
         }
         String debugstr = "";
         if (copy_of_reachableFromDie1 != null) {
-            pulsatePotentialSpike(copy_of_reachableFromDie1, DIE1);
+            pulsatePotentialSpike(copy_of_reachableFromDie1, DieType.DIE1);
             debugstr = "die1";
         }
 
         if (copy_of_reachableFromDie2 != null) {
-            pulsatePotentialSpike(copy_of_reachableFromDie2, DIE2);
+            pulsatePotentialSpike(copy_of_reachableFromDie2, DieType.DIE2);
             debugstr += ", die2";
         }
-        if (copy_of_reachableFromBothDice!= null) {
-            pulsatePotentialSpike(copy_of_reachableFromBothDice, DIE1AND2);
+        if (copy_of_reachableFromBothDice != null) {
+            pulsatePotentialSpike(copy_of_reachableFromBothDice, DieType.DIE1AND2);
             debugstr += ", bothdice";
         }
         if (debugmessages) {
@@ -336,15 +334,6 @@ public class Board {
     public static Spike copy_of_reachableFromDie1;
     public static Spike copy_of_reachableFromDie2;
     public static Spike copy_of_reachableFromBothDice;
-
-    // simply nullifies the string that tells the spike to show its little dice
-    // this is shown to user when they have potential moves.
-    private void getRidOfLittleDice() {
-        //would have carried out the potential move (shouldnt they be linked to these 3 spikes? not sure yet)
-        for (Spike s: spikes) {
-            s.whichDiei = -1;
-        }
-    }
 
     // this handles:
     // detecting if the pieces for each team are in their home area
@@ -398,7 +387,6 @@ public class Board {
     private void drawPotentialMoves(Graphics g) {
         boolean debugmessages = false; // this one can be very handy for debugging, too verbose once you know it works
         allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
-        getRidOfLittleDice(); // kind of intensive?
         detectIfPiecesAreHome(); // sets the right bools if pieces are home
 
         if (CustomCanvas.showRollButton) {
@@ -409,7 +397,7 @@ public class Board {
         if (currentSpikeHoveringOver == null) {
             return;
         }
-        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), DIE1);
+        boolean die1AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue(), DieType.DIE1);
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
@@ -442,11 +430,7 @@ public class Board {
                  if (debugmessages) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1");
                  }
-                 //graphically indicate the spike that is a valid move using die1s value:
-                 pulsatePotentialSpike(reachableFromDie1, DIE1);
-
-                 //copy this so we can keep it pulsating during placing of piece
-                 //and not just when the point is hovered over this spike
+                 pulsatePotentialSpike(reachableFromDie1, DieType.DIE1);
                  copy_of_reachableFromDie1 = reachableFromDie1;
                  if (debugmessages) {
                     log("copy_of_reachableFromDie1 set up.");
@@ -460,8 +444,7 @@ public class Board {
         }
 
         //do DIE2 in same way
-        boolean die2AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die2.getValue(), DIE2);
-
+        boolean die2AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die2.getValue(), DieType.DIE2);
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
         //so this "stillAnOption" variable gets updated below and used at the bottom to update canWeStickPieceToMouse
@@ -496,7 +479,7 @@ public class Board {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE2");
                  }
                  //graphically indicate the spike that is a valid move using die1s value:
-                 pulsatePotentialSpike(reachableFromDie2,DIE2);
+                 pulsatePotentialSpike(reachableFromDie2, DieType.DIE2);
 
                  //copy this so we can keep it pulsating during placing of piece
                  //and not just when the point is hovered over this spike
@@ -513,7 +496,8 @@ public class Board {
         }
 
         //and DIE1 + DIE2
-        boolean bothDiceAnOption = checkValidPotentialMove(currentSpikeHoveringOver, die1.getValue()+die2.getValue(), DIE1AND2);
+        boolean bothDiceAnOption = checkValidPotentialMove(currentSpikeHoveringOver,
+            die1.getValue()+die2.getValue(), DieType.DIE1AND2);
 
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
@@ -550,7 +534,7 @@ public class Board {
                     log("yes " + potentialSpikeIndex + " is a valid option BOTH DICE");
                  }
                  //graphically indicate the spike that is a valid move using die1s value:
-                 reachableFromBothDice.flash(DIE1AND2);
+                 reachableFromBothDice.flash(DieType.DIE1AND2);
 
                  //copy this so we can keep it pulsating during placing of piece
                  //and not just when the point is hovered over this spike
@@ -611,22 +595,17 @@ public class Board {
     //takes in a spike and a die value,
     //this is to indicate to player its a potential move they can make
     //whichDice tells the spike which die would allow this potential move, so it an be displayed to player
-    private void pulsatePotentialSpike(Spike spike, int whichDice) {
+    private void pulsatePotentialSpike(Spike spike, DieType whichDice) {
         //this makes the spike colour pulse nicely to indicate its an option
         spike.flash(whichDice);
     }
-
-    // takes in spike the player is currently hovering over with mouse
-    // and also a die roll, and returns true if the potential spike (ie currentSpike + dieRoll=potentialSpike)
-    // is able to be moved to. TODO: this variable is only needed if active player wants to put piece into container.
-    public static int whichDieGetsUsToPieceContainer = -1;
 
     // whichDieIsThis is passed in which indicates which die roll will be used in this potential move
     // 1 is die 1
     // 2 is die 2
     // 3 is die1+die2
     // these are used simply to update whichDieGetsUsToPieceContainer as it doesnt know otherwise
-    private boolean checkValidPotentialMove(Spike currentSpike, int dieRoll, int whichDieIsThis) {
+    private boolean checkValidPotentialMove(Spike currentSpike, int dieRoll, DieType whichDieIsThis) {
         int potentialSpike = currentPlayer.getDestinationSpike(currentSpike, dieRoll);
         if (potentialSpike == currentPlayer.containerId() && !anybodyNotInHome(currentPlayer)) {
             whichDieGetsUsToPieceContainer = whichDieIsThis;

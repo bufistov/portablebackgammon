@@ -1,6 +1,7 @@
 package gamelogic;
 import java.awt.*;
 
+import data.DieType;
 import data.PlayerColor;
 import data.SpikeType;
 import graphics.Geometry;
@@ -9,6 +10,7 @@ import lowlevel.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import static data.DieType.*;
 import static data.SpikeType.STALECMITE;
 import static data.SpikeType.STALECTITE;
 
@@ -38,7 +40,7 @@ public class Spike {
 
     private static final int NOT_A_REAL_SPIKE_MINUS_99 = -99;
     private Die storedDie;
-    int whichDiei = -1; // the die combination that brings piece at mouse to given spike
+    private DieType whichDiei; // the die combination that brings piece at mouse to given spike
     private boolean flash = false;
 
     private int x1 = 0, y1 = 0; // left most point
@@ -112,7 +114,10 @@ public class Spike {
         workOutPositionsOfSpike(boardHeight, TRIANGLE_WIDTH);
         drawSpike(g);
         drawPieces(g, spikeName);
-        drawPotentialDieMoves(g);
+        if (flash) {
+            drawPotentialDieMoves(g);
+        }
+        flash = false;
     }
 
     public int getSpikeNumber() {
@@ -121,6 +126,45 @@ public class Spike {
 
     int getPosition() {
         return position;
+    }
+
+    SpikeType getType() {
+        return type;
+    }
+
+    // makes a colour that flashes, this gets called from board
+    // when the spike needs to indicate its a potential move to the player.
+    // whichDice tells us which die would be causing this move, so we can show player.
+    void flash(DieType whichDice) {
+        flash = true;
+        whichDiei = whichDice;
+    }
+
+    void makeColourObjects() {
+        black_spike_colour = new Color(BLACK_SPIKE_COLOUR);
+        white_spike_colour = new Color(WHITE_SPIKE_COLOUR);
+    }
+
+    /*
+     * when a piece is on the bar,and we are checking which spikes it can go to, and this spike is a valid option
+     * for ease we store the die which would get it there in this spike, and grab it later, this is the only instance in which this
+     * method is used.
+     */
+    void store_this_die(Die die) {
+        storedDie = die;
+    }
+
+    public Die get_stored_die() {
+        return storedDie;
+    }
+
+    boolean isContainer() {
+        return type == SpikeType.CONTAINER;
+    }
+
+    Point getMiddlePoint() {
+        int dy = type == STALECTITE ? -height() / 2 : height() / 2;
+        return new Point(x2, y2 + dy);
     }
 
     private void drawPieces(Graphics g, String spikeName) {
@@ -171,14 +215,6 @@ public class Spike {
         }
     }
 
-    //makes a colour that flashes, this gets called from board
-    //when the spike needs to indicate its a potential move to the player.
-    //whichDice tells us which die would be causing this move, so we can show player.
-    void flash(int whichDice) {
-        flash = true;
-        whichDiei = whichDice;
-    }
-
     private void drawSpike(Graphics g) {
         if (isContainer()) {
             assert false;
@@ -191,7 +227,6 @@ public class Spike {
         }
         if (flash) {
             utils.setColor(g, flashColor);
-            flash = false;
         }
         utils.fillTriangle(g, x1, y1, x2, y2, x3, y3);
 
@@ -206,22 +241,21 @@ public class Spike {
     }
 
     private void drawPotentialDieMoves(Graphics g) {
-        final int miniDieX = x2 - Die.miniDieWidth() / 2;
-        final int miniDieHeight = Die.miniDieHeight();
-        if (whichDiei == Board.DIE1) {
+        final int miniDieX = x2 - geometry.miniDieSize() / 2;
+        final int miniDieHeight = geometry.miniDieSize();
+        if (whichDiei == DIE1) {
             if (getType() == STALECMITE) {
                 Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
                 Board.die1.drawMiniDie(g, miniDieX, y1);
             }
-
-        } else if (whichDiei == Board.DIE2) {
+        } else if (whichDiei == DIE2) {
             if (getType() == STALECMITE) {
                 Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
                 Board.die2.drawMiniDie(g, miniDieX, y1);
             }
-        } else if (whichDiei == Board.DIE1AND2) {
+        } else if (whichDiei == DIE1AND2) {
             if (getType() == STALECMITE) {
                 Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
                 Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
@@ -229,8 +263,6 @@ public class Spike {
                 Board.die1.drawMiniDie(g, miniDieX, y1);
                 Board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
-        } else if (whichDiei != -1) {
-            Utils._E("whichDiei type is unknown");
         }
     }
 
@@ -243,10 +275,6 @@ public class Spike {
             g.setColor(Color.WHITE);
             return false;
         }
-    }
-
-    SpikeType getType() {
-        return type;
     }
 
     // this calculates the 3 points for this spike, each with x,y value
@@ -286,33 +314,6 @@ public class Spike {
 
     private void log(String s) {
         Utils.log("Spike{}:" + s);
-    }
-
-    void makeColourObjects() {
-        black_spike_colour = new Color(BLACK_SPIKE_COLOUR);
-        white_spike_colour = new Color(WHITE_SPIKE_COLOUR);
-    }
-
-    /*
-     * when a piece is on the bar,and we are checking which spikes it can go to, and this spike is a valid option
-     * for ease we store the die which would get it there in this spike, and grab it later, this is the only instance in which this
-     * method is used.
-     */
-    void store_this_die(Die die) {
-        storedDie=die;
-    }
-
-    public Die get_stored_die() {
-        return storedDie;
-    }
-
-    boolean isContainer() {
-        return type == SpikeType.CONTAINER;
-    }
-
-    Point getMiddlePoint() {
-        int dy = type == STALECTITE ? -height() / 2 : height() / 2;
-        return new Point(x2, y2 + dy);
     }
 
     private int height() {
