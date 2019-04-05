@@ -27,6 +27,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private final int maxSplashCounter;
     private final boolean drawMousePointer;
     private final boolean enableDoubleBuffering;
+
     private static final String SERVER_IP_ADDRESS = "localhost";
     private static final String SPECIAL_END_SYMBOL = "::"; // this signifiys to scroll bar the end is reached whislt being invisible to our customfont
     // breaks down wrapMe into a vector and prints each line after each other making sure that the text wraps
@@ -52,7 +53,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static boolean showBoundaryBoxes = false;
     private static boolean PAINT_STATE = false;
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
-    private static final boolean ALWAYS_ROLL_DOUBLE = false;
 
     public static int TINY_GAP = 5; // when we need a tiny gap
 
@@ -60,9 +60,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private Color panel_colour, background_colour, roll_button_colour;
 
     private static final int PANEL_SIZE_FRACTION = 5; // adjust me to change ratio:
-    //this simply means the panel will represent one x-th of the available screen,
-    // ergo if PANEL_SIZE_FRACTION is 5, it uses 1/5 of the space avail and the game
-    // uses the other 4/5
 
     private CustomFont fontwhite, fontblack;
     private boolean INFO = false;    // 'about box' toggle
@@ -113,8 +110,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     static int D1lastDieRoll_toSendOverNetwork;
     static int D2lastDieRoll_toSendOverNetwork;
     public static boolean someoneRolledADouble;
-    public static int doubleRollCounter=0;//this tracks how many rolls a player has had after rolling a double,
-    //ie, we want them to have 4 rolls if thats the case and not 2
+    public static int doubleRollCounter = 0; // this tracks how many rolls a player has had after rolling a double,
+    // ie, we want them to have 4 rolls if thats the case and not 2
 
     //for glowy buttons
     private static final int GLOW_INCREMENTER = 15;
@@ -145,12 +142,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private NetworkChatClient chatClient;
     static String chatText = "";
 
-    private GameNetworkClient client;
     static final int LEFT_MOUSE_BUTTON = BUTTON1;
     static final int RIGHT_MOUSE_BUTTON = BUTTON3;
 
     public static boolean pieceOnMouse = false; // is true when a piece is stuck to mouse
-    public static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
+    private static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
 
     private boolean showChallengeWindow;
     private String personToChallenge;
@@ -166,7 +162,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private int glowCounter = 125;
 
     private static boolean paintRobotMessages;
-    private long playerMessageSetTimeLong;//thjis keeps the version on screen for a few secs at the start
+    private long playerMessageSetTimeLong; // this keeps the version on screen for a few secs at the start
     //sets the vars to allow a message to be shown to the player in bottom right for
     //a while
 
@@ -201,8 +197,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
     public static final int LAST_DEBUG_OPTION=3;
 
-    public static final int DEBUGLEFT=1;
-    public static final int DEBUGRIGHT=2;
+    public static final int DEBUGLEFT = 1;
+    public static final int DEBUGRIGHT = 2;
 
     public CustomCanvas(JFrame mainWindow, GameColour gameColour, Board board, GameConfig config) {
         log("CustomCanvas made.");
@@ -1377,7 +1373,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                         theirIP = SERVER_IP_ADDRESS;
                     }
                     log("IP TO CONNECT TO:" + theirIP);
-                    client = new GameNetworkClient(this, theirIP);
+                    GameNetworkClient client = new GameNetworkClient(this, theirIP);
                     Thread t = new Thread(client);
                     t.start();
                 }
