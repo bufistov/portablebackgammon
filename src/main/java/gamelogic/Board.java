@@ -29,7 +29,6 @@ public class Board {
 
     public static boolean listBotsOptions;
     public static String botOptions = "<<NONE YET>>";
-    public boolean thereAreOptions = false;
     public SpikePair SPtheMoveToMake; // stores the move they will make
 
     //these flags indicate if the player has took their go yet for that dice
@@ -273,7 +272,6 @@ public class Board {
 
         listBotsOptions = false;
         botOptions = "<<NONE YET>>";
-        thereAreOptions = false;
         SPtheMoveToMake = null;
 
         initialiseBoard(INIT_CONFIGURATION);
@@ -705,14 +703,11 @@ public class Board {
     }
 
     void calculatePotentialMoves() {
-        if (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse && !thereAreOptions) {
+        if (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse && SPtheMoveToMake == null) {
             log("_______________________RECALCULATE MOVES die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
             Vector spikePairs = getValidOptions();
-            // if this is true by the time we get to "no options!" we know we need to let them take a special move and allow the
-            // die roll to wotkeven tho its to big
-            log("spikePairs size:" + spikePairs.size());
-            thereAreOptions = spikePairs.size() > 0;
-            if (thereAreOptions) {
+            log("Potential moves: " + spikePairs.size());
+            if (spikePairs.size() > 0) {
                 listBotsOptions = true;
                 if (listBotsOptions) {
                     botOptions = "";
@@ -723,11 +718,8 @@ public class Board {
                     }
                     log("valid options: " + botOptions);
                 }
-                //PICK ONE AT RANDOM
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
-
                 if (SPtheMoveToMake.dropPiecesOnMe.isContainer()) {
-                    //SPECIAL CONDITION, GO TO PIECE CONTAINER NOT SPIKE
                     log("SPECIAL CASE randomly chose to go to spike:" +
                         SPtheMoveToMake.pickMyPiece.getName() + " and drop off at CONTAINER");
                     CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.getName() + "->Container");
@@ -737,7 +729,6 @@ public class Board {
                         firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2,
                         "TAKE A PIECE TO CONTAINER");
                 } else {
-                    //NORMAL CONDITION
                     log("-randomly chose to go to spike:" +
                         SPtheMoveToMake.pickMyPiece + " and drop off at spike:" +
                         SPtheMoveToMake.dropPiecesOnMe);
@@ -752,8 +743,7 @@ public class Board {
                 }
             } else {
                 log("NO OPTIONS!");
-                // OK NO POTENTIAL MOVES TO BE MADE HERE, NOW WHAT?
-                if (!die1HasBeenUsed){//if this is die 1 were dealing with
+                if (!die1HasBeenUsed){
                     //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
                     //so what we do is sneaky, reduce die value number (hiding it from players of course)
                     //which makes optiosn become available in this case.
@@ -772,9 +762,6 @@ public class Board {
                         sfxNoMove.playSound();
                     }
                 } else if (!die2HasBeenUsed) {
-                    //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
-                    //so what we do is sneaky, reduce die value number (hiding it from players of course)
-                    //which makes optiosn become available in this case.
                     if (whoseTurnIsIt() == PlayerColor.WHITE && allWhitePiecesAreHome) {
                         log("WHITE LOWERING THEVALUE OF DIE 2");
                         die2.setValue(die2.getValue() - 1);
@@ -798,8 +785,8 @@ public class Board {
                 }
             }
         } else if (CustomCanvas.pieceOnMouse) {
+            // Point robot the final destination after it took the piece
             theyWantToPlaceAPiece();
-            thereAreOptions = false;
         }
     }
 
@@ -890,14 +877,11 @@ public class Board {
 
     private void theyWantToPlaceAPiece() {
         if (CustomCanvas.barPieceStuckOnMouse) {
-            //stops tem going on with normal case stuff will bar piece is put down
-            //works briliantly!
             log("dont do anythign til we palce this");
             return;
         }
         if (SPtheMoveToMake == null) {
             log("DOUBLE RECALC.>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            thereAreOptions = false;
             return;
         }
         if (!Bot.getFullAutoPlay() && whoseTurnIsIt() == PlayerColor.WHITE) {
@@ -920,8 +904,6 @@ public class Board {
                     pieceContainerY = CustomCanvas.blackContainerY;
                     pieceContainerWidth = CustomCanvas.blackContainerWidth;
                     pieceContainerHeight = CustomCanvas.blackContainerHeight;
-                } else {
-                    Utils._E("errori n theywanttoplaceapiece, turn is invalid");
                 }
                 setBotDestination(pieceContainerX + pieceContainerWidth / 2,
                     pieceContainerY + pieceContainerHeight / 2,"PIECE CONTAINER DESTINATION");
@@ -929,8 +911,6 @@ public class Board {
                 Point middlePoint = dropOnMe.getMiddlePoint();
                 setBotDestination(middlePoint.x, middlePoint.y, "NORMAL CASE DROP ON SPIKE A");
             }
-        } else {
-            Utils._E("DROP ON ME IS NULL.");
         }
     }
 
@@ -954,6 +934,7 @@ public class Board {
             currentPlayer = whitePlayer;
             log("WHITES TURN");
         }
+        SPtheMoveToMake = null;
     }
 
     // returns the current pip count of the given player.

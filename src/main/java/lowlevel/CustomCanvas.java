@@ -1399,7 +1399,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (buttonPressed == RIGHT_MOUSE_BUTTON) {
             log("RIGHT BUTTON PRESSED");
             unstickPieceFromMouse();
-            board.thereAreOptions = false;
             return;
         }
 
@@ -1485,7 +1484,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             log("board null");
             return;
         }
-        board.SPtheMoveToMake=null; // reset the move to make once a move is made or right click
+        board.SPtheMoveToMake = null; // reset the move to make once a move is made or right click
         Board.spikesAllowedToMoveToFromBar = new Vector(4); // RESET THIS HERE?
         pieceStuckToMouse = null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
     }
