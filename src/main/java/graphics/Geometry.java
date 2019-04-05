@@ -59,4 +59,24 @@ public class Geometry {
         int halfBoard = (boardHeight() - borderWidth() * 2) / 2;
         return halfBoard - halfBoard / 10;
     }
+
+    public int tinyGap() {
+        return 5;
+    }
+
+    public int pieceDiameter() {
+        return (boardHeight() - 2 * borderWidth()) / 14;
+    }
+
+    public int dieSize() {
+        return pieceDiameter();
+    }
+
+    public int dieDotDiameter() {
+        return  dieSize() / 5;
+    }
+
+    public int miniDieSize() {
+        return dieSize() - 6;
+    }
 }

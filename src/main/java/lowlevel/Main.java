@@ -6,6 +6,7 @@ package lowlevel;
 import gamelogic.Board;
 import gamelogic.GameConfig;
 import graphics.GameColour;
+import graphics.Geometry;
 import org.aeonbits.owner.ConfigFactory;
 
 import javax.swing.*;
@@ -15,6 +16,8 @@ import java.awt.Dimension;
 
 public class Main {
 
+    private static final int INIT_WINDOW_WIDTH = 810;
+    private static final int INIT_WINDOW_HEIGHT = 500;
     private static final int WINDOWY_MINUS = 50;
     private static final String MAIN_WINDOW_TITLE = "Backgammon";
 
@@ -30,9 +33,9 @@ public class Main {
         ConfigFactory.setProperty("configFileName", "backgammon.config");
         GameConfig config = ConfigFactory.create(GameConfig.class);
         frame = new JFrame();
-        GameColour gameColour = new GameColour();
-        board = new Board(gameColour, config);
-        canvas = new CustomCanvas(frame, gameColour, board, config);
+        GameColour colours = new GameColour();
+        board = new Board(colours, config);
+        canvas = new CustomCanvas(frame, colours, board, config);
         initMainWindow(frame, true);
         canvas.init();
         bot = new Bot(canvas, frame);
@@ -58,7 +61,7 @@ public class Main {
 
     private static void initMainWindow(JFrame frame, boolean visible) {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(810, 500);
+        frame.setSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
         frame.setResizable(false);
         frame.setVisible(visible);
         frame.setIconImage(Utils.loadImage("/icon.gif"));
