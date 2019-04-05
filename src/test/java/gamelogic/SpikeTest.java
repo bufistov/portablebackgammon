@@ -13,7 +13,7 @@ import java.awt.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SpikeTest {
+class SpikeTest {
 
     @Test
     @DisplayName("Spike can be constructed")
@@ -28,9 +28,8 @@ public class SpikeTest {
         assertEquals(0, spike.getAmountOfPieces(PlayerColor.BLACK));
         assertEquals("1", spike.getName());
         assertEquals(SpikeType.STALECTITE, spike.getType());
-        Graphics graphics = Mockito.mock(Graphics.class);
 
-        Board.BORDER = geometry.borderWidth();
+        Graphics graphics = Mockito.mock(Graphics.class);
         spike.paint(graphics, geometry.boardWidth(), geometry.boardHeight());
         int middleX = geometry.boardWidth() - 2 * geometry.spikeWidth() -
             geometry.borderWidth() + geometry.spikeWidth() / 2;

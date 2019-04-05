@@ -104,8 +104,8 @@ public class Spike {
     }
 
     void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
-        int boardHeight = boardHeightWithBorder - Board.BORDER * 2;
-        int spikesTotalWidth = boardWidth - ((Board.BORDER * 2) + geometry.centralBarWidth());
+        int boardHeight = boardHeightWithBorder - geometry.borderWidth() * 2;
+        int spikesTotalWidth = boardWidth - ((geometry.borderWidth() * 2) + geometry.centralBarWidth());
         TRIANGLE_WIDTH            = (spikesTotalWidth + 6) / 12;
         TRIANGLE_HEIGHT           = boardHeight / 2;
 
@@ -258,8 +258,8 @@ public class Spike {
     // this calculates the 3 points for this spike, each with x,y value
     // and boundaries for mouse click event
     private void workOutPositionsOfSpike(int boardHeight, int TRIANGLE_WIDTH) {
-        int widthMinusBorderAndPieceComponent = geometry.boardWidth() - Board.BORDER;
-        y1 = Board.BORDER;
+        int widthMinusBorderAndPieceComponent = geometry.boardWidth() - geometry.borderWidth();
+        y1 = geometry.borderWidth();
         if (position <= 6) {
             //TOP RIGHT SEGMENT OF BOARD (6 spikes_
             x1 = widthMinusBorderAndPieceComponent - TRIANGLE_WIDTH * position;
@@ -269,7 +269,7 @@ public class Spike {
         } else {
             // BOTTOM
             x1 = widthMinusBorderAndPieceComponent - (TRIANGLE_WIDTH * (25 - position));
-            y1 = Board.BORDER + boardHeight;
+            y1 = geometry.borderWidth() + boardHeight;
             if (position <= 18) {
                 // BOTTOM LEFT
                  x1 -= geometry.centralBarWidth();

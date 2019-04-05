@@ -21,10 +21,6 @@ public class Board {
 
     private Utils utils = new Utils();
 
-    // Geometry
-    public static int BORDER; // the gap around the board
-    // static int BAR;   // the bar in the middle of the board
-
     public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
     public static final int DIE1AND2 = 3;
@@ -99,21 +95,21 @@ public class Board {
     
     public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress) {
         utils.setColor(g, Color.BLACK);
-        BORDER = boardWidth / 64;
+        int borderWidth = geometry.borderWidth();
         int barWidth = geometry.centralBarWidth();
         int widthMinusBorder = boardWidth - barWidth;
 
         //draw the board:
         // outline:
         utils.setColor(g, board_colour);
-        utils.fillRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
+        utils.fillRect(g,borderWidth,borderWidth,widthMinusBorder,boardHeight-borderWidth*2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
+        utils.drawRect(g,borderWidth,borderWidth,widthMinusBorder,boardHeight-borderWidth*2);
         // bar between 2 halves
         utils.setColor(g, bar_colour);
-        utils.fillRect(g,boardWidth / 2 - barWidth / 2, BORDER, barWidth,boardHeight - BORDER * 2);
+        utils.fillRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,boardWidth / 2 - barWidth / 2, BORDER, barWidth,boardHeight - BORDER * 2);
+        utils.drawRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
            spike.paint(g, boardWidth, boardHeight);
@@ -149,8 +145,8 @@ public class Board {
 
     private void paintDice(Graphics g, int WIDTH, int HEIGHT) {
         if (!CustomCanvas.showRollButton) {
-            int diex = (BORDER + ((WIDTH/4)*3)) + Die.getWidth();
-            int diey = (BORDER + (HEIGHT/2)) - Die.getHeight();
+            int diex = (geometry.borderWidth() + ((WIDTH/4)*3)) + Die.getWidth();
+            int diey = (geometry.borderWidth() + (HEIGHT/2)) - Die.getHeight();
             if (!die1HasBeenUsed) {
                 die1.paint(g, diex, diey);
             } else {
@@ -1045,9 +1041,5 @@ public class Board {
     
     public PlayerColor whoseTurnIsIt() {
         return currentPlayer.getColour();
-    }
-
-    public int boardHeight() {
-        return geometry.boardHeight() - 2 * Board.BORDER;
     }
 }

@@ -604,7 +604,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         //paint the message panel to the right with players name etc
         utils.setColor(g, panel_colour);
-        utils.fillRect(g, boardWidth, Board.BORDER, geometry.panelWidth(), boardHeight - (Board.BORDER * 2));
+        utils.fillRect(g, boardWidth, geometry.borderWidth(),
+            geometry.panelWidth(), boardHeight - (geometry.borderWidth() * 2));
 
         //draw the preferences button
         final int prefx = preferencesButtonX();
@@ -626,7 +627,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int xpos = boardWidth + geometry.tinyGap();
 
         // draw the piece container
-        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (Board.BORDER * 2) + geometry.tinyGap();
+        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (geometry.borderWidth() * 2) + geometry.tinyGap();
         int containerSubSize = boardHeight / 70;
         int containerWidth = geometry.panelWidth() / 3;
         int topOfPieceContainer = boardHeight - ((containerSubSize * 15) + heightOf3LinesOfText);
@@ -642,7 +643,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.BLACK);
 
-        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + Board.BORDER + geometry.tinyGap();
+        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + geometry.borderWidth() + geometry.tinyGap();
         topOfPieceContainer = heightOf3LinesOfText;
 
         if (Board.allWhitePiecesAreHome) {
@@ -756,7 +757,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
     // draw all of the text on the panel
     private void drawHUDtext(Graphics g, int xpos) {
-        int ypos = Board.BORDER + geometry.tinyGap();
+        int ypos = geometry.borderWidth() + geometry.tinyGap();
         //draw black players score at top
         String printme = "White (" + board.getWhitePlayer().getName() + ")";
         if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
@@ -772,7 +773,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, printme, xpos, ypos, 0);
 
         //draw white players score at bot
-        ypos = geometry.boardHeight() - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
+        ypos = geometry.boardHeight() - 9 - (geometry.borderWidth() * 2) - (fontwhite.getHeight() * 2);
         printme = "Brown (" + board.getBlackPlayer().getName() + ")";
         if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             printme += "*";
@@ -2428,11 +2429,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     private int preferencesButtonX() {
-        return getWidth() - (Board.BORDER + prefw + geometry.tinyGap() / 2);
+        return getWidth() - (geometry.borderWidth() + prefw + geometry.tinyGap() / 2);
     }
 
     private int preferencesButtonY() {
-        return Board.BORDER;
+        return geometry.borderWidth();
     }
 
     void onHumanPlayerConnectedToServer() {
