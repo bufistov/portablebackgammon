@@ -63,6 +63,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private boolean INFO = false;    // 'about box' toggle
     private Utils utils = new Utils();   // Hardware Abstraction Layer
     private GuiState state = GuiState.SPLASH_SCREEN;
+    private int matchPoints;
 
     private boolean NETWORK_GAME_IN_PROCESS;
     private static Sound sfxError = new Sound("/error.wav");
@@ -786,7 +787,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         int xposTmp = -1;
         ypos = (geometry.boardHeight() / 2) - ((fontwhite.getHeight() * 4) / 2);
-        printme = "Match Points: " + board.matchPoints;
+        printme = "Match Points: " + matchPoints;
         int widthOfPrintMe = (fontwhite.stringWidth(printme));
         xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         fontwhite.drawString(g, printme, xposTmp, ypos, 0);

@@ -14,7 +14,6 @@ public class Board {
     private Geometry geometry;
 
     // game state variables
-    public int matchPoints;
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
     private Player currentPlayer;
