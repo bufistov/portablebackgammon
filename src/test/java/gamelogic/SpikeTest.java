@@ -31,7 +31,6 @@ public class SpikeTest {
         Graphics graphics = Mockito.mock(Graphics.class);
 
         Board.BORDER = geometry.borderWidth();
-        Board.BAR = 2 * geometry.borderWidth();
         spike.paint(graphics, geometry.boardWidth(), geometry.boardHeight());
         int middleX = geometry.boardWidth() - 2 * geometry.spikeWidth() -
             geometry.borderWidth() + geometry.spikeWidth() / 2;

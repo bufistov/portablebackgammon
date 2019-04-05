@@ -7,9 +7,6 @@ import graphics.GameColour;
 import graphics.Geometry;
 import lowlevel.*;
 
-import static data.PlayerColor.BLACK;
-import static data.PlayerColor.WHITE;
-
 public class Board {
 
     private Color board_colour, bar_colour;
@@ -27,7 +24,7 @@ public class Board {
 
     // Geometry
     public static int BORDER; // the gap around the board
-    static int BAR;   // the bar in the middle of the board
+    // static int BAR;   // the bar in the middle of the board
 
     public static final int DIE1 = 1; // these variables are simply for passing over to the spike when it flashes
     public static final int DIE2 = 2; // so it knows which die is carrying out its potential move to tell the player
@@ -104,8 +101,8 @@ public class Board {
     public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress) {
         utils.setColor(g, Color.BLACK);
         BORDER = boardWidth / 64;
-        BAR = BORDER * 2;
-        int widthMinusBorder = boardWidth - BAR;
+        int barWidth = geometry.centralBarWidth();
+        int widthMinusBorder = boardWidth - barWidth;
 
         //draw the board:
         // outline:
@@ -115,9 +112,9 @@ public class Board {
         utils.drawRect(g,BORDER,BORDER,widthMinusBorder,boardHeight-BORDER*2);
         // bar between 2 halves
         utils.setColor(g, bar_colour);
-        utils.fillRect(g,boardWidth / 2 - BAR / 2, BORDER, BAR,boardHeight - BORDER * 2);
+        utils.fillRect(g,boardWidth / 2 - barWidth / 2, BORDER, barWidth,boardHeight - BORDER * 2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,boardWidth / 2 - BAR / 2, BORDER, BAR,boardHeight - BORDER * 2);
+        utils.drawRect(g,boardWidth / 2 - barWidth / 2, BORDER, barWidth,boardHeight - BORDER * 2);
 
         for (Spike spike: spikes) {
            spike.paint(g, boardWidth, boardHeight);

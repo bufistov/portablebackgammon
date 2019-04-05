@@ -105,7 +105,7 @@ public class Spike {
 
     void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
         int boardHeight = boardHeightWithBorder - Board.BORDER * 2;
-        int spikesTotalWidth = boardWidth - ((Board.BORDER * 2) + Board.BAR);
+        int spikesTotalWidth = boardWidth - ((Board.BORDER * 2) + geometry.centralBarWidth());
         TRIANGLE_WIDTH            = (spikesTotalWidth + 6) / 12;
         TRIANGLE_HEIGHT           = boardHeight / 2;
 
@@ -265,14 +265,14 @@ public class Spike {
             x1 = widthMinusBorderAndPieceComponent - TRIANGLE_WIDTH * position;
         } else if (position <= 12) {
             // TOP LEFT
-            x1 = widthMinusBorderAndPieceComponent - TRIANGLE_WIDTH * position - Board.BAR;
+            x1 = widthMinusBorderAndPieceComponent - TRIANGLE_WIDTH * position - geometry.centralBarWidth();
         } else {
             // BOTTOM
             x1 = widthMinusBorderAndPieceComponent - (TRIANGLE_WIDTH * (25 - position));
             y1 = Board.BORDER + boardHeight;
             if (position <= 18) {
                 // BOTTOM LEFT
-                 x1 -= Board.BAR;
+                 x1 -= geometry.centralBarWidth();
             }
         }
 
