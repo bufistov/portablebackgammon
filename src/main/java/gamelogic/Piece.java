@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 import data.PlayerColor;
+import graphics.Geometry;
 import lowlevel.*;
 
 public class Piece {
@@ -47,12 +48,12 @@ public class Piece {
         return colour;
     }
 
-    public void drawPieceOnMouse(Graphics g) {
-        paint( g, 0, 0);
+    public void drawPieceOnMouse(Graphics g, Geometry geometry) {
+        paint( g, geometry, 0, 0);
     }
 
-    public void paint(Graphics g, int x, int y) {
-        PIECE_DIAMETER = (Board.boardHeight() / 2) / 7;
+    public void paint(Graphics g, Geometry geometry, int x, int y) {
+        PIECE_DIAMETER = geometry.pieceDiameter();
         if (colour == PlayerColor.WHITE) {
             utils.setColor(g, white_piece_color);
         } else if (colour == PlayerColor.BLACK) {

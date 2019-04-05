@@ -168,9 +168,9 @@ public class Spike {
                 Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
             }
             if(getType() == STALECTITE) {  // overlap here just squares them up to the bottom/top of spike if there overlapping
-                 p.paint(g, piecex,piecey + overlapOnPieces);
+                 p.paint(g, geometry, piecex,piecey + overlapOnPieces);
             } else {
-                 p.paint(g, piecex,piecey - overlapOnPieces);
+                 p.paint(g, geometry, piecex,piecey - overlapOnPieces);
             }
         }
     }
@@ -258,7 +258,7 @@ public class Spike {
     // this calculates the 3 points for this spike, each with x,y value
     // and boundaries for mouse click event
     private void workOutPositionsOfSpike(int boardHeight, int TRIANGLE_WIDTH) {
-        int widthMinusBorderAndPieceComponent = CustomCanvas.WIDTH - Board.BORDER;
+        int widthMinusBorderAndPieceComponent = geometry.boardWidth() - Board.BORDER;
         y1 = Board.BORDER;
         if (position <= 6) {
             //TOP RIGHT SEGMENT OF BOARD (6 spikes_

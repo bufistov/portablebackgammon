@@ -261,10 +261,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         geometry.setCanvasWidth(getWidth());
         geometry.setCanvasHeight(getHeight());
-
-        WIDTH = (getWidth() / geometry.panelSizeFraction()) * (geometry.panelSizeFraction() - 1);
-        // geometry.panelWidth() = (getWidth() / geometry.panelSizeFraction()) - Board.BORDER;
-        HEIGHT = getHeight();
         paintSwitch(graphics);
         handleMousePointer(graphics);
         if (bufferStrategy != null) {
@@ -389,12 +385,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
 
         utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+        utils.fillRoundRect(g, geometry.boardWidth()/4, geometry.boardHeight()/4, geometry.boardWidth()/2, geometry.boardHeight()/2);
         utils.setColor(g, Color.white);
-        utils.drawRoundRect(g, WIDTH/4, HEIGHT/4, WIDTH/2, HEIGHT/2);
+        utils.drawRoundRect(g, geometry.boardWidth()/4, geometry.boardHeight()/4, geometry.boardWidth()/2, geometry.boardHeight()/2);
 
-        int xabout = WIDTH / 2;
-        int yabout = (HEIGHT/4) + geometry.tinyGap();
+        int xabout = geometry.boardWidth() / 2;
+        int yabout = (geometry.boardHeight()/4) + geometry.tinyGap();
 
         //paint the about box
         String printme="Forumosa Backgammon ("+VERSION+")";
@@ -424,9 +420,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, 0, 0, 0, 125);
         int x = 10;
         int y = 10;
-        utils.fillRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
+        utils.fillRoundRect(g, x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
         utils.setColor(g, Color.yellow);
-        utils.drawRoundRect(g, x, y, WIDTH / 2, HEIGHT - 40);
+        utils.drawRoundRect(g, x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
 
         x += 5;
         y += geometry.tinyGap();
@@ -496,7 +492,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             fontwhite.drawString(g, printme, x, y, 0);/////y+=fontblack.getHeight();
             //Graphics g,int y, String wrapMe, CustomFont font,String newLineChar,boolean backdrop,boolean scrollbar,boolean outline,boolean justifyleft)
             printme = Board.botOptions;
-            y = drawMeWrapped(g, x, y, printme, fontwhite, false, false, true, WIDTH / 2, false);
+            y = drawMeWrapped(g, x, y, printme, fontwhite, false, false, true, geometry.boardWidth() / 2, false);
         }
         printme = "BAR:W(" + theBarWHITE.size() + "),B(" + theBarBLACK.size() + ")";
         fontwhite.drawString(g, printme, x, y, 0);
@@ -561,9 +557,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void paintState(Graphics g) {
         fontblack.drawString(g, state.name(),20,20,0);
     }
-
-    public static int WIDTH;
-    public static int HEIGHT;
 
     public static int pointerX;
     public static int pointerY;
@@ -662,22 +655,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.WHITE);
 
-        int pieceOnBarY = (HEIGHT / 2) - Piece.PIECE_DIAMETER;
+        int pieceOnBarY = (geometry.boardHeight() / 2) - Piece.PIECE_DIAMETER;
         //Draw pieces on the bar//////////////
         Enumeration eW = theBarWHITE.elements();
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
-            p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY -= Piece.PIECE_DIAMETER);
+            p.paint(g, geometry,
+                (geometry.boardWidth() / 2) - Piece.PIECE_DIAMETER / 2,
+                pieceOnBarY -= Piece.PIECE_DIAMETER);
         }
-        pieceOnBarY = (HEIGHT / 2);
+        pieceOnBarY = (geometry.boardHeight() / 2);
         Enumeration eB = theBarBLACK.elements();
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
-            p.paint(g, (WIDTH / 2) - Piece.PIECE_DIAMETER / 2, pieceOnBarY += Piece.PIECE_DIAMETER);
+            p.paint(g, geometry,
+                (geometry.boardWidth() / 2) - Piece.PIECE_DIAMETER / 2,
+                pieceOnBarY += Piece.PIECE_DIAMETER);
         }
         drawHUDtext(g, xpos);
         if (pieceStuckToMouse != null) {
-            pieceStuckToMouse.drawPieceOnMouse(g);
+            pieceStuckToMouse.drawPieceOnMouse(g, geometry);
         }
         if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
             log("GO TO NEW TURN AA");
@@ -718,7 +715,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else if (player == PlayerColor.BLACK) {
             piecesOnContainer = blackPiecesSafelyInContainer.size();
         }
-        int myX = WIDTH + ((geometry.panelWidth() / 4) - (containerWidth / 2));
+        int myX = geometry.boardWidth() + ((geometry.panelWidth() / 4) - (containerWidth / 2));
         int myY = topOfPieceContainer;
         for (int i = 0; i < 15; i++) {
             //simply draws the containers green if players have all their pieces in the home section
@@ -774,7 +771,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, printme, xpos, ypos, 0);
 
         //draw white players score at bot
-        ypos = HEIGHT - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
+        ypos = geometry.boardHeight() - 9 - (Board.BORDER * 2) - (fontwhite.getHeight() * 2);
         printme = "Brown (" + board.getBlackPlayer().getName() + ")";
         if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             printme += "*";
@@ -788,10 +785,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         fontwhite.drawString(g, printme, xpos, ypos, 0);
 
         int xposTmp = -1;
-        ypos = (HEIGHT / 2) - ((fontwhite.getHeight() * 4) / 2);
+        ypos = (geometry.boardHeight() / 2) - ((fontwhite.getHeight() * 4) / 2);
         printme = "Match Points: " + board.matchPoints;
         int widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
+        xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         fontwhite.drawString(g, printme, xposTmp, ypos, 0);
         ypos += fontwhite.getHeight();
         utils.setColor(g, roll_button_colour);
@@ -800,7 +797,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ///////// double button
         printme = "Double";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
+        xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         utils.setColor(g, roll_button_colour);
         ypos += 10;
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
@@ -822,7 +819,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         //only show roll button when required
         if (CustomCanvas.showRollButton) {
             //draw in centre:
-            xposTmp = ((WIDTH / 2)) - widthOfPrintMe / 2;
+            xposTmp = ((geometry.boardWidth() / 2)) - widthOfPrintMe / 2;
 
             utils.setColor(g, roll_button_colour);
             utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
@@ -855,7 +852,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         ///////// resign button
         printme = "Resign";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
-        xposTmp = (WIDTH + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
+        xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         utils.setColor(g, roll_button_colour);
         ypos += 10;
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
@@ -1165,15 +1162,14 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int HEIGHT_OF_MESSAGE_TEXT = ((getHeight()-getHeight()/8)-(BORDER+y+SMALLGAP))+2;
         int WIDTH_OF_USERLIST  = getWidth()-(WIDTH_OF_MESSAGE_TEXT+BORDER+SMALLGAP);
         int HEIGHT_OF_USERLIST = HEIGHT_OF_MESSAGE_TEXT+1;
-        int WIDTH_OF_ENTERTEXT_BOX=WIDTH_OF_MESSAGE_TEXT;
-        int HEIGHT_OF_ENTERTEXT_BOX=getHeight()-(HEIGHT_OF_MESSAGE_TEXT+BORDER+y+SMALLGAP);
-
-        int HEIGHT_OF_TOPIC_AND_NEWS_BOX=getHeight()-(HEIGHT_OF_MESSAGE_TEXT+HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP*5);
-        y=SMALLGAP;
+        int WIDTH_OF_ENTERTEXT_BOX = HEIGHT_OF_MESSAGE_TEXT;
+        int HEIGHT_OF_ENTERTEXT_BOX = getHeight() - (HEIGHT_OF_MESSAGE_TEXT + BORDER + y + SMALLGAP);
+        int HEIGHT_OF_TOPIC_AND_NEWS_BOX=getHeight()-(HEIGHT_OF_MESSAGE_TEXT + HEIGHT_OF_ENTERTEXT_BOX + SMALLGAP * 5);
+        y = SMALLGAP;
 
         ///////////////////////////////////////////
 
-        x=x+WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
+        x = x + WIDTH_OF_MESSAGE_TEXT + SMALLGAP;
         //info box top right (amount of users and ops)
         utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
         utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
@@ -1210,7 +1206,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
              int ydiff=y;
              int yorig=y;
              String message = (String) e.nextElement();
-             y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
+             y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,HEIGHT_OF_ENTERTEXT_BOX-15,false);
              flip=!flip;
              if (flip)
              {
@@ -1314,12 +1310,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
 
         if (showChallengeWindow) {
             utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
-            utils.fillRoundRect(g, WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2);
+            utils.fillRoundRect(g, geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
             utils.setColor(g, Color.white);
-            utils.drawRoundRect(g, WIDTH / 4, HEIGHT / 4, WIDTH / 2, HEIGHT / 2);
+            utils.drawRoundRect(g, geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
 
-            int xabout = WIDTH / 2;
-            int yabout = (HEIGHT / 4) + geometry.tinyGap();
+            int xabout = geometry.boardWidth() / 2;
+            int yabout = (geometry.boardHeight() / 4) + geometry.tinyGap();
 
             //paint the about box
             printme = "Challenge this player?";
@@ -2216,9 +2212,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
         if (gameComplete) {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
-            messagex = (WIDTH / 2) - messageWidth / 2;
+            messagex = (geometry.boardWidth() / 2) - messageWidth / 2;
             messageHeight = fontwhite.getHeight();
-            messagey = (HEIGHT / 2) - messageHeight / 2;
+            messagey = (geometry.boardHeight() / 2) - messageHeight / 2;
 
             utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
             utils.setColor(g, Color.WHITE);
@@ -2228,7 +2224,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
             messagex = 10;
-            messagey = HEIGHT - (fontwhite.getHeight() + geometry.tinyGap());
+            messagey = geometry.boardHeight() - (fontwhite.getHeight() + geometry.tinyGap());
             messageHeight = fontwhite.getHeight();
             utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
             utils.setColor(g, Color.WHITE);
@@ -2241,7 +2237,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     void paintRobotMessage(Graphics g) {
         utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
         messageWidth = fontwhite.stringWidth(robotMoveDesc + "  ");
-        messagex = WIDTH - (messageWidth + 10);
+        messagex = geometry.boardWidth() - (messageWidth + 10);
         messagey = 10;//(fontwhite.getHeight()+geometry.tinyGap());
         messageHeight = fontwhite.getHeight();
 
@@ -2361,7 +2357,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     Xtmp=x;
                 } else if (justifyRight) {
                 } else {
-                    Xtmp=(WIDTH/2)-(font.stringWidth(printme)/2);
+                    Xtmp=(geometry.boardWidth()/2)-(font.stringWidth(printme)/2);
                 }
                 // this is a bit of a hack but a legacy form the custom font days
                 // check if the end of the text is reached and control users ability to scroll with bools.

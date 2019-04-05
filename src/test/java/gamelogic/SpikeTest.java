@@ -30,8 +30,6 @@ public class SpikeTest {
         assertEquals(SpikeType.STALECTITE, spike.getType());
         Graphics graphics = Mockito.mock(Graphics.class);
 
-        CustomCanvas.WIDTH = geometry.boardWidth();
-        CustomCanvas.HEIGHT = canvasHeight;
         Board.BORDER = geometry.borderWidth();
         Board.BAR = 2 * geometry.borderWidth();
         spike.paint(graphics, geometry.boardWidth(), geometry.boardHeight());

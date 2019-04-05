@@ -1051,7 +1051,7 @@ public class Board {
         return currentPlayer.getColour();
     }
 
-    public static int boardHeight() {
-        return CustomCanvas.HEIGHT - 2 * Board.BORDER;
+    public int boardHeight() {
+        return geometry.boardHeight() - 2 * Board.BORDER;
     }
 }
