@@ -119,7 +119,7 @@ public class Spike {
         return position - 1;
     }
 
-    public int getPosition() {
+    int getPosition() {
         return position;
     }
 
@@ -136,12 +136,8 @@ public class Spike {
         } else {
             Utils._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
         }
-        ///////////////////////////////////////////////
 
         int overlapOnPieces = 0;
-        if (pieces.size() <= 5) {
-            overlapOnPieces = 0;
-        }
         if (pieces.size() > 5) {
             overlapOnPieces = Piece.PIECE_DIAMETER / 3;
         }
@@ -233,14 +229,12 @@ public class Spike {
                 Board.die1.drawMiniDie(g, miniDieX, y1);
                 Board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
-        } else if (whichDiei == -1) {
-            //not an error now just means dont draw s it must be -1
-        } else {
+        } else if (whichDiei != -1) {
             Utils._E("whichDiei type is unknown");
         }
     }
 
-    //sets the colour based on odd and even to alternative spike colours
+    // sets the colour based on odd and even to alternative spike colours
     private boolean paintBlackColour(Graphics g) {
         if (getSpikeNumber() % 2 == 0) {
             g.setColor(Color.BLACK);

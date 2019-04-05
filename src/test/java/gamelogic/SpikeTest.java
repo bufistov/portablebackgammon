@@ -3,7 +3,6 @@ package gamelogic;
 import data.PlayerColor;
 import data.SpikeType;
 import graphics.Geometry;
-import lowlevel.CustomCanvas;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
