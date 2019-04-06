@@ -887,23 +887,11 @@ public class Board {
         Spike dropOnMe = SPtheMoveToMake.dropPiecesOnMe;
         if (dropOnMe != null) {
             if (dropOnMe.isContainer()) {
-                int pieceContainerX = 0;
-                int pieceContainerY = 0;
-                int pieceContainerWidth = 0;
-                int pieceContainerHeight = 0;
-                if (whoseTurnIsIt() == PlayerColor.WHITE) {
-                    pieceContainerX = CustomCanvas.whiteContainerX;
-                    pieceContainerY = CustomCanvas.whiteContainerY;
-                    pieceContainerWidth = CustomCanvas.whiteContainerWidth;
-                    pieceContainerHeight = CustomCanvas.whiteContainerHeight;
-                } else if (whoseTurnIsIt() == PlayerColor.BLACK) {
-                    pieceContainerX = CustomCanvas.blackContainerX;
-                    pieceContainerY = CustomCanvas.blackContainerY;
-                    pieceContainerWidth = CustomCanvas.blackContainerWidth;
-                    pieceContainerHeight = CustomCanvas.blackContainerHeight;
-                }
-                setBotDestination(pieceContainerX + pieceContainerWidth / 2,
-                    pieceContainerY + pieceContainerHeight / 2,"PIECE CONTAINER DESTINATION");
+                int pieceContainerX = geometry.containerX();
+                int pieceContainerY = (whoseTurnIsIt() == PlayerColor.WHITE) ? geometry.whiteContainerY() :
+                    geometry.blackContainerY();
+                setBotDestination(pieceContainerX + geometry.containerWidth() / 2,
+                    pieceContainerY + geometry.containerHeight() / 2,"PIECE CONTAINER DESTINATION");
             } else {
                 Point middlePoint = dropOnMe.getMiddlePoint();
                 setBotDestination(middlePoint.x, middlePoint.y, "NORMAL CASE DROP ON SPIKE A");

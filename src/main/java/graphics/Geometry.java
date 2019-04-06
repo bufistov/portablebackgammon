@@ -85,4 +85,36 @@ public class Geometry {
     public int pieceRadius() {
         return pieceDiameter() / 2;
     }
+
+    public int containerWidth() {
+        return panelWidth() / 3;
+    }
+
+    public int containerHeight() {
+        return containerSubSize() * 15;
+    }
+
+    public int containerSubSize() {
+        return boardHeight() / 70;
+    }
+
+    public int panelFontHeight() {
+        return 20;
+    }
+
+    public int containerX() {
+        return boardWidth() + ((panelWidth() / 4) - (containerWidth() / 2));
+    }
+
+    public int containerMargin() {
+        return panelFontHeight() * 3 + borderWidth() * 2 + tinyGap();
+    }
+
+    public int whiteContainerY() {
+        return containerMargin();
+    }
+
+    public int blackContainerY() {
+        return boardHeight() - (containerHeight() + containerMargin());
+    }
 }

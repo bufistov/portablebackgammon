@@ -88,16 +88,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private static long robotMessageSetTimeLong;
     private static int TRANSPARENCY_LEVEL = 100;
 
-    // for collisions.
-    public static int whiteContainerX;
-    public static int whiteContainerY;
-    public static int whiteContainerWidth;
-    public static int whiteContainerHeight;
-    public static int blackContainerX;
-    public static int blackContainerY;
-    public static int blackContainerWidth;
-    public static int blackContainerHeight;
-
     // use these to detect if the roll button was clicked.
     private int rollButtonX;
     private int rollButtonY;
@@ -624,14 +614,11 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRect(g, prefx, prefy, prefw, prefh);
         }
 
-        // draw panel text:
-        int xpos = boardWidth + geometry.tinyGap();
-
         // draw the piece container
-        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + (geometry.borderWidth() * 2) + geometry.tinyGap();
+        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + geometry.borderWidth()*2 + geometry.tinyGap();
         int containerSubSize = boardHeight / 70;
         int containerWidth = geometry.panelWidth() / 3;
-        int topOfPieceContainer = boardHeight - ((containerSubSize * 15) + heightOf3LinesOfText);
+        int topOfPieceContainer = boardHeight - (geometry.containerHeight() + heightOf3LinesOfText);
 
         if (Board.allBlackPiecesAreHome) {
             utils.setColor(g, Color.GREEN);
@@ -643,7 +630,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         drawPieceContainer(g, topOfPieceContainer, containerWidth, containerSubSize, PlayerColor.BLACK);
 
-        heightOf3LinesOfText = (fontwhite.getHeight() * 3) + geometry.borderWidth() + geometry.tinyGap();
         topOfPieceContainer = heightOf3LinesOfText;
 
         if (Board.allWhitePiecesAreHome) {
@@ -674,6 +660,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
                 pieceOnBarY += geometry.pieceDiameter());
         }
+
+        // draw panel text:
+        int xpos = boardWidth + geometry.tinyGap();
         drawHUDtext(g, xpos);
         if (pieceStuckToMouse != null) {
             pieceStuckToMouse.drawPieceOnMouse(g);
@@ -706,21 +695,16 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    //draws the little holder where the pieces go
     private void drawPieceContainer(Graphics g, int topOfPieceContainer,
             int containerWidth, int containerSubSize,
             PlayerColor player) {
 
-        int piecesOnContainer = 0;
-        if (player == PlayerColor.WHITE) {
-            piecesOnContainer = whitePiecesSafelyInContainer.size();
-        } else if (player == PlayerColor.BLACK) {
-            piecesOnContainer = blackPiecesSafelyInContainer.size();
-        }
-        int myX = geometry.boardWidth() + ((geometry.panelWidth() / 4) - (containerWidth / 2));
+        int piecesOnContainer = (player == PlayerColor.WHITE) ? whitePiecesSafelyInContainer.size() :
+            blackPiecesSafelyInContainer.size();
+        final int myX = geometry.containerX();
         int myY = topOfPieceContainer;
         for (int i = 0; i < 15; i++) {
-            myY = myY + containerSubSize;
+            myY += containerSubSize;
             if (i < piecesOnContainer) {
                 Color originalColor = utils.getColor();
                 utils.setColor(g, Color.ORANGE);
@@ -729,25 +713,10 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             }
             utils.drawRect(g, myX, myY, containerWidth, containerSubSize);
         }
-        //update collision data
-        if (player == PlayerColor.WHITE) {
-            whiteContainerX = myX;
-            whiteContainerY = myY - (containerSubSize * 14);
-            whiteContainerWidth = containerWidth;
-            whiteContainerHeight = containerSubSize * 15;
-            if (showBoundaryBoxes) {
-                utils.setColor(g, Color.RED);
-                utils.drawRect(g, whiteContainerX, whiteContainerY, whiteContainerWidth, whiteContainerHeight);
-            }
-        } else if (player == PlayerColor.BLACK) {
-            blackContainerX = myX;
-            blackContainerY = myY - (containerSubSize * 14);
-            blackContainerWidth = containerWidth;
-            blackContainerHeight = containerSubSize * 15;
-            if (showBoundaryBoxes) {
-                utils.setColor(g, Color.RED);
-                utils.drawRect(g, blackContainerX, blackContainerY, blackContainerWidth, blackContainerHeight);
-            }
+        if (showBoundaryBoxes) {
+            utils.setColor(g, Color.RED);
+            utils.drawRect(g, myX, myY - (containerSubSize * 14),
+                geometry.containerWidth(), geometry.containerHeight());
         }
     }
 
@@ -1536,38 +1505,18 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    private void checkIfPieceContainerClickedOn(int x,int y) {
-        int myX = 0;
-        int myY = 0;
-        int myWidth = 0;
-        int myHeight = 0;
-        String clickedOnText = "NONE";
-        if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
-            myX = whiteContainerX;
-            myY = whiteContainerY;
-            myWidth = whiteContainerWidth;
-            myHeight = whiteContainerHeight;
-            clickedOnText = "WHITE CONTAINER CLICKED ON";
-        } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
-            myX = blackContainerX;
-            myY = blackContainerY;
-            myWidth = blackContainerWidth;
-            myHeight = blackContainerHeight;
-            clickedOnText = "BLACK CONTAINER CLICKED ON";
-        } else {
-            Utils._E("checkIfPieceContainerClickedOn knows not whom click upon it!");
-        }
-
-        if (x >= myX && x < (myX + myWidth)) {
-            if (y > myY && y < (myY + myHeight)) {
-                log("" + clickedOnText);
+    private void checkIfPieceContainerClickedOn(int x, int y) {
+        int myX = geometry.containerX();
+        int myY = (board.whoseTurnIsIt() == PlayerColor.WHITE) ? geometry.whiteContainerY() :
+            geometry.blackContainerY();
+        if (x >= myX && x < (myX + geometry.containerWidth())) {
+            if (y > myY && y < (myY + geometry.containerHeight())) {
+                log(String.format("%s CONTAINER CLICKED ON", board.whoseTurnIsIt()));
                 DieType correctDie = Board.whichDieGetsUsToPieceContainer;
                 if (Board.pulsateWhiteContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("WHITE put in container");
                     placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
                 } else if (Board.pulsateBlackContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.BLACK) {
-                    //if container is yellow, ie it knows its a potential option, AND we have a piece on the mouse
-                    //then we simply let it go into the piece container.
                     log("BLACK put in container");
                     placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
                 }
