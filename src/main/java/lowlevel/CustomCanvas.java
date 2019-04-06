@@ -2162,29 +2162,20 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     private void loadCustomFonts() {
         boolean land = false;
         int gap = 10;
-        String path = "/";
-        int GAP = 3; // REAL GAP VAL, REMOVE REDUNDANT ONES (TODO)- (lower value the bigger gap)
+        int GAP = 3;
         try {
-            utils.log("loading fonts:");
-            fontwhite = CustomFont.getFont(utils.loadImage(path + "whitefont.png"),
-                CustomFont.SIZE_SMALL,
-                CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
-            if (fontwhite == null) {
-                Utils._E("-- fontwhite image is null");
-            }
-            fontblack = CustomFont.getFont(utils.loadImage(path + "blackfont.png"),
-                CustomFont.SIZE_SMALL,
-                CustomFont.STYLE_PLAIN, land, 32, 93, GAP, gap, true, this);
-            if (fontblack == null) {
-                Utils._E("-- fontblack image is null");
-            }
+            Utils.log("loading fonts:");
+            fontwhite = CustomFont.getFont(utils.loadImage("/whitefont.png"),
+                land, 32, 93, GAP, gap, this);
+            fontblack = CustomFont.getFont(utils.loadImage("/blackfont.png"),
+                land, 32, 93, GAP, gap, this);
         } catch (Exception e) {
             Utils._E("== error loading fonts " + e.getMessage());
         }
     }
 
     //for debugging, paints sytem.out to screen
-    void paintStringsToCanvas(Graphics g) {
+    private void paintStringsToCanvas(Graphics g) {
         Enumeration e = Utils.systemOuts.elements();
         int x = 3;
         int y = 3;
