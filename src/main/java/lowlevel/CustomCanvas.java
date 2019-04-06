@@ -650,7 +650,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Board.allWhitePiecesAreHome) {
             utils.setColor(g, Color.GREEN);
             if (Board.pulsateWhiteContainer) {
-                utils.setColor(g, Color.YELLOW);//dra piece container yellow when its an option
+                utils.setColor(g, Color.YELLOW);//draw piece container yellow when its an option
             }
         } else {
             utils.setColor(g, Color.WHITE);

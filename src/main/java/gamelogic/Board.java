@@ -444,18 +444,17 @@ public class Board {
             boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
                 && !anybodyNotInHome(currentPlayer);
               //only for the case when a piece can go into the piece container
-            if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
-                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE)
-                {
+            if (highlightPieceContainerAsOption) {
+                if (potentialSpikeIndex==FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
-                    pulsateWhiteContainer=true;
+                    pulsateWhiteContainer = true;
                     die2StillAnOption=true;
-                    copy_of_reachableFromDie2=null;//EXPERIMENT- YES IT WORKS
-                } else if (potentialSpikeIndex==LAST_SPIKE+1 && whoseTurnIsIt() == PlayerColor.BLACK) {
+                    copy_of_reachableFromDie2 = null;//EXPERIMENT- YES IT WORKS
+                } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
-                    pulsateBlackContainer=true;
-                    die2StillAnOption=true;
-                    copy_of_reachableFromDie2=null;//EXPERIMENT-YES IT WORKS
+                     pulsateBlackContainer = true;
+                     die2StillAnOption=true;
+                     copy_of_reachableFromDie2=null;//EXPERIMENT-YES IT WORKS
                 }
             }
             ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
@@ -877,7 +876,7 @@ public class Board {
 
     private void theyWantToPlaceAPiece() {
         if (CustomCanvas.barPieceStuckOnMouse) {
-            log("dont do anythign til we palce this");
+            log("dont do anythign til we place this");
             return;
         }
         if (SPtheMoveToMake == null) {
