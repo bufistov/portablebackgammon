@@ -31,9 +31,6 @@ public class Spike {
     private Geometry geometry;
     private Utils utils = new Utils();
 
-    private int TRIANGLE_WIDTH = 0;
-    private int TRIANGLE_HEIGHT = 0;
-
     // these variables (along with TRIANGLE_WIDTH & TRIANGLE_HEIGHT) are used to work out if the player has clicked on the piece
     private int collision_x;
     private int collision_y;
@@ -105,13 +102,9 @@ public class Spike {
         return pieces.size();
     }
 
-    void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
-        int boardHeight = boardHeightWithBorder - geometry.borderWidth() * 2;
-        int spikesTotalWidth = boardWidth - ((geometry.borderWidth() * 2) + geometry.centralBarWidth());
-        TRIANGLE_WIDTH            = (spikesTotalWidth + 6) / 12;
-        TRIANGLE_HEIGHT           = boardHeight / 2;
-
-        workOutPositionsOfSpike(boardHeight, TRIANGLE_WIDTH);
+    void paint(Graphics g) {
+        workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
+            geometry.spikeWidth());
         drawSpike(g);
         drawPieces(g, spikeName);
         if (flash) {
@@ -281,6 +274,8 @@ public class Spike {
     // and boundaries for mouse click event
     private void workOutPositionsOfSpike(int boardHeight, int TRIANGLE_WIDTH) {
         int widthMinusBorderAndPieceComponent = geometry.boardWidth() - geometry.borderWidth();
+        int total = geometry.spikeWidth() * 12 + geometry.centralBarWidth() + 2 * geometry.borderWidth();
+        assert total == geometry.boardWidth();
         y1 = geometry.borderWidth();
         if (position <= 6) {
             //TOP RIGHT SEGMENT OF BOARD (6 spikes_
@@ -317,11 +312,10 @@ public class Spike {
     }
 
     private int height() {
-        assert TRIANGLE_HEIGHT > 0;
-        return TRIANGLE_HEIGHT - TRIANGLE_HEIGHT / 10;
+        return geometry.spikeHeight();
     }
 
     private int width() {
-        return TRIANGLE_WIDTH;
+        return geometry.spikeWidth();
     }
 }

@@ -112,7 +112,7 @@ public class Board {
         utils.drawRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
-           spike.paint(g, boardWidth, boardHeight);
+           spike.paint(g);
         }
 
         paintDice(g,boardWidth,boardHeight);

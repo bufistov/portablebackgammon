@@ -29,7 +29,7 @@ class SpikeTest {
         assertEquals(SpikeType.STALECTITE, spike.getType());
 
         Graphics graphics = Mockito.mock(Graphics.class);
-        spike.paint(graphics, geometry.boardWidth(), geometry.boardHeight());
+        spike.paint(graphics);
         int middleX = geometry.boardWidth() - 2 * geometry.spikeWidth() -
             geometry.borderWidth() + geometry.spikeWidth() / 2;
         int middleY = geometry.borderWidth() + geometry.spikeHeight() / 2;
