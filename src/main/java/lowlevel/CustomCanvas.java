@@ -614,33 +614,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             utils.drawRect(g, prefx, prefy, prefw, prefh);
         }
 
-        // draw the piece container
-        int heightOf3LinesOfText = (fontwhite.getHeight() * 3) + geometry.borderWidth()*2 + geometry.tinyGap();
-        int containerSubSize = boardHeight / 70;
-        int containerWidth = geometry.panelWidth() / 3;
-        int topOfPieceContainer = boardHeight - (geometry.containerHeight() + heightOf3LinesOfText);
-
-        if (Board.allBlackPiecesAreHome) {
-            utils.setColor(g, Color.GREEN);
-            if (Board.pulsateBlackContainer) {
-                utils.setColor(g, Color.YELLOW);
-            }
-        } else {
-            utils.setColor(g, Color.WHITE);
-        }
-        drawPieceContainer(g, topOfPieceContainer, containerWidth, containerSubSize, PlayerColor.BLACK);
-
-        topOfPieceContainer = heightOf3LinesOfText;
-
-        if (Board.allWhitePiecesAreHome) {
-            utils.setColor(g, Color.GREEN);
-            if (Board.pulsateWhiteContainer) {
-                utils.setColor(g, Color.YELLOW);
-            }
-        } else {
-            utils.setColor(g, Color.WHITE);
-        }
-        drawPieceContainer(g, topOfPieceContainer, containerWidth, containerSubSize, PlayerColor.WHITE);
+        board.drawBlackPieceContainer(g);
+        board.drawWhitePieceContainer(g);
 
         int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
 
@@ -692,31 +667,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (gameComplete || whiteResigned || blackResigned) {
             sfxGameOver.playSound();
             tellPlayers(gameCompleteString);
-        }
-    }
-
-    private void drawPieceContainer(Graphics g, int topOfPieceContainer,
-            int containerWidth, int containerSubSize,
-            PlayerColor player) {
-
-        int piecesOnContainer = (player == PlayerColor.WHITE) ? whitePiecesSafelyInContainer.size() :
-            blackPiecesSafelyInContainer.size();
-        final int myX = geometry.containerX();
-        int myY = topOfPieceContainer;
-        for (int i = 0; i < 15; i++) {
-            myY += containerSubSize;
-            if (i < piecesOnContainer) {
-                Color originalColor = utils.getColor();
-                utils.setColor(g, Color.ORANGE);
-                utils.fillRect(g, myX, myY, containerWidth, containerSubSize);
-                utils.setColor(g, originalColor);
-            }
-            utils.drawRect(g, myX, myY, containerWidth, containerSubSize);
-        }
-        if (showBoundaryBoxes) {
-            utils.setColor(g, Color.RED);
-            utils.drawRect(g, myX, myY - (containerSubSize * 14),
-                geometry.containerWidth(), geometry.containerHeight());
         }
     }
 

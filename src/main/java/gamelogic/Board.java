@@ -966,4 +966,42 @@ public class Board {
     public PlayerColor whoseTurnIsIt() {
         return currentPlayer.getColour();
     }
+
+    public void drawBlackPieceContainer(Graphics g) {
+        boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(blackPlayer) +
+            CustomCanvas.blackPiecesSafelyInContainer.size() == 15;
+        drawPieceContainer(g, geometry.blackContainerY(), pulsateBlackContainer, allPiecesAreHome,
+            CustomCanvas.blackPiecesSafelyInContainer.size());
+    }
+
+    public void drawWhitePieceContainer(Graphics g) {
+        boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(whitePlayer) +
+            CustomCanvas.whitePiecesSafelyInContainer.size() == 15;
+        drawPieceContainer(g, geometry.whiteContainerY(), pulsateWhiteContainer, allPiecesAreHome,
+            CustomCanvas.whitePiecesSafelyInContainer.size());
+    }
+
+    private void drawPieceContainer(Graphics g, int topY, boolean pulsateContainer, boolean allPiecesAreHome,
+                                    int piecesOnContainer) {
+        if (allPiecesAreHome) {
+            utils.setColor(g, Color.GREEN);
+            if (pulsateContainer) {
+                utils.setColor(g, Color.YELLOW);
+            }
+        } else {
+            utils.setColor(g, Color.WHITE);
+        }
+        final int myX = geometry.containerX();
+        int myY = topY;
+        for (int i = 0; i < 15; i++) {
+            myY += geometry.containerSubSize();
+            if (i < piecesOnContainer) {
+                Color originalColor = utils.getColor();
+                utils.setColor(g, Color.ORANGE);
+                utils.fillRect(g, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
+                utils.setColor(g, originalColor);
+            }
+            utils.drawRect(g, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
+        }
+    }
 }
