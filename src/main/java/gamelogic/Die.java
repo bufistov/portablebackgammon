@@ -1,20 +1,16 @@
 package gamelogic;
 import java.awt.Color;
 import java.awt.Graphics;
+
+import graphics.Geometry;
 import lowlevel.*;
 
 public class Die {
     public static int DIE_COLOUR = 0xFFFFFF;
     public static int DOT_COLOUR = 0x000000;
-
     private static Color die_colour, dot_colour;
 
-    private static int dieWidth = Piece.PIECE_DIAMETER;
-    private static int dieHeight = Piece.PIECE_DIAMETER;
-
-    private int dotDiameter = Piece.PIECE_DIAMETER / 5;
-    private final int TINY_GAP = 5;
-
+    private Geometry geometry;
     private Utils utils = new Utils();
     private int value = -1; // 1 to 6
 
@@ -23,22 +19,15 @@ public class Die {
     // we DO NOT want the player to see this tho so we flag a boolean in here to stop the dice painting different.
     private int originalValue;
 
-    public Die() {
+    public Die(Geometry geometry) {
         log("Die made");
+        this.geometry = geometry;
         makeColourObjects();
     }
 
     public static void makeColourObjects() {
         die_colour = new Color(DIE_COLOUR);
         dot_colour = new Color(DOT_COLOUR);
-    }
-
-    public static int getWidth() {
-        return dieWidth;
-    }
-
-    public static int getHeight() {
-        return dieHeight;
     }
 
     public int roll() {
@@ -79,23 +68,12 @@ public class Die {
         return value > 0;
     }
 
-    static int miniDieWidth() {
-        return Piece.PIECE_DIAMETER-6;
-    }
-
-    static int miniDieHeight() {
-        return Piece.PIECE_DIAMETER-6;
-    }
-
     void paint(Graphics g, int x, int y) {
         if (value >= 1) {
-            //die size based on piece diameter
-            dieWidth = Piece.PIECE_DIAMETER;
-            dieHeight = Piece.PIECE_DIAMETER;
-            dotDiameter = Piece.PIECE_DIAMETER / 5;
+            int dotDiameter = geometry.dieDotDiameter();
             int halfDotDiameter = dotDiameter / 2;
-            drawOutline(g, x, y, dieWidth, dieHeight);
-            drawDots(g, x, y, dieWidth, dieHeight, dotDiameter, halfDotDiameter);
+            drawOutline(g, x, y, geometry.dieSize(), geometry.dieSize());
+            drawDots(g, x, y, geometry.dieSize(), geometry.dieSize(), dotDiameter, halfDotDiameter);
         }
     }
 
@@ -103,10 +81,11 @@ public class Die {
     // draws a minni version of the die anywhere you specifiy, the purpose is so that a small die
     // can be drawn when potential moves are so they know which die theyre going to use up
     void drawMiniDie(Graphics g, int x, int y) {
-        int miniDotDiameter = miniDieWidth() / 5;
-        int miniHalfDotDiameter = dotDiameter / 2;
-        drawOutline(g,x,y,miniDieWidth(), miniDieHeight());
-        drawDots(g, x, y, miniDieWidth(), miniDieHeight(), miniDotDiameter,miniHalfDotDiameter);
+        int miniDotDiameter = geometry.miniDieSize() / 5;
+        int miniHalfDotDiameter = geometry.dieDotDiameter() / 2;
+        drawOutline(g,x, y, geometry.miniDieSize(), geometry.miniDieSize());
+        drawDots(g, x, y, geometry.miniDieSize(), geometry.miniDieSize(),
+            miniDotDiameter, miniHalfDotDiameter);
     }
 
     private void drawOutline(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT) {
@@ -128,7 +107,7 @@ public class Die {
         if (value != originalValue) {
             utils.setColor(g, Color.RED);
         }
-
+        int tinyGap = geometry.tinyGap();
         switch(dots) {
             case 1:
                 //draw single dot in middle
@@ -136,40 +115,40 @@ public class Die {
                 break;
             case 2:
                 //draw 2 dots in opposing corners
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 3:
                 //draw 3 dots diagnally
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 4:
                 //draw 4 dots 2 at top and 2 at bottom
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 5:
                 //draw 4 dots 2 at top and 2 at bottom
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 //and one in the middle
                 utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, (y+DIE_HEIGHT/2)-HALF_DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
                 break;
             case 6:
                 //draw 4 dots 2 at top and 2 at bottom
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+TINY_GAP), y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH)-(DOT_DIAMETER+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+tinyGap), y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 //and 2 in middle top and bottom
                 utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+DOT_DIAMETER, DOT_DIAMETER, DOT_DIAMETER);
-                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+(DIE_HEIGHT-DOT_DIAMETER-TINY_GAP), DOT_DIAMETER, DOT_DIAMETER);
+                utils.fillCircle(g, (x+DIE_WIDTH/2)-HALF_DOT_DIAMETER, y+(DIE_HEIGHT-DOT_DIAMETER-tinyGap), DOT_DIAMETER, DOT_DIAMETER);
                 break;
             default:
                 break;

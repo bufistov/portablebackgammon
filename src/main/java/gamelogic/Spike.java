@@ -162,48 +162,34 @@ public class Spike {
 
     private void drawPieces(Graphics g, String spikeName) {
         Enumeration e = pieces.elements();
-        int yPosForPieces = y1 - Piece.PIECE_DIAMETER;
-
-        //adjust the starting point of the pieces pending on type of spike:
-        /////////////////////////////////////////////
-        if(getType() == STALECTITE) {
-           yPosForPieces = y1 - Piece.PIECE_DIAMETER;
-        } else if(getType() == STALECMITE) {
+        int yPosForPieces = y1 - geometry.pieceDiameter();
+        if(getType() == STALECMITE) {
            yPosForPieces = y1;
-        } else {
-            Utils._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
         }
 
         int overlapOnPieces = 0;
         if (pieces.size() > 5) {
-            overlapOnPieces = Piece.PIECE_DIAMETER / 3;
+            overlapOnPieces = geometry.pieceDiameter() / 3;
         }
         if (pieces.size() > 7) {
-            overlapOnPieces = Piece.PIECE_DIAMETER / 2;
+            overlapOnPieces = geometry.pieceDiameter() / 2;
         }
         if (pieces.size() > 9) {
-            overlapOnPieces = (Piece.PIECE_DIAMETER / 2) + pieces.size() / 3;
+            overlapOnPieces = geometry.pieceDiameter() / 2 + pieces.size() / 3;
         }
+        int piecex = x2 - geometry.pieceDiameter() / 2;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
-            int piecex = x2 - Piece.PIECE_DIAMETER / 2;
             int piecey = -1;
-
-            //caters for overlappin pieces when manny are added.
-            // we need a different y value for top and bottom spikes
-            // so that on top spikes the pieces move down
-            // and on bottom spikes the pieces move up
             if(getType() == STALECTITE) {
-               piecey = yPosForPieces += (Piece.PIECE_DIAMETER-overlapOnPieces);
+               piecey = yPosForPieces += (geometry.pieceDiameter() - overlapOnPieces);
             } else if(getType() == STALECMITE) {
-                piecey = yPosForPieces -= (Piece.PIECE_DIAMETER-overlapOnPieces);
-            } else {
-                Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
+                piecey = yPosForPieces -= (geometry.pieceDiameter() - overlapOnPieces);
             }
-            if(getType() == STALECTITE) {  // overlap here just squares them up to the bottom/top of spike if there overlapping
-                 p.paint(g, geometry, piecex,piecey + overlapOnPieces);
+            if(getType() == STALECTITE) {
+                 p.paint(g, piecex,piecey + overlapOnPieces);
             } else {
-                 p.paint(g, geometry, piecex,piecey - overlapOnPieces);
+                 p.paint(g, piecex,piecey - overlapOnPieces);
             }
         }
     }

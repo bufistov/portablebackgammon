@@ -72,7 +72,7 @@ public class Utils {
     }
 
     public void fillCircle(Graphics g, int x, int y,int width, int height) {
-          g.fillArc(x, y,width, height, 1, 360);
+          g.fillArc(x, y, width, height, 1, 360);
     }
 
     static Image loadImage(String path) {

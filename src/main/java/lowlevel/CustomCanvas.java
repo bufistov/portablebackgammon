@@ -658,26 +658,26 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
             containerSubSize, heightOf3LinesOfText, PlayerColor.WHITE);
 
-        int pieceOnBarY = (geometry.boardHeight() / 2) - Piece.PIECE_DIAMETER;
+        int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
         //Draw pieces on the bar//////////////
         Enumeration eW = theBarWHITE.elements();
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
-            p.paint(g, geometry,
-                (geometry.boardWidth() / 2) - Piece.PIECE_DIAMETER / 2,
-                pieceOnBarY -= Piece.PIECE_DIAMETER);
+            p.paint(g,
+                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                pieceOnBarY -= geometry.pieceDiameter());
         }
         pieceOnBarY = (geometry.boardHeight() / 2);
         Enumeration eB = theBarBLACK.elements();
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
-            p.paint(g, geometry,
-                (geometry.boardWidth() / 2) - Piece.PIECE_DIAMETER / 2,
-                pieceOnBarY += Piece.PIECE_DIAMETER);
+            p.paint(g,
+                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                pieceOnBarY += geometry.pieceDiameter());
         }
         drawHUDtext(g, xpos);
         if (pieceStuckToMouse != null) {
-            pieceStuckToMouse.drawPieceOnMouse(g, geometry);
+            pieceStuckToMouse.drawPieceOnMouse(g);
         }
         if (Board.die1HasBeenUsed && Board.die2HasBeenUsed) {
             log("GO TO NEW TURN AA");
@@ -2148,7 +2148,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
         makeColourObjects();
         board.makeColourObjects();
-        Piece.makeColourObjects(true);
+        Piece.makeColourObjects();
         Die.makeColourObjects();
         log("Theme is loaded now and working.");
     }

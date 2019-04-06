@@ -74,8 +74,8 @@ public class Board {
         for (int i = 1; i <= 24; i++) {
             spikes.add(new Spike(geometry, i));
         }
-        die1 = new Die();
-        die2 = new Die();
+        die1 = new Die(geometry);
+        die2 = new Die(geometry);
         makeColourObjects();
         initialiseBoard(INIT_CONFIGURATION);
         log("Board made");
@@ -138,15 +138,15 @@ public class Board {
 
     private void paintDice(Graphics g, int WIDTH, int HEIGHT) {
         if (!CustomCanvas.showRollButton) {
-            int diex = (geometry.borderWidth() + ((WIDTH/4)*3)) + Die.getWidth();
-            int diey = (geometry.borderWidth() + (HEIGHT/2)) - Die.getHeight();
+            int diex = (geometry.borderWidth() + ((WIDTH/4)*3)) + geometry.dieSize();
+            int diey = (geometry.borderWidth() + (HEIGHT/2)) - geometry.dieSize();
             if (!die1HasBeenUsed) {
                 die1.paint(g, diex, diey);
             } else {
                 die1.disable();
             }
 
-            diex += Die.getWidth() + geometry.tinyGap();
+            diex += geometry.dieSize() + geometry.tinyGap();
             if (!die2HasBeenUsed) {
                 die2.paint(g, diex, diey);
             } else {
@@ -229,8 +229,7 @@ public class Board {
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
             Piece p = (Piece) theBarPieces.firstElement();
-            setBotDestination(p.collision_x+Piece.PIECE_DIAMETER/2,
-                p.collision_y+Piece.PIECE_DIAMETER/2,"DESTINATION FOR BOT, PIECE ON BAR......");
+            setBotDestination(p.getCenterX(), p.getCenterY(),"DESTINATION FOR BOT, PIECE ON BAR......");
         }
     }
 
@@ -670,13 +669,13 @@ public class Board {
         }
         for (int i = 0; i < whiteInitPositions.length; ++i) {
             for (int j = 0; j < whiteInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(whitePlayer);
+                Piece newPiece = new Piece(geometry, whitePlayer);
                 spikes.get(i).addPiece(newPiece);
             }
         }
         for (int i = 0; i < whiteInitPositions.length; ++i) {
             for (int j = 0; j < blackInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(blackPlayer);
+                Piece newPiece = new Piece(geometry, blackPlayer);
                 spikes.get(i).addPiece(newPiece);
             }
         }
@@ -724,8 +723,7 @@ public class Board {
                     CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.getName() + "->Container");
                     Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                     Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    setBotDestination(firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2,
-                        firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2,
+                    setBotDestination(firstPiece.getCenterX(), firstPiece.getCenterY(),
                         "TAKE A PIECE TO CONTAINER");
                 } else {
                     log("-randomly chose to go to spike:" +
@@ -735,8 +733,8 @@ public class Board {
                         "->" + SPtheMoveToMake.dropPiecesOnMe);
                     Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                     Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    int goToX = firstPiece.collision_x + firstPiece.PIECE_DIAMETER / 2;
-                    int goToY = firstPiece.collision_y + firstPiece.PIECE_DIAMETER / 2;
+                    int goToX = firstPiece.getCenterX();
+                    int goToY = firstPiece.getCenterY();
                     setBotDestination(goToX, goToY, "RANDOMLY CHOOSE A PIECE");
                     log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
                 }

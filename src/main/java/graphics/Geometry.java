@@ -81,4 +81,8 @@ public class Geometry {
     public int miniDieSize() {
         return dieSize() - 6;
     }
+
+    public int pieceRadius() {
+        return pieceDiameter() / 2;
+    }
 }
