@@ -641,8 +641,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         } else {
             utils.setColor(g, Color.WHITE);
         }
-        drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
-            containerSubSize, heightOf3LinesOfText, PlayerColor.BLACK);
+        drawPieceContainer(g, topOfPieceContainer, containerWidth, containerSubSize, PlayerColor.BLACK);
 
         heightOf3LinesOfText = (fontwhite.getHeight() * 3) + geometry.borderWidth() + geometry.tinyGap();
         topOfPieceContainer = heightOf3LinesOfText;
@@ -650,15 +649,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Board.allWhitePiecesAreHome) {
             utils.setColor(g, Color.GREEN);
             if (Board.pulsateWhiteContainer) {
-                utils.setColor(g, Color.YELLOW);//draw piece container yellow when its an option
+                utils.setColor(g, Color.YELLOW);
             }
         } else {
             utils.setColor(g, Color.WHITE);
         }
-        drawPieceContainer(g, xpos, topOfPieceContainer, containerWidth,
-            containerSubSize, heightOf3LinesOfText, PlayerColor.WHITE);
+        drawPieceContainer(g, topOfPieceContainer, containerWidth, containerSubSize, PlayerColor.WHITE);
 
         int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
+
         //Draw pieces on the bar//////////////
         Enumeration eW = theBarWHITE.elements();
         while (eW.hasMoreElements()) {
@@ -708,8 +707,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     }
 
     //draws the little holder where the pieces go
-    private void drawPieceContainer(Graphics g, int xpos, int topOfPieceContainer,
-            int containerWidth, int containerSubSize, int heightOf3LinesOfText,
+    private void drawPieceContainer(Graphics g, int topOfPieceContainer,
+            int containerWidth, int containerSubSize,
             PlayerColor player) {
 
         int piecesOnContainer = 0;
@@ -721,8 +720,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         int myX = geometry.boardWidth() + ((geometry.panelWidth() / 4) - (containerWidth / 2));
         int myY = topOfPieceContainer;
         for (int i = 0; i < 15; i++) {
-            //simply draws the containers green if players have all their pieces in the home section
-            //and therefore the piece containers are 'live' and ready for action
             myY = myY + containerSubSize;
             if (i < piecesOnContainer) {
                 Color originalColor = utils.getColor();
@@ -751,8 +748,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 utils.setColor(g, Color.RED);
                 utils.drawRect(g, blackContainerX, blackContainerY, blackContainerWidth, blackContainerHeight);
             }
-        } else {
-            Utils._E("drawPieceContainer has been given incorrect player number!");
         }
     }
 
