@@ -1546,21 +1546,18 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     }
                 }
 
-                // DIE1 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie1 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie1.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1)");
                     placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE1, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
-                // DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromDie2 != null && spike.getSpikeNumber() == board.copy_of_reachableFromDie2.getSpikeNumber()) {
                     log("clicked on valid potential spike (die2)");
                     placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE2, false);
                     return;//EXPERMINETAL so it doesnt do any more checks since we are using this die
                 }
 
-                // DIE1 + DIE2 MOVE
                 if (pieceStuckToMouse != null && board.copy_of_reachableFromBothDice != null && spike.getSpikeNumber() == board.copy_of_reachableFromBothDice.getSpikeNumber()) {
                     log("clicked on valid potential spike (die1+die2)");
                     placePieceRemoveOldOneAndSetDieToUsed(DieType.DIE1AND2, false);

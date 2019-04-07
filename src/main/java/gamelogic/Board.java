@@ -466,11 +466,6 @@ public class Board {
         return result;
     }
 
-    private ArrayList<Integer> reachableSpikesFromBar(Player player, Die die1, Die die2) {
-        ArrayList<Integer> result = new ArrayList<>();
-        return result;
-    }
-
     private int calculateAmountOfPiecesOnBoard(PlayerColor player) {
         int piecesOnBoard = 0;
         for (Spike spike: spikes) {
