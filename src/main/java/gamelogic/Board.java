@@ -54,7 +54,6 @@ public class Board {
     public static boolean die1HasBeenUsed, die2HasBeenUsed;
 
     public static boolean NOT_A_BOT_BUT_A_NETWORKED_PLAYER = false;
-    public static boolean pulsateWhiteContainer, pulsateBlackContainer;
 
     public Board(GameColour gameColour, Geometry geometry, GameConfig config) {
         this.gameColour = gameColour;
@@ -116,10 +115,10 @@ public class Board {
             if (haveToMovePieceFromBar(currentPlayer.getColour())) {
                 drawPotentialMovesFromBar();
             } else {
-                if (!CustomCanvas.pieceOnMouse) {
-                    drawPotentialMoves(g);
+                if (CustomCanvas.pieceStuckToMouse == null) {
+                    drawPotentialMoves();
                 } else {
-                    keepPotentialSpikesPulsing();
+                    keepPotentialSpikesPulsing(CustomCanvas.pieceStuckToMouse.sourceSpikeId());
                 }
             }
             if (die1.enabled() || die2.enabled()) {
@@ -150,7 +149,7 @@ public class Board {
     // when piece is on the bar this should display the options for it
     private void drawPotentialMovesFromBar() {
         allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
-        detectIfPiecesAreHome();
+        checkConsistent();
         if (CustomCanvas.showRollButton) {
             return;
         }
@@ -216,8 +215,6 @@ public class Board {
         loadSounds(soundOn);
         currentPlayer = whitePlayer;
         allowPieceToStickToMouse = false;
-        pulsateWhiteContainer = false;
-        pulsateBlackContainer = false;
         die1HasBeenUsed = false;
         die2HasBeenUsed = false;
 
@@ -228,29 +225,30 @@ public class Board {
         initialiseBoard(INIT_CONFIGURATION);
     }
 
-    // simply pulses the spikes while they are not null
-    // "Pulses" means color them differently, so it is clear that a piece can be moved there.
-    private void keepPotentialSpikesPulsing() {
-        boolean debugmessages = false;
-        if (debugmessages) {
-            log("keepPotentialSpikesPulsing");
-        }
-        String debugstr = "";
-        if (copy_of_reachableFromDie1 != null) {
-            pulsatePotentialSpike(copy_of_reachableFromDie1, DieType.DIE1);
-            debugstr = "die1";
-        }
-
-        if (copy_of_reachableFromDie2 != null) {
-            pulsatePotentialSpike(copy_of_reachableFromDie2, DieType.DIE2);
-            debugstr += ", die2";
-        }
-        if (copy_of_reachableFromBothDice != null) {
-            pulsatePotentialSpike(copy_of_reachableFromBothDice, DieType.DIE1AND2);
-            debugstr += ", bothdice";
-        }
-        if (debugmessages) {
-            log("debugstr:" + debugstr);
+    // pulses the spikes while piece is stuck to mouse
+    private void keepPotentialSpikesPulsing(int sourceSpikeId) {
+        if (sourceSpikeId == -1) {
+            ArrayList<Spike> possibleSpikes = this.spikesToMoveToFromBar(whoseTurnIsIt());
+            for (Spike spike: possibleSpikes) {
+                int neededValue = currentPlayer.isWhite() ? spike.getPosition() : 24 - spike.getPosition();
+                spike.flash(neededValue == die1.getValue() ? DieType.DIE1 : DieType.DIE2);
+            }
+        } else {
+            ArrayList<Integer> possibleSpikes = reachableSpikes(spikes.get(sourceSpikeId), currentPlayer, die1, die2);
+            for (Integer spikeId: possibleSpikes) {
+                int neededValue = Math.abs(sourceSpikeId - spikeId);
+                DieType dieType = DieType.DIE1;
+                if (neededValue == die1.getValue()) {
+                    dieType = DieType.DIE1;
+                } else if (neededValue == die2.getValue()) {
+                    dieType = DieType.DIE2;
+                } else if (neededValue == die1.getValue() + die2.getValue()) {
+                    dieType = DieType.DIE1AND2;
+                }
+                if (spikeId != currentPlayer.containerId()) {
+                    spikes.get(spikeId).flash(dieType);
+                }
+            }
         }
     }
 
@@ -272,14 +270,7 @@ public class Board {
     public static Spike copy_of_reachableFromDie2;
     public static Spike copy_of_reachableFromBothDice;
 
-    // this handles:
-    // detecting if the pieces for each team are in their home area
-    // will throw an error if all pieces in play (or on piece container) arent equals to 15 for both players
-    private void detectIfPiecesAreHome() {
-         //RESET THESE HERE?
-        pulsateWhiteContainer = false;
-        pulsateBlackContainer = false;
-
+    private void checkConsistent() {
         final int whitePieces = calculateAmountOfPiecesOnBoard(PlayerColor.WHITE) +
             CustomCanvas.whitePiecesSafelyInContainer.size() +
             CustomCanvas.theBarWHITE.size();
@@ -299,10 +290,10 @@ public class Board {
      * for the piece they currently have the mouse hovered over
      * there can be up to 3 potential moves: die1, die2, die1+die2
      */
-    private void drawPotentialMoves(Graphics g) {
+    private void drawPotentialMoves() {
         boolean debugmessages = false;
         allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
-        detectIfPiecesAreHome(); // sets the right bools if pieces are home
+        checkConsistent(); // sets the right bools if pieces are home
 
         if (CustomCanvas.showRollButton) {
             return;
@@ -326,12 +317,10 @@ public class Board {
                 && !anybodyNotInHome(currentPlayer);
             if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
-                    pulsateWhiteContainer = true;
                     die1StillAnOption = true;
                     copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 } else if (potentialSpikeIndex == LAST_SPIKE+1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
-                    pulsateBlackContainer = true;
                     die1StillAnOption = true;
                     copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 }
@@ -365,12 +354,10 @@ public class Board {
             if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
-                    pulsateWhiteContainer = true;
                     die2StillAnOption = true;
                     copy_of_reachableFromDie2 = null;//EXPERIMENT- YES IT WORKS
                 } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
-                     pulsateBlackContainer = true;
                      die2StillAnOption = true;
                      copy_of_reachableFromDie2 = null;//EXPERIMENT-YES IT WORKS
                 }
@@ -413,11 +400,9 @@ public class Board {
             if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
-                    pulsateWhiteContainer = true;
                     bothDiceStillAnOption = true;
                 } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE BLACK CONTAINER");
-                    pulsateBlackContainer = true;
                     bothDiceStillAnOption = true;
                 }
             }
@@ -884,6 +869,7 @@ public class Board {
     public void drawBlackPieceContainer(Graphics g) {
         boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(blackPlayer) +
             CustomCanvas.blackPiecesSafelyInContainer.size() == 15;
+        boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(currentPlayer, activeSpikeId());
         drawPieceContainer(g, geometry.blackContainerY(), pulsateBlackContainer, allPiecesAreHome,
             CustomCanvas.blackPiecesSafelyInContainer.size());
     }
@@ -891,6 +877,7 @@ public class Board {
     public void drawWhitePieceContainer(Graphics g) {
         boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(whitePlayer) +
             CustomCanvas.whitePiecesSafelyInContainer.size() == 15;
+        boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(currentPlayer, activeSpikeId());
         drawPieceContainer(g, geometry.whiteContainerY(), pulsateWhiteContainer, allPiecesAreHome,
             CustomCanvas.whitePiecesSafelyInContainer.size());
     }
@@ -985,5 +972,27 @@ public class Board {
     public boolean haveToMovePieceFromBar(PlayerColor playerColor) {
         return (playerColor == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) ||
         (playerColor == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0);
+    }
+
+    public boolean pulsateContainer(Player player, int sourceSpikeId) {
+        return sourceSpikeId >= 0 &&
+            reachableSpikes(spikes.get(sourceSpikeId), player, die1, die2).contains(currentPlayer.containerId());
+    }
+
+    /**
+     * Returns id of currently active spike.
+     * @return Either id of the spike the piece is dragged from or id of the spike the mouse points on.
+     */
+    private int activeSpikeId() {
+        int spikeId = -1;
+        if (CustomCanvas.pieceStuckToMouse != null)
+            spikeId = CustomCanvas.pieceStuckToMouse.sourceSpikeId();
+        else {
+            Spike spike = grabSpikeHoveringOver();
+            if (spike != null && spike.getAmountOfPieces(whoseTurnIsIt()) > 0) {
+                spikeId = spike.getSpikeNumber();
+            }
+        }
+        return spikeId;
     }
 }

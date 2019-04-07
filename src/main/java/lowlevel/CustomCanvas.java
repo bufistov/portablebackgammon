@@ -136,7 +136,7 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     static final int RIGHT_MOUSE_BUTTON = BUTTON3;
 
     public static boolean pieceOnMouse = false; // is true when a piece is stuck to mouse
-    private static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
+    public static Piece pieceStuckToMouse; // this is simply a copy of whatever piece (if any) is stuck to mouse
 
     private boolean showChallengeWindow;
     private String personToChallenge;
@@ -1469,11 +1469,8 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 if (pieceStuckToMouse != null && pieceStuckToMouse.sourceSpikeId() >= 0) {
                     DieType correctDie = board.whichDieGetsUsToPieceContainer(board.getCurrentPlayer(),
                         pieceStuckToMouse.sourceSpikeId());
-                    if (Board.pulsateWhiteContainer && board.whoseTurnIsIt() == PlayerColor.WHITE) {
-                        log("WHITE put in container");
-                        placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
-                    } else if (Board.pulsateBlackContainer && board.whoseTurnIsIt() == PlayerColor.BLACK) {
-                        log("BLACK put in container");
+                    if (board.pulsateContainer(board.getCurrentPlayer(), pieceStuckToMouse.sourceSpikeId())) {
+                        log(String.format("%s put in container", board.getCurrentPlayer().getColour()));
                         placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
                     }
                 }
