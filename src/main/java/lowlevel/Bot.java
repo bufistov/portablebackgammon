@@ -57,7 +57,7 @@ public class Bot extends Thread {
         FULL_AUTO_PLAY = value;
     }
 
-    private void tick() {
+    private void tick() throws Exception {
         if (dead || canvas.gameComplete()) {
             try {
                 Thread.sleep(50);
@@ -151,7 +151,11 @@ public class Bot extends Thread {
     @Override
     public void run() {
         while(isRunning) {
-            tick();
+            try {
+                tick();
+            } catch (Exception exception) {
+                Utils._E("Bot Exception: " + exception);
+            }
         }
     }
 

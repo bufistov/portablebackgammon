@@ -70,6 +70,15 @@ public class Spike {
         return spikeName;
     }
 
+    @Override
+    public boolean equals(Object that) {
+        if (! (that instanceof Spike)) {
+            return false;
+        }
+        Spike thatSpike = (Spike)that;
+        return position == thatSpike.getPosition();
+    }
+
     public boolean userClickedOnThis(int mouseX, int mouseY) {
         return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
             (mouseY >= collision_y && mouseY <= collision_y + height());

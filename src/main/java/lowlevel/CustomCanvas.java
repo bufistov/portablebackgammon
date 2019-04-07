@@ -12,6 +12,7 @@ import graphics.Geometry;
 
 import java.awt.image.BufferStrategy;
 import java.awt.image.MemoryImageSource;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -1304,11 +1305,15 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         if (Bot.getFullAutoPlay() || (!Bot.dead && HUMAN_VS_COMPUTER && board.whoseTurnIsIt() == PlayerColor.BLACK) ) {
         } else {
             log("mouseClicked " + e.getX() + "," + e.getY());
-            mouseClickedX(e.getX(), e.getY(), e.getButton());
+            try {
+                mouseClickedX(e.getX(), e.getY(), e.getButton());
+            } catch (Exception exeption) {
+                Utils._E(String.format("%s CustomCanvas ERROR %s", Thread.currentThread().getName(), exeption));
+            }
         }
     }
 
-    void mouseClickedX(int x, int y, int buttonPressed) {
+    void mouseClickedX(int x, int y, int buttonPressed) throws Exception {
         splashCounter = maxSplashCounter + 1; // turn off splash if its on
         if (buttonPressed == RIGHT_MOUSE_BUTTON) {
             log("RIGHT BUTTON PRESSED");
@@ -1399,7 +1404,6 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
             return;
         }
         board.SPtheMoveToMake = null; // reset the move to make once a move is made or right click
-        Board.spikesAllowedToMoveToFromBar = new Vector(4); // RESET THIS HERE?
         pieceStuckToMouse = null;/////////////////////<-will this stop it stickign ot pointer?pieceStuckToMouse
     }
 
@@ -1455,20 +1459,23 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
     }
 
-    private void checkIfPieceContainerClickedOn(int x, int y) {
+    private void checkIfPieceContainerClickedOn(int x, int y) throws Exception {
         int myX = geometry.containerX();
         int myY = (board.whoseTurnIsIt() == PlayerColor.WHITE) ? geometry.whiteContainerY() :
             geometry.blackContainerY();
         if (x >= myX && x < (myX + geometry.containerWidth())) {
             if (y > myY && y < (myY + geometry.containerHeight())) {
                 log(String.format("%s CONTAINER CLICKED ON", board.whoseTurnIsIt()));
-                DieType correctDie = Board.whichDieGetsUsToPieceContainer;
-                if (Board.pulsateWhiteContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.WHITE) {
-                    log("WHITE put in container");
-                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
-                } else if (Board.pulsateBlackContainer && pieceOnMouse && board.whoseTurnIsIt() == PlayerColor.BLACK) {
-                    log("BLACK put in container");
-                    placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
+                if (pieceStuckToMouse != null && pieceStuckToMouse.sourceSpikeId() >= 0) {
+                    DieType correctDie = board.whichDieGetsUsToPieceContainer(board.getCurrentPlayer(),
+                        pieceStuckToMouse.sourceSpikeId());
+                    if (Board.pulsateWhiteContainer && board.whoseTurnIsIt() == PlayerColor.WHITE) {
+                        log("WHITE put in container");
+                        placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
+                    } else if (Board.pulsateBlackContainer && board.whoseTurnIsIt() == PlayerColor.BLACK) {
+                        log("BLACK put in container");
+                        placePieceRemoveOldOneAndSetDieToUsed(correctDie, true);
+                    }
                 }
             }
         }
@@ -1481,14 +1488,12 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                 log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
                 // find out if this is a valid spike to go to from bar
                 if (barPieceStuckOnMouse) {
-                    log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + Board.spikesAllowedToMoveToFromBar.size());
-                    Enumeration e = Board.spikesAllowedToMoveToFromBar.elements();
-                    while (e.hasMoreElements()) {
-                        Spike sp = (Spike) e.nextElement();
+                    ArrayList<Spike> spikesAllowedToMoveToFromBar = board.spikesToMoveToFromBar(board.whoseTurnIsIt());
+                    log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + spikesAllowedToMoveToFromBar.size());
+                    for (Spike sp: spikesAllowedToMoveToFromBar) {
                         log("checking spike:" + sp.getSpikeNumber());
                         if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
                             log("YES WE CAN DROP OFF AT THIS SPIKE " + sp.getSpikeNumber());
-                            //remove piece from bar
                             if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
                                 log("WHITE PIECE REMOVED FROM BAR");
                                 theBarWHITE.remove(pieceStuckToMouse);
@@ -1762,24 +1767,23 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
         }
 
         // check pieces on bar
-        if (Board.pickingPieceUpFromBar) {
-            Vector piecesOnTheBar = (board.whoseTurnIsIt() == PlayerColor.WHITE) ? theBarWHITE : theBarBLACK;
-            Enumeration e = piecesOnTheBar.elements();
-            while (e.hasMoreElements()) {
-                Piece p = (Piece) e.nextElement();
-                if (p.userClickedOnThis(x, y)) {
-                    log("PIECE ON THE BAR CLICKED ON.");
-                    p.stickToMouse();
-                    pieceOnMouse = true;
-                    barPieceStuckOnMouse = true;
-                    pieceStuckToMouse = p;
-                    return;
-                }
+        Vector piecesOnTheBar = (board.whoseTurnIsIt() == PlayerColor.WHITE) ? theBarWHITE : theBarBLACK;
+        Enumeration e = piecesOnTheBar.elements();
+        ArrayList<Spike> possibleDestinationsFromBar = new ArrayList<>();
+        if (piecesOnTheBar.size() > 0)
+            possibleDestinationsFromBar = board.spikesToMoveToFromBar(board.whoseTurnIsIt());
+        while (!possibleDestinationsFromBar.isEmpty() && e.hasMoreElements()) {
+            Piece p = (Piece) e.nextElement();
+            if (p.userClickedOnThis(x, y)) {
+                log("PIECE ON THE BAR CLICKED ON.");
+                p.stickToMouse(-1);
+                pieceOnMouse = true;
+                barPieceStuckOnMouse = true;
+                pieceStuckToMouse = p;
+                return;
             }
         }
-
         if (board.allowPieceToStickToMouse) {
-            // see if the user clicked on that piece
            for (Spike spike: board.getSpikes()) {
                 Enumeration pieces_e = spike.pieces.elements();
                 while (pieces_e.hasMoreElements()) {
@@ -1787,14 +1791,13 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
                     if (piece.userClickedOnThis(x, y)) {
                         if (piece.getColour() == board.whoseTurnIsIt()) {
                             log("PICKED UP PIECE: " + piece.getColour());
-                            piece.stickToMouse();
+                            piece.stickToMouse(spike.getSpikeNumber());
                             pieceOnMouse = true;
                             pieceStuckToMouse = piece;
-                            originalSpikeForPieceSelected = spike; // keep a copy of this piece's original Spike (for removing the piece later if need be)
+                            originalSpikeForPieceSelected = spike;
                         }
                         log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse: true " +
                             "board.whoseTurnIsIt:" + board.whoseTurnIsIt());
-                        // At most one piece can be sticked to the mouse!
                         return;
                     }
                 }

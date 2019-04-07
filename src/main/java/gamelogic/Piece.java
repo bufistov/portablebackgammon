@@ -22,6 +22,7 @@ public class Piece {
     private PlayerColor colour;
     private Utils utils = new Utils();
     private boolean stickToMouse;
+    private int sourceSpikeId;
 
     Piece(Geometry geometry, Player father) {
         if (father == null) {
@@ -84,8 +85,13 @@ public class Piece {
     //this is called to tell the piece to use the x, y vals from the mouse
     //instead of its usual ones as the user is placing it and it needs to stick to the
     //mouse point until they do place it.
-    public void stickToMouse() {
+    public void stickToMouse(int spikeId) {
         stickToMouse = true;
+        sourceSpikeId = spikeId;
+    }
+
+    public int sourceSpikeId() {
+        return sourceSpikeId;
     }
     
     public void unstickFromMouse() {

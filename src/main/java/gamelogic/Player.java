@@ -46,4 +46,13 @@ public class Player {
         return colour == WHITE ? source.getSpikeNumber() - roll :
             source.getSpikeNumber() + roll;
     }
+
+    int getDestinationSpikeId(Spike source, int roll) {
+        return colour == WHITE ? Math.max(containerId(), source.getSpikeNumber() - roll) :
+            Math.min(containerId(), source.getSpikeNumber() + roll);
+    }
+
+    boolean isWhite() {
+        return getColour() == PlayerColor.WHITE;
+    }
 }
