@@ -85,7 +85,7 @@ class BoardTest {
         assertEquals("Source spike does not belongs to WHITE player", error.getMessage());
 
         error = assertThrows(Exception.class, () -> board.whichDieGetsUsToPieceContainer(board.getBlackPlayer(), 20));
-        assertEquals("Container cannot be reached from spike 20", error.getMessage());
+        assertEquals("Container cannot be reached from spike 20 die1: 1, die2: 2", error.getMessage());
     }
 
     @Test
@@ -117,5 +117,33 @@ class BoardTest {
         assertEquals(2, spikes.size());
         assertEquals(24, spikes.get(0).getPosition());
         assertEquals(23 , spikes.get(1).getPosition());
+    }
+
+    @Test
+    @DisplayName("Board calculates which die gets us to the container")
+    void test4() throws Exception {
+        ConfigFactory.setProperty("configFileName", "somenonexistingconfig.config");
+        GameConfig config = ConfigFactory.create(GameConfig.class);
+        GameColour colours = new GameColour();
+        Geometry geometry = new Geometry(810, 500);
+        Board board = new TestableBoard(colours, geometry, config, 0, 5);
+
+        int[] whiteHome = {
+            0,15,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+
+        int[] blackHome = {
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,7,8,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.setCurrentPlayer(PlayerColor.BLACK);
+        board.rollDies();
+        assertEquals(DieType.DIE2, board.whichDieGetsUsToPieceContainer(board.getBlackPlayer(), 19));
     }
 }

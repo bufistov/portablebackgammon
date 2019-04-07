@@ -44,7 +44,6 @@ public class Board {
         }
     }
 
-
     // Garbage
     public static boolean listBotsOptions;
     public static String botOptions = "<<NONE YET>>";
@@ -464,8 +463,7 @@ public class Board {
             if (die2AnOption) {
                 Integer die2Destination = player.getDestinationSpikeId(currentSpike, die2.getValue());
                 if (die2Destination == player.containerId()) {
-                    if (!result.isEmpty() && result.get(0) == player.containerId() &&
-                        die2.getValue() == die1.getValue()) {
+                    if (die2.getValue() == die1.getValue() || result.isEmpty()) {
                             result.add(die2Destination);
                     }
                 } else {
@@ -595,16 +593,16 @@ public class Board {
         if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
             log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
             int[] whiteHome = {
-                0, 0, 0, 0, 0, 14,
+                0, 5, 5, 5, 0, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0
             };
             int[] blackHome = {
-                0, 0, 0, 0, 2, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
-                0, 0, 11, 2, 0, 0
+                0, 0, 0, 0, 0, 0,
+                0, 2, 11, 2, 0, 0
             };
             initialiseBoardForNewGame(whiteHome, blackHome);
         }
@@ -964,7 +962,8 @@ public class Board {
 
         ArrayList<Integer> reachableFromSource = reachableSpikes(sourceSpike, player, die1, die2);
         if (!reachableFromSource.contains(player.containerId())) {
-            throw new  Exception(String.format("Container cannot be reached from spike %s", sourceSpike.getName()));
+            throw new  Exception(String.format("Container cannot be reached from spike %s die1: %d, die2: %d",
+                sourceSpike.getName(), die1.getValue(), die2.getValue()));
         }
         if (die1.getValue() == exactValue)
             return DieType.DIE1;
