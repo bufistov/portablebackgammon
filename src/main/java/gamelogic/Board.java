@@ -475,17 +475,17 @@ public class Board {
     }
 
     private int calculateAmountOfPiecesInHomeArea(Player player) {
-        int piecesinHomeArea = 0;
+        int piecesInHomeArea = 0;
         for (Spike spike: spikes) {
             if (!spike.pieces.isEmpty() &&
                 spike.getSpikeNumber() >= player.homeSpikeStart() && spike.getSpikeNumber() <= player.homeSpikeEnd()) {
                 Piece piece = (Piece) spike.pieces.firstElement();
                 if (piece.getColour() == player.getColour()) {
-                    piecesinHomeArea += spike.pieces.size();
+                    piecesInHomeArea += spike.pieces.size();
                 }
             }
         }
-        return piecesinHomeArea;
+        return piecesInHomeArea;
     }
 
     private boolean anybodyNotInHome(Player player) {
