@@ -18,10 +18,16 @@ public class Board {
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
     private Player currentPlayer;
-    public static Die die1, die2;
+    public Die die1, die2;
+    private Spike theBarWHITE;
+    private Spike theBarBLACK;
+    private Vector whitePiecesSafelyInContainer = new Vector(15);
+    private Vector blackPiecesSafelyInContainer = new Vector(15);
 
     private Utils utils = new Utils();
     private Sound sfxNoMove;
+    private Sound sfxKilled;
+    private Sound sfxPutPieceInContainer;
 
     private static final int LAST_SPIKE = 23;
     private static final int FIRST_SPIKE = 0;
@@ -44,21 +50,14 @@ public class Board {
         }
     }
 
-    // Garbage
-    public static boolean listBotsOptions;
-    public static String botOptions = "<<NONE YET>>";
-    public SpikePair SPtheMoveToMake; // stores the move they will make
-
-    //these flags indicate if the player has took their go yet for that dice
-    //if the dice are combined then they are both set to false in one go.
-    public static boolean die1HasBeenUsed, die2HasBeenUsed;
-
-    public static boolean NOT_A_BOT_BUT_A_NETWORKED_PLAYER = false;
+    private SpikePair SPtheMoveToMake; // stores the move they will make
 
     public Board(GameColour gameColour, Geometry geometry, GameConfig config) {
         this.gameColour = gameColour;
         this.geometry = geometry;
         sfxNoMove = new Sound("/nomove.wav");
+        sfxKilled = new Sound("/killed.wav");
+        sfxPutPieceInContainer = new Sound("/pieceputaway.wav");
         loadSounds(config.soundOn());
         whitePlayer = new Player(PlayerColor.WHITE,"Player1");
         blackPlayer = new Player(PlayerColor.BLACK,"Player2");
@@ -69,6 +68,8 @@ public class Board {
         }
         die1 = new Die(geometry);
         die2 = new Die(geometry);
+        theBarWHITE = new Spike(geometry, 25);
+        theBarBLACK = new Spike(geometry, 25);
         makeColourObjects();
         initialiseBoard(INIT_CONFIGURATION);
         log("Board made");
@@ -76,6 +77,8 @@ public class Board {
 
     public void loadSounds(boolean soundOn) {
         sfxNoMove.loadSound(soundOn);
+        sfxKilled.loadSound(soundOn);
+        sfxPutPieceInContainer.loadSound(soundOn);
     }
 
     public void makeColourObjects() {
@@ -85,8 +88,60 @@ public class Board {
             spike.makeColourObjects();
         }
     }
+
+    void initialiseBoard(int mode) {
+        log("mode: BOARD_NEW_GAME");
+        initialiseBoardForNewGame(whiteInitPositions, blackInitPositioin);
+        if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
+            int[] whiteHome = {
+                0, 5, 5, 5, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0
+            };
+            int[] blackHome = {
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
+                0, 2, 11, 2, 0, 0
+            };
+            initialiseBoardForNewGame(whiteHome, blackHome);
+        }
+    }
+
+
+    // puts the pieces where they need to be to initialise a new game of backgammon
+    void initialiseBoardForNewGame(int[] whiteInitPositions, int[] blackInitPositions) {
+        log("initialiseBoardForNewGame");
+        for (Spike spike: spikes) {
+            spike.pieces.clear();
+        }
+        int whitePiecesOnBoard = 0;
+        for (int i = 0; i < whiteInitPositions.length; ++i) {
+            whitePiecesOnBoard += whiteInitPositions[i];
+            for (int j = 0; j < whiteInitPositions[i]; ++j) {
+                Piece newPiece = new Piece(geometry, whitePlayer);
+                spikes.get(i).addPiece(newPiece);
+            }
+        }
+        int blackPiecesOnBoard = 0;
+        for (int i = 0; i < blackInitPositions.length; ++i) {
+            blackPiecesOnBoard += blackInitPositions[i];
+            for (int j = 0; j < blackInitPositions[i]; ++j) {
+                Piece newPiece = new Piece(geometry, blackPlayer);
+                spikes.get(i).addPiece(newPiece);
+            }
+        }
+        for (int j = whitePiecesOnBoard; j < 15; ++j) {
+            theBarWHITE.addPiece(new Piece(geometry, whitePlayer));
+        }
+        for (int j = blackPiecesOnBoard; j < 15; ++j) {
+            theBarBLACK.addPiece(new Piece(geometry, blackPlayer));
+        }
+    }
     
-    public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress) {
+    public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress,
+                      int mouseX, int mouseY) {
         utils.setColor(g, Color.BLACK);
         int borderWidth = geometry.borderWidth();
         int barWidth = geometry.centralBarWidth();
@@ -105,21 +160,17 @@ public class Board {
         utils.drawRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
-           spike.paint(g);
+           spike.paint(g, this);
         }
 
-        paintDice(g,boardWidth,boardHeight);
+        paintDice(g, boardWidth, boardHeight);
 
         // draw the potential moves for whoevers go it is
-        if (gameInProgress) {
+        if (gameInProgress && !CustomCanvas.showRollButton) {
             if (haveToMovePieceFromBar(currentPlayer.getColour())) {
-                drawPotentialMovesFromBar();
+                pulsatePotentialSpikesFromBar();
             } else {
-                if (CustomCanvas.pieceStuckToMouse == null) {
-                    drawPotentialMoves();
-                } else {
-                    keepPotentialSpikesPulsing(CustomCanvas.pieceStuckToMouse.sourceSpikeId());
-                }
+                pulsatePotentialSpikes(mouseX, mouseY);
             }
             if (die1.enabled() || die2.enabled()) {
                 calculatePotentialMoves();
@@ -131,29 +182,19 @@ public class Board {
         if (!CustomCanvas.showRollButton) {
             int diex = (geometry.borderWidth() + ((WIDTH/4)*3)) + geometry.dieSize();
             int diey = (geometry.borderWidth() + (HEIGHT/2)) - geometry.dieSize();
-            if (!die1HasBeenUsed) {
+            if (die1.enabled()) {
                 die1.paint(g, diex, diey);
-            } else {
-                die1.disable();
             }
 
             diex += geometry.dieSize() + geometry.tinyGap();
-            if (!die2HasBeenUsed) {
+            if (die2.enabled()) {
                 die2.paint(g, diex, diey);
-            } else {
-                die2.disable();
             }
         }
     }
 
-    // when piece is on the bar this should display the options for it
-    private void drawPotentialMovesFromBar() {
-        allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
+    private void pulsatePotentialSpikesFromBar() {
         checkConsistent();
-        if (CustomCanvas.showRollButton) {
-            return;
-        }
-
         ArrayList<Spike> spikesAllowedToMoveToFromBar = new ArrayList<>();
         boolean cantGetOfBarWithDie1 = !canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, spikesAllowedToMoveToFromBar);
         if (!cantGetOfBarWithDie1) {
@@ -170,24 +211,22 @@ public class Board {
 
         if (cantGetOfBarWithDie1 && cantGetOfBarWithDie2) {
             log("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!");
-            die1HasBeenUsed = true;
-            die2HasBeenUsed = true;
-            die1.disable();
-            die2.disable();
+            die1.noOptions();
+            die2.noOptions();
         }
     }
 
     private void getOffTheBarOptions(ArrayList<Spike> spikesAllowedToMoveToFromBar) {
         Spike destinationSpike = spikesAllowedToMoveToFromBar.get(0);
-        Vector theBarPieces = whoseTurnIsIt() == PlayerColor.WHITE ? CustomCanvas.theBarWHITE : CustomCanvas.theBarBLACK;
-        log("White pieces on bar potential pick ups: " + theBarPieces.size());
-        if (CustomCanvas.pieceOnMouse) {
+        Spike theBarPieces = whoseTurnIsIt() == PlayerColor.WHITE ? theBarWHITE : theBarBLACK;
+        log("White pieces on bar potential pick ups: " + theBarPieces.pieces.size());
+        if (pieceStuckToMouse() != null) {
             log("Destination PLACE ON AVAIL SPIKE:" + destinationSpike.getSpikeNumber());
             Point spikeMiddle = destinationSpike.getMiddlePoint();
             setBotDestination(spikeMiddle.x, spikeMiddle.y, "PLACE FROM BAR ONTO AVAIL SPIKES");
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
-            Piece p = (Piece) theBarPieces.firstElement();
+            Piece p = (Piece) theBarPieces.pieces.firstElement();
             setBotDestination(p.getCenterX(), p.getCenterY(),"DESTINATION FOR BOT, PIECE ON BAR......");
         }
     }
@@ -214,26 +253,35 @@ public class Board {
     public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
         loadSounds(soundOn);
         currentPlayer = whitePlayer;
-        allowPieceToStickToMouse = false;
-        die1HasBeenUsed = false;
-        die2HasBeenUsed = false;
-
-        listBotsOptions = false;
-        botOptions = "<<NONE YET>>";
+        theBarBLACK.pieces.clear();
+        theBarWHITE.pieces.clear();
+        whitePiecesSafelyInContainer.clear();
+        blackPiecesSafelyInContainer.clear();
         SPtheMoveToMake = null;
-
         initialiseBoard(INIT_CONFIGURATION);
     }
 
-    // pulses the spikes while piece is stuck to mouse
-    private void keepPotentialSpikesPulsing(int sourceSpikeId) {
+    // pulsates the spikes while piece is stuck to mouse or hovering over some spike
+    private void pulsatePotentialSpikes(int mouseX, int mouseY) {
+        int sourceSpikeId;
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        if (pieceStuckToMouse != null) {
+            sourceSpikeId = pieceStuckToMouse.sourceSpikeId();
+        } else {
+            Spike activeSpike = grabSpikeHoveringOver(mouseX, mouseY);
+            if (activeSpike != null) {
+                sourceSpikeId = activeSpike.getSpikeNumber();
+            } else {
+                sourceSpikeId = -2;
+            }
+        }
         if (sourceSpikeId == -1) {
             ArrayList<Spike> possibleSpikes = this.spikesToMoveToFromBar(whoseTurnIsIt());
             for (Spike spike: possibleSpikes) {
                 int neededValue = currentPlayer.isWhite() ? spike.getPosition() : 24 - spike.getPosition();
                 spike.flash(neededValue == die1.getValue() ? DieType.DIE1 : DieType.DIE2);
             }
-        } else {
+        } else if (sourceSpikeId >= 0){
             ArrayList<Integer> possibleSpikes = reachableSpikes(spikes.get(sourceSpikeId), currentPlayer, die1, die2);
             for (Integer spikeId: possibleSpikes) {
                 int neededValue = Math.abs(sourceSpikeId - spikeId);
@@ -252,34 +300,14 @@ public class Board {
         }
     }
 
-    // this is always the current x and y vals of the mouse pointer
-    public static int mouseHoverX,mouseHoverY;
-
-    // controls whether the piece should follow the mouse when clicked on by player
-    // (based on if there are potential moves to be made)
-    public static boolean allowPieceToStickToMouse = false;
-
-    // we take copies of the "pulsating" spikes (ie those that are valid spikes that
-    // the current player could move a piece to) - we take these copies so that
-    // when the player picks up a piece (ie it becomes stuck to the mouse pointer)
-    // and moves it around, we can still show the pulsating valid spikes that he
-    // can drop this piece onto. Without these copies as soon as the pointer
-    // stopped hovering over the current spike (like it would if player was placing
-    // a piece) the pulsating indication of valid options would vanish.
-    public static Spike copy_of_reachableFromDie1;
-    public static Spike copy_of_reachableFromDie2;
-    public static Spike copy_of_reachableFromBothDice;
-
     void checkConsistent() {
         final int whitePieces = calculateAmountOfPiecesOnBoard(PlayerColor.WHITE) +
-            CustomCanvas.whitePiecesSafelyInContainer.size() +
-            CustomCanvas.theBarWHITE.size();
+            whitePiecesSafelyInContainer.size() + theBarWHITE.pieces.size();
         if (whitePieces != 15) {
             throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR WHITE its " + whitePieces);
         }
         final int blackPieces = calculateAmountOfPiecesOnBoard(PlayerColor.BLACK) +
-            CustomCanvas.blackPiecesSafelyInContainer.size() +
-            CustomCanvas.theBarBLACK.size();
+            blackPiecesSafelyInContainer.size() + theBarBLACK.pieces.size();
         if (blackPieces != 15) {
             throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR BLACK its " + blackPieces);
         }
@@ -291,15 +319,13 @@ public class Board {
      * there can be up to 3 potential moves: die1, die2, die1+die2
      */
     private void drawPotentialMoves() {
-        boolean debugmessages = false;
-        allowPieceToStickToMouse = false; // make this false right away since its decided in this method, but could still be true from last time.
-        checkConsistent(); // sets the right bools if pieces are home
+        checkConsistent();
 
         if (CustomCanvas.showRollButton) {
             return;
         }
 
-        Spike currentSpikeHoveringOver = doesThisSpikeBelongToPlayer();
+        Spike currentSpikeHoveringOver = doesThisSpikeBelongToPlayer(0, 0);
         if (currentSpikeHoveringOver == null) {
             return;
         }
@@ -308,46 +334,30 @@ public class Board {
         //this boolean is used to keep track of whether we let a piece stick to mouse, so we need to keep a track on if die1
         //is an option (since if it is we want that piece to be able to be picked up) but we do further checks below
         //so this "stillAnOption" variable gets updated below and used at the bottom to update canWeStickPieceToMouse
-        boolean die1StillAnOption = false;//set to false first so we know if its true its been updated below
+        boolean die1StillAnOption = false; // set to false first so we know if its true its been updated below
 
-        if (die1AnOption && !die1HasBeenUsed) {
-            copy_of_reachableFromDie1 = null;
+        if (die1AnOption && die1.enabled()) {
             int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue());
             boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId())
                 && allPiecesAreHome(currentPlayer);
             if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     die1StillAnOption = true;
-                    copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 } else if (potentialSpikeIndex == LAST_SPIKE+1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1 TO GET ONTO PIECE BLACK CONTAINER");
                     die1StillAnOption = true;
-                    copy_of_reachableFromDie1 = null; // STOPS OLD SPIKES FLASHING IN PICE CONTAINER CIRCUMSTANCES
                 }
             }
-           ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
             if (potentialSpikeIndex >= FIRST_SPIKE && potentialSpikeIndex <= LAST_SPIKE) {
                  Spike reachableFromDie1 = spikes.get(potentialSpikeIndex);
-                 if (debugmessages) {
-                    log("yes " + potentialSpikeIndex + " is a valid option DIE1");
-                 }
                  pulsatePotentialSpike(reachableFromDie1, DieType.DIE1);
-                 copy_of_reachableFromDie1 = reachableFromDie1;
-                 if (debugmessages) {
-                    log("copy_of_reachableFromDie1 set up.");
-                 }
                  die1StillAnOption=true;
             }
-        } else {
-            //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
-            //make this null if we know for certain its not a potential move or ot gets remembered
-            copy_of_reachableFromDie1 = null;
         }
 
         boolean die2AnOption = checkValidPotentialMove(currentSpikeHoveringOver, die2.getValue());
         boolean die2StillAnOption = false;
-        if (die2AnOption && !die2HasBeenUsed) {
-            copy_of_reachableFromDie2 = null; //Set to null here so we know if its valid by the end it true is
+        if (die2AnOption && die2.enabled()) {
             int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die2.getValue());
             boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId())
                 && allPiecesAreHome(currentPlayer);
@@ -355,49 +365,27 @@ public class Board {
                 if (potentialSpikeIndex == FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     die2StillAnOption = true;
-                    copy_of_reachableFromDie2 = null;//EXPERIMENT- YES IT WORKS
                 } else if (potentialSpikeIndex == LAST_SPIKE + 1 && whoseTurnIsIt() == PlayerColor.BLACK) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE BLACK CONTAINER");
                      die2StillAnOption = true;
-                     copy_of_reachableFromDie2 = null;//EXPERIMENT-YES IT WORKS
                 }
             }
             if (potentialSpikeIndex >= FIRST_SPIKE && potentialSpikeIndex <= LAST_SPIKE) {
                  Spike reachableFromDie2 = spikes.get(potentialSpikeIndex);
-                 if (debugmessages) {
-                    log("yes " + potentialSpikeIndex + " is a valid option DIE2");
-                 }
                  pulsatePotentialSpike(reachableFromDie2, DieType.DIE2);
-
-                 copy_of_reachableFromDie2=reachableFromDie2;
-                 if (debugmessages) {
-                    log("copy_of_reachableFromDie2 set up.");
-                 }
-                 die2StillAnOption=true;
+                 die2StillAnOption = true;
             }
-        } else {
-            //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
-            //make this null if we know for certain its not a potential move or ot gets remembered
-            copy_of_reachableFromDie2=null;
         }
-
-        //and DIE1 + DIE2
         boolean bothDiceAnOption = checkValidPotentialMove(currentSpikeHoveringOver,die1.getValue()+die2.getValue());
         boolean bothDiceStillAnOption = false;
 
-
-        //if die1+die2 would yield a potential valid spike to land on AND if the
-        //player has not used die1 OR die2 this turn yet.
-        //AND ***IMPORTANTLY IF die1 OR die2 are valid options, since the player needs to be able to take each
-        //turn and not simply add them together (therefore making an invalid move by combining their rolls)
-        //this is not how backgammon works.
-        if (bothDiceAnOption && !die1HasBeenUsed && !die2HasBeenUsed && (die1AnOption || die2AnOption)) {
-            copy_of_reachableFromBothDice = null; // Set to null here so we know if its valid by the end it true is
-            int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue() + die2.getValue());
+        if (bothDiceAnOption && die1.enabled() && die2.enabled() && (die1AnOption || die2AnOption)) {
+            int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver,
+                die1.getValue() + die2.getValue());
             boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId()) &&
                 allPiecesAreHome(currentPlayer);
             // only for the case when a piece can go into the piece container
-            if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
+            if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     log("yes " + potentialSpikeIndex + " is a valid option DIE1+DIE2 TO GET ONTO PIECE WHITE CONTAINER");
                     bothDiceStillAnOption = true;
@@ -406,25 +394,12 @@ public class Board {
                     bothDiceStillAnOption = true;
                 }
             }
-            ///NO NEED FOR ELSE HERE EXPERIMENTAL 21JAN 1018AM else // normal situation. ie a spike is the option
             if (potentialSpikeIndex >= FIRST_SPIKE && potentialSpikeIndex <= LAST_SPIKE) {
                  Spike reachableFromBothDice = spikes.get(potentialSpikeIndex);
-                 if (debugmessages) {
-                    log("yes " + potentialSpikeIndex + " is a valid option BOTH DICE");
-                 }
                  reachableFromBothDice.flash(DieType.DIE1AND2);
-                 copy_of_reachableFromBothDice = reachableFromBothDice;
-                 if (debugmessages) {
-                    log("copy_of_reachableFromBothDice set up.");
-                 }
-                 bothDiceStillAnOption=true;
+                 bothDiceStillAnOption = true;
             }
-        } else {
-            //EXPERIMENTAL JAN 14TH 2010 [seems to work remove this line]
-            //make this null if we know for certain its not a potential move or ot gets remembered
-            copy_of_reachableFromBothDice=null;
         }
-        allowPieceToStickToMouse = die1StillAnOption || die2StillAnOption || bothDiceStillAnOption;
     }
 
     /**
@@ -488,9 +463,6 @@ public class Board {
         return piecesInHomeArea;
     }
 
-    //takes in a spike and a die value,
-    //this is to indicate to player its a potential move they can make
-    //whichDice tells the spike which die would allow this potential move, so it an be displayed to player
     private void pulsatePotentialSpike(Spike spike, DieType whichDice) {
         //this makes the spike colour pulse nicely to indicate its an option
         spike.flash(whichDice);
@@ -518,8 +490,8 @@ public class Board {
                 doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt()));
     }
 
-    private Spike doesThisSpikeBelongToPlayer() {
-        Spike hoverSpike = grabSpikeHoveringOver();
+    private Spike doesThisSpikeBelongToPlayer(int mouseHoverX, int mouseHoverY) {
+        Spike hoverSpike = grabSpikeHoveringOver(mouseHoverX, mouseHoverY);
         boolean containsOneOfTheirPieces = false;
         if (hoverSpike != null) {
            containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike, whoseTurnIsIt());
@@ -531,7 +503,7 @@ public class Board {
         }
     }
 
-    private Spike grabSpikeHoveringOver() {
+    private Spike grabSpikeHoveringOver(int mouseHoverX, int mouseHoverY) {
        for (Spike currentSpike: spikes) {
            if (currentSpike.userClickedOnThis(mouseHoverX, mouseHoverY)) {
                return currentSpike;
@@ -542,7 +514,7 @@ public class Board {
 
     // ALSO RETURNS TRUE IF THERE IS ONLY ONE ENEMY PIECE ON THE SPIKE
     private boolean isThisSpikeEmpty(Spike checkme) {
-        return  checkme.pieces.size() <= 1;
+        return  checkme.isBar() ? checkme.pieces.isEmpty() : checkme.pieces.size() <= 1;
     }
 
     //returns true if the spike passed in contains a piece belonging to
@@ -558,57 +530,6 @@ public class Board {
         return false;
     }
 
-    void initialiseBoard(int mode) {
-        log("mode: BOARD_NEW_GAME");
-        initialiseBoardForNewGame(whiteInitPositions, blackInitPositioin);
-        if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
-            int[] whiteHome = {
-                0, 5, 5, 5, 0, 0,
-                0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0
-            };
-            int[] blackHome = {
-                0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0,
-                0, 2, 11, 2, 0, 0
-            };
-            initialiseBoardForNewGame(whiteHome, blackHome);
-        }
-    }
-
-
-    // puts the pieces where they need to be to initialise a new game of backgammon
-    void initialiseBoardForNewGame(int[] whiteInitPositions, int[] blackInitPositions) {
-        log("initialiseBoardForNewGame");
-        for (Spike spike: spikes) {
-            spike.pieces.clear();
-        }
-        int whitePiecesOnBoard = 0;
-        for (int i = 0; i < whiteInitPositions.length; ++i) {
-            whitePiecesOnBoard += whiteInitPositions[i];
-            for (int j = 0; j < whiteInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(geometry, whitePlayer);
-                spikes.get(i).addPiece(newPiece);
-            }
-        }
-        int blackPiecesOnBoard = 0;
-        for (int i = 0; i < blackInitPositions.length; ++i) {
-            blackPiecesOnBoard += blackInitPositions[i];
-            for (int j = 0; j < blackInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(geometry, blackPlayer);
-                spikes.get(i).addPiece(newPiece);
-            }
-        }
-        for (int j = whitePiecesOnBoard; j < 15; ++j) {
-            CustomCanvas.theBarWHITE.add(new Piece(geometry, whitePlayer));
-        }
-        for (int j = blackPiecesOnBoard; j < 15; ++j) {
-            CustomCanvas.theBarBLACK.add(new Piece(geometry, blackPlayer));
-        }
-    }
-
     public Player getWhitePlayer() {
         return whitePlayer;
     }
@@ -622,21 +543,18 @@ public class Board {
     }
 
     void calculatePotentialMoves() {
-        if (!CustomCanvas.showRollButton && !CustomCanvas.pieceOnMouse && SPtheMoveToMake == null) {
-            log("_______________________RECALCULATE MOVES die1:" + die1HasBeenUsed + " die2:" + die2HasBeenUsed);
+        if (pieceStuckToMouse() == null && SPtheMoveToMake == null) {
+            log("_______________________RECALCULATE MOVES die1:" + die1.disabled() + " die2:" + die2.disabled());
             Vector spikePairs = getValidOptions();
             log("Potential moves: " + spikePairs.size());
             if (spikePairs.size() > 0) {
-                listBotsOptions = true;
-                if (listBotsOptions) {
-                    botOptions = "";
-                    Enumeration ee = spikePairs.elements();
-                    while (ee.hasMoreElements()) {
-                        SpikePair sp = (SpikePair) ee.nextElement();
-                        botOptions += "->" + sp.pickMyPiece.getName() + "->" + sp.dropPiecesOnMe.getName() + " ";
-                    }
-                    log("valid options: " + botOptions);
+                String botOptions = "";
+                Enumeration ee = spikePairs.elements();
+                while (ee.hasMoreElements()) {
+                    SpikePair sp = (SpikePair) ee.nextElement();
+                    botOptions += "->" + sp.pickMyPiece.getName() + "->" + sp.dropPiecesOnMe.getName() + " ";
                 }
+                log("valid options: " + botOptions);
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
                 if (SPtheMoveToMake.dropPiecesOnMe.isContainer()) {
                     log("SPECIAL CASE randomly chose to go to spike:" +
@@ -659,44 +577,13 @@ public class Board {
                     setBotDestination(goToX, goToY, "RANDOMLY CHOOSE A PIECE");
                     log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
                 }
-            } else {
+            } else if (spikesToMoveToFromBar(whoseTurnIsIt()).isEmpty()){
                 log("NO OPTIONS!");
-                if (!die1HasBeenUsed){
-                    //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
-                    //so what we do is sneaky, reduce die value number (hiding it from players of course)
-                    //which makes option become available in this case.
-                    if (allPiecesAreHome(currentPlayer)) {
-                        log("LOWERING THEVALUE OF DIE 1");
-                        die1.setValue(die1.getValue() - 1);
-                    } else {
-                        //ORDINARY CASE
-                        //use this die up so it can move onto next one
-                        die1HasBeenUsed = true;
-                        log("DISABLED DIE 1x");
-                        // canvas.tellPlayers("No option with Die 1 (" + die1.getValue() + ")");
-                        sfxNoMove.playSound();
-                    }
-                } else if (!die2HasBeenUsed) {
-                    if (allPiecesAreHome(currentPlayer)) {
-                        log("LOWERING THEVALUE OF DIE 2");
-                        die2.setValue(die2.getValue() - 1);
-                    } else {
-                        //use this die up so it can move onto next go
-                        die2HasBeenUsed = true;
-                        log("DISABLED DIE 2x");
-                        // canvas.tellPlayers("No options available with Die 2 (" + die2.getValue() + ")");
-                        sfxNoMove.playSound();
-                        //it should move onto next players go NOW...
-                        if (CustomCanvas.someoneRolledADouble) {
-                            //even cancel a double go if theres no options for die2
-                            CustomCanvas.someoneRolledADouble = false;
-                            CustomCanvas.doubleRollCounter = 3;
-                            log("NO OPTIONS SO CANCELLED DOUBLE TURN!");
-                        }
-                    }
-                }
+                die1.noOptions();
+                die2.noOptions();
+                sfxNoMove.playSound();
             }
-        } else if (CustomCanvas.pieceOnMouse) {
+        } else if (pieceStuckToMouse() != null) {
             // Point robot the final destination after it took the piece
             theyWantToPlaceAPiece();
         }
@@ -704,46 +591,38 @@ public class Board {
 
     /**
      * Checks the currently available die and populates spikePairs vector with
-     * valid (sourceSpike, destinationSpike) pairs.
-     * FIXME: it does not take bar into account
+     * valid (sourceSpike, destinationSpike) pairs. Does not take bar spike into account.
+     * Bar spike is handled separately before, so bot destination should be set at this point.
      */
     private Vector getValidOptions() {
         log("Getting valid spike pairs");
         Vector spikePairs = new Vector(5);
         int diceRoll = -1;
-        if (!die1HasBeenUsed) {
+        if (die1.enabled()) {
             diceRoll = die1.getValue();
             log("using DIE1 value " + diceRoll);
-        } else if (!die2HasBeenUsed) {
+        } else if (die2.enabled()) {
             diceRoll = die2.getValue();
             log("using DIE2 value " + diceRoll);
         }
         if (diceRoll > 0) {
             for (Spike spike: spikes) {
                 if (spike.getAmountOfPieces(currentPlayer.getColour()) > 0) {
-                    int potentialSpike = currentPlayer.getDestinationSpike(spike, diceRoll);
-                    if (allPiecesAreHome(currentPlayer)) {
-                        if (potentialSpike >= FIRST_SPIKE - 1 && potentialSpike <= LAST_SPIKE + 1) {
-                            log("checkAbleToGetIntoPieceContainer is true - potentialSpike:" + potentialSpike);
-                            if (potentialSpike == LAST_SPIKE + 1 || potentialSpike == FIRST_SPIKE - 1) {
-                                log("PIECECONTAINER: MAKING A FAKE SPIKE, potentialspike is " + potentialSpike);
-                                Spike destinationSpike = new Spike(geometry,-1);
-                                log("yes " + destinationSpike + " IS A PIECE CONTAINER we can move to");
-                                spikePairs.add(new SpikePair(spike, destinationSpike));
-                            }
-                        }
-                    }
-                    if (potentialSpike >= FIRST_SPIKE && potentialSpike <= LAST_SPIKE){
-                        Spike destinationSpike = spikes.get(potentialSpike);
-                        if (destinationSpike.pieces.size() <= 1 ||
-                            doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
-                            spikePairs.add(new SpikePair(spike, destinationSpike));
-                        }
+                    Integer potentialSpike = currentPlayer.getDestinationSpikeId(spike, diceRoll);
+                    ArrayList<Integer> reachableSpikes = reachableSpikes(spike, currentPlayer, die1, die2);
+                    if (reachableSpikes.contains(potentialSpike)) {
+                        Spike destinationSpike = potentialSpike == currentPlayer.containerId() ?
+                            new Spike(geometry, -1) : spikes.get(potentialSpike);
+                        spikePairs.add(new SpikePair(spike, destinationSpike));
                     }
                 }
             }
-        } else {
-            log(" warnign dice roll was under 0 - this indicates no options for this player");
+        }
+        if (spikePairs.isEmpty()) {
+            if (diceRoll == die1.getValue() && !canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, null))
+                die1.noOptions();
+            if (diceRoll == die2.getValue() && !canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, null))
+                die2.noOptions();
         }
         log("finished getValidOptions");
         return spikePairs;
@@ -758,7 +637,8 @@ public class Board {
     }
 
     private void theyWantToPlaceAPiece() {
-        if (CustomCanvas.barPieceStuckOnMouse) {
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        if (pieceStuckToMouse != null && pieceStuckToMouse.sourceSpikeId() < 0) {
             log("dont do anythign til we place this");
             return;
         }
@@ -837,7 +717,10 @@ public class Board {
     public void rollDies() {
         die1.roll();
         die2.roll();
-        die1HasBeenUsed = die2HasBeenUsed = false;
+        if (die1.getValue() == die2.getValue()) {
+            die1.doubleRoll();
+            die2.doubleRoll();
+        }
     }
 
     public boolean rolledDouble() {
@@ -848,20 +731,20 @@ public class Board {
         return currentPlayer.getColour();
     }
 
-    public void drawBlackPieceContainer(Graphics g) {
+    public void drawBlackPieceContainer(Graphics g, int mouseX, int mouseY) {
         boolean allPiecesAreHome = allPiecesAreHome(blackPlayer);
-        boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(blackPlayer, activeSpikeId())
+        boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(blackPlayer, activeSpikeId(mouseX, mouseY))
             && !currentPlayer.isWhite();
         drawPieceContainer(g, geometry.blackContainerY(), pulsateBlackContainer, allPiecesAreHome,
-            CustomCanvas.blackPiecesSafelyInContainer.size());
+            blackPiecesSafelyInContainer.size());
     }
 
-    public void drawWhitePieceContainer(Graphics g) {
+    public void drawWhitePieceContainer(Graphics g, int mouseX, int mouseY) {
         boolean allPiecesAreHome = allPiecesAreHome(whitePlayer);
-        boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(whitePlayer, activeSpikeId()) &&
+        boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(whitePlayer, activeSpikeId(mouseX, mouseY)) &&
             currentPlayer.isWhite();
         drawPieceContainer(g, geometry.whiteContainerY(), pulsateWhiteContainer, allPiecesAreHome,
-            CustomCanvas.whitePiecesSafelyInContainer.size());
+            whitePiecesSafelyInContainer.size());
     }
 
     private void drawPieceContainer(Graphics g, int topY, boolean pulsateContainer, boolean allPiecesAreHome,
@@ -889,8 +772,8 @@ public class Board {
     }
 
     private boolean allPiecesAreHome(Player player) {
-        int inContainer = player.isWhite() ?  CustomCanvas.whitePiecesSafelyInContainer.size() :
-            CustomCanvas.blackPiecesSafelyInContainer.size();
+        int inContainer = player.isWhite() ?  whitePiecesSafelyInContainer.size() :
+            blackPiecesSafelyInContainer.size();
         return calculateAmountOfPiecesInHomeArea(player) +  inContainer == 15;
     }
 
@@ -921,7 +804,7 @@ public class Board {
      * @return Die type
      * @throws Exception if source spike does not belong to player of container cannot be reached from it.
      */
-    public DieType whichDieGetsUsToPieceContainer(Player player, int sourceSpikeId) throws Exception {
+    DieType whichDieGetsUsToPieceContainer(Player player, int sourceSpikeId) throws Exception {
         int exactValue = player.isWhite() ? sourceSpikeId - player.containerId() : player.containerId() - sourceSpikeId;
         int maxDieValue = Math.max(die1.getValue(), die2.getValue());
         Spike sourceSpike = spikes.get(sourceSpikeId);
@@ -944,7 +827,7 @@ public class Board {
         return DieType.DIE1AND2;
     }
 
-    public ArrayList<Spike> spikesToMoveToFromBar(PlayerColor playerColor) {
+    ArrayList<Spike> spikesToMoveToFromBar(PlayerColor playerColor) {
         ArrayList<Spike> result = new ArrayList<>();
         canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, result);
         canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, result);
@@ -952,30 +835,273 @@ public class Board {
     }
 
     private boolean haveToMovePieceFromBar(PlayerColor playerColor) {
-        return (playerColor == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) ||
-        (playerColor == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0);
+        return (playerColor == PlayerColor.WHITE && theBarWHITE.pieces.size() > 0) ||
+        (playerColor == PlayerColor.BLACK && theBarBLACK.pieces.size() > 0);
     }
 
-    public boolean pulsateContainer(Player player, int sourceSpikeId) {
-
+    boolean pulsateContainer(Player player, int sourceSpikeId) {
         return sourceSpikeId >= 0 &&
             reachableSpikes(spikes.get(sourceSpikeId), player, die1, die2).contains(player.containerId());
+    }
+
+    public int drawBarPieces(Graphics g) {
+        int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
+        Enumeration eW = theBarWHITE.pieces.elements();
+        while (eW.hasMoreElements()) {
+            Piece p = (Piece) eW.nextElement();
+            p.paint(g,
+                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                pieceOnBarY -= geometry.pieceDiameter());
+        }
+        pieceOnBarY = (geometry.boardHeight() / 2);
+        Enumeration eB = theBarBLACK.pieces.elements();
+        while (eB.hasMoreElements()) {
+            Piece p = (Piece) eB.nextElement();
+            p.paint(g,
+                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                pieceOnBarY += geometry.pieceDiameter());
+        }
+        return pieceOnBarY;
+    }
+
+    public void drawPieceStuckToMouse(Graphics g, int mouseX, int mouseY) {
+        Piece piece = pieceStuckToMouse();
+        if (piece != null) {
+            piece.drawPieceOnMouse(g, mouseX, mouseY);
+        }
     }
 
     /**
      * Returns id of currently active spike.
      * @return Either id of the spike the piece is dragged from or id of the spike the mouse points on.
      */
-    private int activeSpikeId() {
+    private int activeSpikeId(int mouseX, int mouseY) {
         int spikeId = -1;
-        if (CustomCanvas.pieceStuckToMouse != null)
-            spikeId = CustomCanvas.pieceStuckToMouse.sourceSpikeId();
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        if (pieceStuckToMouse != null)
+            spikeId = pieceStuckToMouse.sourceSpikeId();
         else {
-            Spike spike = grabSpikeHoveringOver();
+            Spike spike = grabSpikeHoveringOver(mouseX, mouseY);
             if (spike != null && spike.getAmountOfPieces(whoseTurnIsIt()) > 0) {
                 spikeId = spike.getSpikeNumber();
             }
         }
         return spikeId;
+    }
+
+    public void checkIfPieceContainerClickedOn(int x, int y) throws Exception {
+        final int myX = geometry.containerX();
+        final int myY = currentPlayer.isWhite() ? geometry.whiteContainerY() : geometry.blackContainerY();
+        if (x >= myX && x < (myX + geometry.containerWidth())) {
+            if (y > myY && y < (myY + geometry.containerHeight())) {
+                log(String.format("%s CONTAINER CLICKED ON", whoseTurnIsIt()));
+                Piece pieceStuckToMouse = pieceStuckToMouse();
+                if (pieceStuckToMouse != null && pieceStuckToMouse.sourceSpikeId() >= 0) {
+                    DieType correctDie = whichDieGetsUsToPieceContainer(currentPlayer,
+                        pieceStuckToMouse.sourceSpikeId());
+                    if (pulsateContainer(getCurrentPlayer(), pieceStuckToMouse.sourceSpikeId())) {
+                        log(String.format("%s put in container", whoseTurnIsIt()));
+                        placePieceRemoveOldOneAndSetDieToUsed(currentPlayer.containerId(), correctDie);
+                    }
+                }
+            }
+        }
+    }
+
+    public void checkIfSpikeClickedOn(int x, int y) {
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        for (Spike spike: spikes) {
+            if (spike.userClickedOnThis(x, y)) {
+                log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
+                if (pieceStuckToMouse != null) {
+                    if (pieceStuckToMouse.sourceSpikeId() < 0) {
+                        ArrayList<Spike> spikesAllowedToMoveToFromBar = spikesToMoveToFromBar(whoseTurnIsIt());
+                        log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + spikesAllowedToMoveToFromBar.size());
+                        for (Spike sp : spikesAllowedToMoveToFromBar) {
+                            if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
+                                log("WE CAN DROP OFF AT THIS SPIKE " + sp.getSpikeNumber());
+                                if (whoseTurnIsIt() == PlayerColor.WHITE) {
+                                    log("WHITE PIECE REMOVED FROM BAR");
+                                    theBarWHITE.removePiece(pieceStuckToMouse);
+                                    // IF this spike contains an enemy piece Kill it
+                                    if (sp.getAmountOfPieces(PlayerColor.BLACK) == 1) {
+                                        log("WHITE KILLED A BLACK WHILE GETTING OFF BAR");
+                                        Piece piece = (Piece) sp.pieces.firstElement();
+                                        theBarBLACK.addPiece(piece);
+                                        sp.removePiece(piece);
+                                        sfxKilled.playSound();
+                                    }
+                                }
+                                if (whoseTurnIsIt() == PlayerColor.BLACK) {
+                                    log("BLACK PIECE REMOVED FROM BAR");
+                                    theBarBLACK.removePiece(pieceStuckToMouse);
+                                    if (sp.getAmountOfPieces(PlayerColor.WHITE) == 1) {
+                                        Piece piece = (Piece) sp.pieces.firstElement();
+                                        theBarWHITE.addPiece(piece);
+                                        log("BLACK KILLED A WHITE WHILE GETTING OFF BAR");
+                                        sp.removePiece((Piece) sp.pieces.firstElement());
+                                        sfxKilled.playSound();
+                                    }
+                                }
+                                sp.addPiece(pieceStuckToMouse);
+                                unstickPieceFromMouse();
+                                Die theDieThatGotUsHere = sp.get_stored_die();
+                                if (theDieThatGotUsHere.getValue() == die1.getValue()) {
+                                    log("DIE1 USED GETTING OFF BAR " + die1.getValue());
+                                    die1.disable();
+                                } else {
+                                    log("DIE2 USED GETTING OFF BAR " + die2.getValue());
+                                    die2.disable();
+                                }
+                                return;
+                            }
+                        }
+                    } else {
+                        Spike sourceSpike = spikes.get(pieceStuckToMouse.sourceSpikeId());
+                        ArrayList<Integer> reachable = reachableSpikes(sourceSpike, currentPlayer, die1, die2);
+                        Integer destinationSpikeId = reachable.indexOf(spike.getSpikeNumber());
+                        if (destinationSpikeId >= 0) {
+                            int neededValue = Math.abs(spike.getPosition() - sourceSpike.getPosition());
+                            assert neededValue > 0;
+                            DieType dieType = DieType.DIE1AND2;
+                            if (neededValue == die1.getValue())
+                                dieType = DieType.DIE1;
+                            else if (neededValue == die2.getValue())
+                                dieType = DieType.DIE2;
+                            else
+                                assert neededValue == die1.getValue() + die2.getValue();
+                            placePieceRemoveOldOneAndSetDieToUsed(destinationSpikeId, dieType);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Piece pieceStuckToMouse() {
+        for (Spike spike: spikes) {
+            for (Object elem: spike.pieces) {
+                Piece piece = (Piece) elem;
+                if (piece.stickToMouse())
+                    return piece;
+            }
+        }
+        for (Object elem: theBarWHITE.pieces) {
+            Piece piece = (Piece) elem;
+            if (piece.stickToMouse())
+                return piece;
+        }
+        for (Object elem: theBarBLACK.pieces) {
+            Piece piece = (Piece) elem;
+            if (piece.stickToMouse())
+                return piece;
+        }
+        return null;
+    }
+
+    public void unstickPieceFromMouse() {
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        if (pieceStuckToMouse != null) {
+            pieceStuckToMouse.unstickFromMouse();
+        }
+        SPtheMoveToMake = null;
+    }
+
+    // removes piece from the spike it came from, adds it to the new one just clicked on,
+    // and sets the die that did this to used
+    private void placePieceRemoveOldOneAndSetDieToUsed(int destinationSpikeId, DieType dieToSetUnused) {
+        log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:" + dieToSetUnused);
+        Piece pieceStuckToMouse = pieceStuckToMouse();
+        assert pieceStuckToMouse != null;
+        if (pieceStuckToMouse.sourceSpikeId() >= 0)
+            spikes.get(pieceStuckToMouse.sourceSpikeId()).removePiece(pieceStuckToMouse);
+
+        if (destinationSpikeId == currentPlayer.containerId()) {
+            if (whoseTurnIsIt() == PlayerColor.WHITE) {
+                whitePiecesSafelyInContainer.add(pieceStuckToMouse);
+                log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" +
+                    whitePiecesSafelyInContainer.size());
+            } else if (whoseTurnIsIt() == PlayerColor.BLACK) {
+                blackPiecesSafelyInContainer.add(pieceStuckToMouse);
+                log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" +
+                    blackPiecesSafelyInContainer.size());
+            }
+            sfxPutPieceInContainer.playSound();
+        } else {
+            Spike destinationSpike = spikes.get(destinationSpikeId);
+            PlayerColor thisColor = currentPlayer.getColour();
+            PlayerColor otherColor = currentPlayer.isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
+            Spike piecesOnBar = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
+            if (destinationSpike.getAmountOfPieces(otherColor) > 0) {
+                //// SPECIAL CONDITION - A PIECE KILLED////////////////////
+                log(String.format("%s KILLED A %s", thisColor, otherColor));
+                Piece firstPiece = (Piece) destinationSpike.pieces.firstElement();
+                destinationSpike.removePiece(firstPiece);
+                destinationSpike.addPiece(pieceStuckToMouse);
+                piecesOnBar.addPiece(firstPiece);
+                sfxKilled.playSound();
+            } else {
+                destinationSpike.addPiece(pieceStuckToMouse);
+            }
+        }
+        if (dieToSetUnused == DieType.DIE1) {
+            die1.disable();
+            log("die1HasBeenUsed A.");
+        } else if (dieToSetUnused == DieType.DIE2) {
+            die2.disable();
+            log("die2HasBeenUsed A.");
+        } else {
+            die1.disable();
+            die2.disable();
+            log("Both dies have been used");
+        }
+        unstickPieceFromMouse();
+    }
+
+    public void checkIfPieceClickedOn(int x,int y) {
+        if (pieceStuckToMouse() != null) {
+            return;
+        }
+        Spike piecesOnTheBar = (whoseTurnIsIt() == PlayerColor.WHITE) ? theBarWHITE : theBarBLACK;
+        Enumeration e = piecesOnTheBar.pieces.elements();
+        ArrayList<Spike> possibleDestinationsFromBar = new ArrayList<>();
+        if (piecesOnTheBar.pieces.size() > 0)
+            possibleDestinationsFromBar = spikesToMoveToFromBar(whoseTurnIsIt());
+        while (!possibleDestinationsFromBar.isEmpty() && e.hasMoreElements()) {
+            Piece p = (Piece) e.nextElement();
+            if (p.userClickedOnThis(x, y)) {
+                log("PIECE ON THE BAR CLICKED ON.");
+                p.stickToMouse(-1);
+                return;
+            }
+        }
+
+        for (Spike spike: spikes) {
+            Enumeration pieces_e = spike.pieces.elements();
+            while (pieces_e.hasMoreElements()) {
+                Piece piece = (Piece) pieces_e.nextElement();
+                if (piece.userClickedOnThis(x, y)) {
+                    if (allowPieceToStickToMouse(spike) && piece.getColour() == whoseTurnIsIt()) {
+                        log("PICKED UP PIECE: " + piece.getColour());
+                        piece.stickToMouse(spike.getSpikeNumber());
+                    }
+                    log("Piece was clicked on (" + piece + ") board.allowPieceToStickToMouse: true " +
+                        "board.whoseTurnIsIt:" + whoseTurnIsIt());
+                    return;
+                }
+            }
+        }
+    }
+
+    public boolean gameIsOver() {
+        return whitePiecesSafelyInContainer.size() == 15 || blackPiecesSafelyInContainer.size() == 15;
+    }
+
+    public boolean turnOver() {
+        return die1.disabled() && die2.disabled();
+    }
+
+    private boolean allowPieceToStickToMouse(Spike activeSpike) {
+        return !reachableSpikes(activeSpike, currentPlayer, die1, die2).isEmpty();
     }
 }

@@ -13,6 +13,7 @@ public class Die {
     private Geometry geometry;
     private Utils utils = new Utils();
     private int value = -1; // 1 to 6
+    private int usesCounter;
 
     //Update, this does get called when the player is putting their pieces away and they roll a value too high leaving them with
     //no options, in this special case we lower the value of the die to allow the algorithm to handle that there is options
@@ -33,7 +34,12 @@ public class Die {
     public int roll() {
         value = Utils.getRand(1,6);
         originalValue = value;
+        usesCounter = 1;
         return value;
+    }
+
+    public void doubleRoll() {
+        this.usesCounter = 2;
     }
 
     public void setActualValue(int newValue) {
@@ -61,11 +67,24 @@ public class Die {
 
     // disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
     void disable() {
+        if (usesCounter <= 0) {
+            throw new RuntimeException("Disabling disabled die, value: " + value);
+        }
+        --usesCounter;
+        if (usesCounter == 0)
+            value = 0;
+    }
+
+    void noOptions() {
         value = 0;
     }
 
     boolean enabled() {
         return value > 0;
+    }
+
+    boolean disabled() {
+        return value == 0;
     }
 
     void paint(Graphics g, int x, int y) {

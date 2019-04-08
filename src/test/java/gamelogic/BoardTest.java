@@ -10,8 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -91,7 +93,7 @@ class BoardTest {
 
     @Test
     @DisplayName("Board calculates valid moves from the bar")
-    void test3() {
+    void test3() throws Exception {
         Board board = new TestableBoard(colours, geometry, config, 1, 2);
 
         int[] whiteHome = {
@@ -107,7 +109,9 @@ class BoardTest {
             0, 0, 11, 2, 0, 0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        CustomCanvas.theBarWHITE.add(new Piece(geometry, board.getWhitePlayer()));
+        Field theBarWHITE = Board.class.getDeclaredField("theBarWHITE");
+        theBarWHITE.setAccessible(true);
+        ((Spike)theBarWHITE.get(board)).addPiece(new Piece(geometry, board.getWhitePlayer()));
         board.setCurrentPlayer(board.getWhitePlayer());
         board.rollDies();
         ArrayList<Spike> spikes = board.spikesToMoveToFromBar(PlayerColor.WHITE);
@@ -172,8 +176,12 @@ class BoardTest {
             0,6,8,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        CustomCanvas.theBarWHITE.remove(0);
-        CustomCanvas.whitePiecesSafelyInContainer.add(new Piece(geometry, board.getWhitePlayer()));
+        Field theBarWHITE = Board.class.getDeclaredField("theBarWHITE");
+        theBarWHITE.setAccessible(true);
+        ((Spike)theBarWHITE.get(board)).pieces.remove(0);
+        Field whitePiecesSafelyInContainer = Board.class.getDeclaredField("whitePiecesSafelyInContainer");
+        whitePiecesSafelyInContainer.setAccessible(true);
+        ((Vector) whitePiecesSafelyInContainer.get(board)).add(new Piece(geometry, board.getWhitePlayer()));
         board.checkConsistent();
 
         Method allPiecesAreHome = Board.class.getDeclaredMethod("allPiecesAreHome", Player.class);

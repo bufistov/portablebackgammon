@@ -24,7 +24,7 @@ public class Spike {
     private Color black_spike_colour, white_spike_colour;
     private static final Color flashColor = new Color(255,225,0);
 
-    public  Vector pieces = new Vector();
+    Vector pieces = new Vector();
     private int position; // 1 to 24
     private final SpikeType type;
     private final String spikeName;
@@ -49,10 +49,15 @@ public class Spike {
         this.position = position;
         assert position != 0;
         if (position < 0) {
-            log("Special spike made, this isnt a spike at all, its a piece container");
+            log("Container spike is made");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
             this.spikeName = "Container";
             this.type = SpikeType.CONTAINER;
+        } else if (position > 24) {
+            log("Bar spike is make");
+            this.position = NOT_A_REAL_SPIKE_MINUS_99;
+            this.spikeName = "Bar";
+            this.type = SpikeType.BAR;
         } else {
             spikeName = Integer.toString(position - 1);
             this.type = position <= 12 ? STALECTITE : STALECMITE;
@@ -79,13 +84,13 @@ public class Spike {
         return position == thatSpike.getPosition();
     }
 
-    public boolean userClickedOnThis(int mouseX, int mouseY) {
+    boolean userClickedOnThis(int mouseX, int mouseY) {
         return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
             (mouseY >= collision_y && mouseY <= collision_y + height());
     }
 
     // add a piece to this spike
-    public boolean addPiece(Piece p) {
+    boolean addPiece(Piece p) {
         if (spikeName != null) {
             log("Spike "+ getSpikeNumber()+ " just has a piece added.");
         }
@@ -95,7 +100,7 @@ public class Spike {
 
     // remove this piece from the spike, pass spike in to remove, or pass null and the
     // first one will be removed.
-    public boolean removePiece(Piece p) {
+    boolean removePiece(Piece p) {
         if (spikeName != null) {
             log("Spike "+getSpikeNumber()+" just has a piece removed.");
         } else {
@@ -105,24 +110,24 @@ public class Spike {
         return true;
     }
 
-    public int getAmountOfPieces(PlayerColor playerColor) {
+    int getAmountOfPieces(PlayerColor playerColor) {
         if (pieces.size() == 0 || ((Piece)pieces.get(0)).getColour() != playerColor)
             return 0;
         return pieces.size();
     }
 
-    void paint(Graphics g) {
+    void paint(Graphics g, Board board) {
         workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
             geometry.spikeWidth());
         drawSpike(g);
         drawPieces(g, spikeName);
         if (flash) {
-            drawPotentialDieMoves(g);
+            drawPotentialDieMoves(g, board);
         }
         flash = false;
     }
 
-    public int getSpikeNumber() {
+    int getSpikeNumber() {
         return position - 1;
     }
 
@@ -156,12 +161,16 @@ public class Spike {
         storedDie = die;
     }
 
-    public Die get_stored_die() {
+    Die get_stored_die() {
         return storedDie;
     }
 
     boolean isContainer() {
         return type == SpikeType.CONTAINER;
+    }
+
+    boolean isBar() {
+        return type == SpikeType.BAR;
     }
 
     Point getMiddlePoint() {
@@ -228,28 +237,28 @@ public class Spike {
         }
     }
 
-    private void drawPotentialDieMoves(Graphics g) {
+    private void drawPotentialDieMoves(Graphics g, Board board) {
         final int miniDieX = x2 - geometry.miniDieSize() / 2;
         final int miniDieHeight = geometry.miniDieSize();
         if (whichDiei == DIE1) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, miniDieX, y1);
+                board.die1.drawMiniDie(g, miniDieX, y1);
             }
         } else if (whichDiei == DIE2) {
             if (getType() == STALECMITE) {
-                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die2.drawMiniDie(g, miniDieX, y1);
+                board.die2.drawMiniDie(g, miniDieX, y1);
             }
         } else if (whichDiei == DIE1AND2) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
-                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
+                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, miniDieX, y1);
-                Board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1);
+                board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
         }
     }

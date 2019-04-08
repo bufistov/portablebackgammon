@@ -39,8 +39,7 @@ public class Piece {
         black_piece_color = new Color(BLACK_PIECE_COLOUR);
     }
 
-    public PlayerColor getColour()
-    {
+    public PlayerColor getColour() {
         return colour;
     }
 
@@ -52,8 +51,8 @@ public class Piece {
         return centerY;
     }
 
-    public void drawPieceOnMouse(Graphics g) {
-        paint( g, 0, 0);
+    public void drawPieceOnMouse(Graphics g, int mouseX, int mouseY) {
+        paint( g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
     }
 
     public void paint(Graphics g, int x, int y) {
@@ -62,14 +61,8 @@ public class Piece {
             utils.setColor(g, white_piece_color);
         } else if (colour == PlayerColor.BLACK) {
             utils.setColor(g, black_piece_color);
-        } else {
-            Utils._E("Dave, Im a bit worried that this piece doesnt know what colour it is.");
         }
 
-        if (stickToMouse) {
-            x = Board.mouseHoverX;
-            y = Board.mouseHoverY;
-        }
         utils.fillCircle(g, x, y, pieceDiameter, pieceDiameter);
         utils.setColor(g, Color.BLACK);
         utils.drawCircle(g, x, y, pieceDiameter, pieceDiameter);
@@ -82,9 +75,6 @@ public class Piece {
         }
     }
 
-    //this is called to tell the piece to use the x, y vals from the mouse
-    //instead of its usual ones as the user is placing it and it needs to stick to the
-    //mouse point until they do place it.
     public void stickToMouse(int spikeId) {
         stickToMouse = true;
         sourceSpikeId = spikeId;
@@ -92,6 +82,10 @@ public class Piece {
 
     public int sourceSpikeId() {
         return sourceSpikeId;
+    }
+
+    public boolean stickToMouse() {
+        return stickToMouse;
     }
     
     public void unstickFromMouse() {
