@@ -19,7 +19,7 @@ public class Piece {
     private int centerX;
     private int centerY;
 
-    private PlayerColor colour;
+    private final PlayerColor colour;
     private Utils utils = new Utils();
     private boolean stickToMouse;
     private int sourceSpikeId;

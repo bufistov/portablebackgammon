@@ -198,16 +198,18 @@ public class Spike {
         int piecex = x2 - geometry.pieceDiameter() / 2;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
-            int piecey = -1;
-            if(getType() == STALECTITE) {
-               piecey = yPosForPieces += (geometry.pieceDiameter() - overlapOnPieces);
-            } else if(getType() == STALECMITE) {
-                piecey = yPosForPieces -= (geometry.pieceDiameter() - overlapOnPieces);
-            }
-            if(getType() == STALECTITE) {
-                 p.paint(g, piecex,piecey + overlapOnPieces);
-            } else {
-                 p.paint(g, piecex,piecey - overlapOnPieces);
+            if (!p.stickToMouse()) {
+                int piecey = -1;
+                if (getType() == STALECTITE) {
+                    piecey = yPosForPieces += (geometry.pieceDiameter() - overlapOnPieces);
+                } else if (getType() == STALECMITE) {
+                    piecey = yPosForPieces -= (geometry.pieceDiameter() - overlapOnPieces);
+                }
+                if (getType() == STALECTITE) {
+                    p.paint(g, piecex, piecey + overlapOnPieces);
+                } else {
+                    p.paint(g, piecex, piecey - overlapOnPieces);
+                }
             }
         }
     }

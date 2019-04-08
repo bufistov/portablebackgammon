@@ -167,6 +167,7 @@ public class Board {
 
         // draw the potential moves for whoevers go it is
         if (gameInProgress && !CustomCanvas.showRollButton) {
+            checkConsistent();
             if (haveToMovePieceFromBar(currentPlayer.getColour())) {
                 pulsatePotentialSpikesFromBar();
             } else {
@@ -194,7 +195,6 @@ public class Board {
     }
 
     private void pulsatePotentialSpikesFromBar() {
-        checkConsistent();
         ArrayList<Spike> spikesAllowedToMoveToFromBar = new ArrayList<>();
         boolean cantGetOfBarWithDie1 = !canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, spikesAllowedToMoveToFromBar);
         if (!cantGetOfBarWithDie1) {
@@ -319,8 +319,6 @@ public class Board {
      * there can be up to 3 potential moves: die1, die2, die1+die2
      */
     private void drawPotentialMoves() {
-        checkConsistent();
-
         if (CustomCanvas.showRollButton) {
             return;
         }
@@ -959,8 +957,8 @@ public class Board {
                     } else {
                         Spike sourceSpike = spikes.get(pieceStuckToMouse.sourceSpikeId());
                         ArrayList<Integer> reachable = reachableSpikes(sourceSpike, currentPlayer, die1, die2);
-                        Integer destinationSpikeId = reachable.indexOf(spike.getSpikeNumber());
-                        if (destinationSpikeId >= 0) {
+                        Integer idx = reachable.indexOf(spike.getSpikeNumber());
+                        if (idx >= 0) {
                             int neededValue = Math.abs(spike.getPosition() - sourceSpike.getPosition());
                             assert neededValue > 0;
                             DieType dieType = DieType.DIE1AND2;
@@ -970,7 +968,7 @@ public class Board {
                                 dieType = DieType.DIE2;
                             else
                                 assert neededValue == die1.getValue() + die2.getValue();
-                            placePieceRemoveOldOneAndSetDieToUsed(destinationSpikeId, dieType);
+                            placePieceRemoveOldOneAndSetDieToUsed(reachable.get(idx), dieType);
                         }
                     }
                 }
@@ -1010,7 +1008,8 @@ public class Board {
     // removes piece from the spike it came from, adds it to the new one just clicked on,
     // and sets the die that did this to used
     private void placePieceRemoveOldOneAndSetDieToUsed(int destinationSpikeId, DieType dieToSetUnused) {
-        log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:" + dieToSetUnused);
+        log("placePieceRemoveOldOneAndSetDieToUsed dieToSetUnused:" + dieToSetUnused +
+            " destinationSpikeId: " + destinationSpikeId);
         Piece pieceStuckToMouse = pieceStuckToMouse();
         assert pieceStuckToMouse != null;
         if (pieceStuckToMouse.sourceSpikeId() >= 0)
