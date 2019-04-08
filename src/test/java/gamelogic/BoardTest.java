@@ -77,7 +77,7 @@ class BoardTest {
             0,0,13,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        board.setCurrentPlayer(PlayerColor.WHITE);
+        board.setCurrentPlayer(board.getWhitePlayer());
         board.rollDies();
 
         assertEquals(DieType.DIE2, board.whichDieGetsUsToPieceContainer(board.getWhitePlayer(), 1));
@@ -108,7 +108,7 @@ class BoardTest {
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         CustomCanvas.theBarWHITE.add(new Piece(geometry, board.getWhitePlayer()));
-        board.setCurrentPlayer(PlayerColor.WHITE);
+        board.setCurrentPlayer(board.getWhitePlayer());
         board.rollDies();
         ArrayList<Spike> spikes = board.spikesToMoveToFromBar(PlayerColor.WHITE);
         assertEquals(2, spikes.size());
@@ -135,13 +135,13 @@ class BoardTest {
             0,7,8,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        board.setCurrentPlayer(PlayerColor.BLACK);
+        board.setCurrentPlayer(board.getBlackPlayer());
         board.rollDies();
         assertEquals(DieType.DIE2, board.whichDieGetsUsToPieceContainer(board.getBlackPlayer(), 19));
     }
 
     @Test
-    @DisplayName("Board everybodyAtHome")
+    @DisplayName("Board allPiecesAreHome")
     void test5() throws Exception {
         Board board = new Board(colours, geometry, config);
         Method allPiecesAreHome = Board.class.getDeclaredMethod("allPiecesAreHome", Player.class);
@@ -156,7 +156,7 @@ class BoardTest {
     }
 
     @Test
-    @DisplayName("Board everybodyAtHome, some at container")
+    @DisplayName("Board allPiecesAreHome, some at container")
     void test6() throws Exception {
         Board board = new Board(colours, geometry, config);
         int[] whiteHome = {
@@ -180,5 +180,46 @@ class BoardTest {
         allPiecesAreHome.setAccessible(true);
         assertTrue((Boolean)allPiecesAreHome.invoke(board, board.getWhitePlayer()));
         assertFalse((Boolean)allPiecesAreHome.invoke(board, board.getBlackPlayer()));
+    }
+
+    @Test
+    @DisplayName("Board pulsateContainer")
+    void test7() throws Exception {
+        Board board = new TestableBoard(colours, geometry, config, 3);
+        Method pulsateContainer = Board.class.getDeclaredMethod("pulsateContainer",
+            Player.class, int.class);
+        pulsateContainer.setAccessible(true);
+        for (int spikeId = 0; spikeId < board.getSpikes().size(); ++spikeId) {
+            assertFalse((Boolean) pulsateContainer.invoke(board, board.getWhitePlayer(), spikeId));
+            assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), spikeId));
+        }
+
+        int[] whiteHome = {
+            0,0,0,0,14,1,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,6,9,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.checkConsistent();
+        board.rollDies();
+        board.setCurrentPlayer(board.getWhitePlayer());
+        assertTrue((Boolean) pulsateContainer.invoke(board, board.getWhitePlayer(), 5));
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getWhitePlayer(), 4));
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getWhitePlayer(), 2));
+
+        assertTrue((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 19));
+        board.setCurrentPlayer(board.getBlackPlayer());
+        assertEquals(PlayerColor.BLACK, board.getCurrentPlayer().getColour());
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 20));
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 21));
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 22));
+        assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 18));
     }
 }

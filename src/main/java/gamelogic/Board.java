@@ -788,12 +788,8 @@ public class Board {
         return currentPlayer;
     }
 
-    public void setCurrentPlayer(PlayerColor player) {
-        if (player == PlayerColor.WHITE) {
-            currentPlayer = whitePlayer;
-        } else {
-            currentPlayer = blackPlayer;
-        }
+    public void setCurrentPlayer(Player player) {
+        currentPlayer = player;
     }
 
     public void nextTurn() {
@@ -961,8 +957,9 @@ public class Board {
     }
 
     public boolean pulsateContainer(Player player, int sourceSpikeId) {
+
         return sourceSpikeId >= 0 &&
-            reachableSpikes(spikes.get(sourceSpikeId), player, die1, die2).contains(currentPlayer.containerId());
+            reachableSpikes(spikes.get(sourceSpikeId), player, die1, die2).contains(player.containerId());
     }
 
     /**

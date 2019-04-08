@@ -2324,9 +2324,9 @@ public class CustomCanvas extends Canvas implements MouseListener, MouseMotionLi
     void startGame() {
         int val = Utils.getRand(0, 999_999);
         String playerStr = "White";
-        PlayerColor player = PlayerColor.WHITE;
+        Player player = board.getWhitePlayer();
         if (val >= 500_000) {
-            player = PlayerColor.BLACK;
+            player = board.getBlackPlayer();
             playerStr = "Black";
             if (HUMAN_VS_COMPUTER) {
                 Bot.dead = false;

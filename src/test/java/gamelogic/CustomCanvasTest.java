@@ -125,7 +125,7 @@ class CustomCanvasTest {
             0,0,13,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        board.setCurrentPlayer(PlayerColor.WHITE);
+        board.setCurrentPlayer(board.getWhitePlayer());
         assertTrue(CustomCanvas.showRollButton);
 
         Field rollButtonX = makeCanvasFieldPublic("rollButtonX");
