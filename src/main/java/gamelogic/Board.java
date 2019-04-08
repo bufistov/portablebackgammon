@@ -270,7 +270,7 @@ public class Board {
     public static Spike copy_of_reachableFromDie2;
     public static Spike copy_of_reachableFromBothDice;
 
-    private void checkConsistent() {
+    void checkConsistent() {
         final int whitePieces = calculateAmountOfPiecesOnBoard(PlayerColor.WHITE) +
             CustomCanvas.whitePiecesSafelyInContainer.size() +
             CustomCanvas.theBarWHITE.size();
@@ -313,8 +313,8 @@ public class Board {
         if (die1AnOption && !die1HasBeenUsed) {
             copy_of_reachableFromDie1 = null;
             int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue());
-            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
-                && !anybodyNotInHome(currentPlayer);
+            boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId())
+                && allPiecesAreHome(currentPlayer);
             if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                     die1StillAnOption = true;
@@ -349,8 +349,8 @@ public class Board {
         if (die2AnOption && !die2HasBeenUsed) {
             copy_of_reachableFromDie2 = null; //Set to null here so we know if its valid by the end it true is
             int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die2.getValue());
-            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId()
-                && !anybodyNotInHome(currentPlayer);
+            boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId())
+                && allPiecesAreHome(currentPlayer);
             if (highlightPieceContainerAsOption) {
                 if (potentialSpikeIndex == FIRST_SPIKE-1 && whoseTurnIsIt() == PlayerColor.WHITE) {
                      log("yes " + potentialSpikeIndex + " is a valid option DIE2 TO GET ONTO PIECE WHITE CONTAINER");
@@ -394,8 +394,8 @@ public class Board {
         if (bothDiceAnOption && !die1HasBeenUsed && !die2HasBeenUsed && (die1AnOption || die2AnOption)) {
             copy_of_reachableFromBothDice = null; // Set to null here so we know if its valid by the end it true is
             int potentialSpikeIndex = currentPlayer.getDestinationSpike(currentSpikeHoveringOver, die1.getValue() + die2.getValue());
-            boolean highlightPieceContainerAsOption = potentialSpikeIndex == currentPlayer.containerId() &&
-                !anybodyNotInHome(currentPlayer);
+            boolean highlightPieceContainerAsOption = (potentialSpikeIndex == currentPlayer.containerId()) &&
+                allPiecesAreHome(currentPlayer);
             // only for the case when a piece can go into the piece container
             if (highlightPieceContainerAsOption) {//<-- this can get set by checkValidPotentialMove when the situation is right
                 if (potentialSpikeIndex == FIRST_SPIKE - 1 && whoseTurnIsIt() == PlayerColor.WHITE) {
@@ -488,15 +488,6 @@ public class Board {
         return piecesInHomeArea;
     }
 
-    private boolean anybodyNotInHome(Player player) {
-        for (Spike spike: spikes) {
-            if (spike.getAmountOfPieces(player.getColour()) > 0 &&
-                (spike.getSpikeNumber() < player.homeSpikeStart() || spike.getSpikeNumber() > player.homeSpikeEnd()))
-                return true;
-        }
-        return false;
-    }
-
     //takes in a spike and a die value,
     //this is to indicate to player its a potential move they can make
     //whichDice tells the spike which die would allow this potential move, so it an be displayed to player
@@ -519,7 +510,7 @@ public class Board {
         if (potentialSpike > blackPlayer.containerId() && lastNotEmptyBlackSpike().getPosition() == currentSpike.getPosition()) {
             potentialSpike = blackPlayer.containerId();
         }
-        if (potentialSpike == currentPlayer.containerId() && !anybodyNotInHome(currentPlayer)) {
+        if (potentialSpike == currentPlayer.containerId() && allPiecesAreHome(currentPlayer)) {
             return true;
         }
         return (potentialSpike >= FIRST_SPIKE) && (potentialSpike <= LAST_SPIKE) &&
@@ -571,7 +562,6 @@ public class Board {
         log("mode: BOARD_NEW_GAME");
         initialiseBoardForNewGame(whiteInitPositions, blackInitPositioin);
         if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
-            log("mode: DEBUG_BOARD_WHITE_PIECES_IN_THEIR_HOME");
             int[] whiteHome = {
                 0, 5, 5, 5, 0, 0,
                 0, 0, 0, 0, 0, 0,
@@ -675,7 +665,7 @@ public class Board {
                     //SPECIAL CASE LARGE DIE ROLLS NEED TO BECOME VALID NOW. AS THEY NEED TO PUT PIECES AWAY
                     //so what we do is sneaky, reduce die value number (hiding it from players of course)
                     //which makes option become available in this case.
-                    if (allPiecesAreHome()) {
+                    if (allPiecesAreHome(currentPlayer)) {
                         log("LOWERING THEVALUE OF DIE 1");
                         die1.setValue(die1.getValue() - 1);
                     } else {
@@ -687,7 +677,7 @@ public class Board {
                         sfxNoMove.playSound();
                     }
                 } else if (!die2HasBeenUsed) {
-                    if (allPiecesAreHome()) {
+                    if (allPiecesAreHome(currentPlayer)) {
                         log("LOWERING THEVALUE OF DIE 2");
                         die2.setValue(die2.getValue() - 1);
                     } else {
@@ -715,6 +705,7 @@ public class Board {
     /**
      * Checks the currently available die and populates spikePairs vector with
      * valid (sourceSpike, destinationSpike) pairs.
+     * FIXME: it does not take bar into account
      */
     private Vector getValidOptions() {
         log("Getting valid spike pairs");
@@ -731,7 +722,7 @@ public class Board {
             for (Spike spike: spikes) {
                 if (spike.getAmountOfPieces(currentPlayer.getColour()) > 0) {
                     int potentialSpike = currentPlayer.getDestinationSpike(spike, diceRoll);
-                    if (allPiecesAreHome()) {
+                    if (allPiecesAreHome(currentPlayer)) {
                         if (potentialSpike >= FIRST_SPIKE - 1 && potentialSpike <= LAST_SPIKE + 1) {
                             log("checkAbleToGetIntoPieceContainer is true - potentialSpike:" + potentialSpike);
                             if (potentialSpike == LAST_SPIKE + 1 || potentialSpike == FIRST_SPIKE - 1) {
@@ -862,17 +853,17 @@ public class Board {
     }
 
     public void drawBlackPieceContainer(Graphics g) {
-        boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(blackPlayer) +
-            CustomCanvas.blackPiecesSafelyInContainer.size() == 15;
-        boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(currentPlayer, activeSpikeId());
+        boolean allPiecesAreHome = allPiecesAreHome(blackPlayer);
+        boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(blackPlayer, activeSpikeId())
+            && !currentPlayer.isWhite();
         drawPieceContainer(g, geometry.blackContainerY(), pulsateBlackContainer, allPiecesAreHome,
             CustomCanvas.blackPiecesSafelyInContainer.size());
     }
 
     public void drawWhitePieceContainer(Graphics g) {
-        boolean allPiecesAreHome = calculateAmountOfPiecesInHomeArea(whitePlayer) +
-            CustomCanvas.whitePiecesSafelyInContainer.size() == 15;
-        boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(currentPlayer, activeSpikeId());
+        boolean allPiecesAreHome = allPiecesAreHome(whitePlayer);
+        boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(whitePlayer, activeSpikeId()) &&
+            currentPlayer.isWhite();
         drawPieceContainer(g, geometry.whiteContainerY(), pulsateWhiteContainer, allPiecesAreHome,
             CustomCanvas.whitePiecesSafelyInContainer.size());
     }
@@ -901,10 +892,10 @@ public class Board {
         }
     }
 
-    private boolean allPiecesAreHome() {
-        int inContainer = currentPlayer.isWhite() ?  CustomCanvas.whitePiecesSafelyInContainer.size() :
+    private boolean allPiecesAreHome(Player player) {
+        int inContainer = player.isWhite() ?  CustomCanvas.whitePiecesSafelyInContainer.size() :
             CustomCanvas.blackPiecesSafelyInContainer.size();
-        return calculateAmountOfPiecesInHomeArea(currentPlayer) +  inContainer == 15;
+        return calculateAmountOfPiecesInHomeArea(player) +  inContainer == 15;
     }
 
     private Spike lastNotEmptyWhiteSpike() {
@@ -964,7 +955,7 @@ public class Board {
         return result;
     }
 
-    public boolean haveToMovePieceFromBar(PlayerColor playerColor) {
+    private boolean haveToMovePieceFromBar(PlayerColor playerColor) {
         return (playerColor == PlayerColor.WHITE && CustomCanvas.theBarWHITE.size() > 0) ||
         (playerColor == PlayerColor.BLACK && CustomCanvas.theBarBLACK.size() > 0);
     }
