@@ -4,7 +4,6 @@ import data.DieType;
 import data.PlayerColor;
 import graphics.GameColour;
 import graphics.Geometry;
-import lowlevel.CustomCanvas;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,8 +32,8 @@ class TestableBoard extends Board {
 
     @Override
     public void rollDies(){
-        die1.setActualValue(roll1Value);
-        die2.setActualValue(roll2Value);
+        die1.setValue(roll1Value);
+        die2.setValue(roll2Value);
     }
 }
 

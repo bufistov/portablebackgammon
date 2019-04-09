@@ -97,8 +97,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     private int rollButtonW;
     private int rollButtonH;
 
-    public static boolean showRollButton = true;
-
     static int D1lastDieRoll_toSendOverNetwork;
     static int D2lastDieRoll_toSendOverNetwork;
 
@@ -171,6 +169,9 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
     public static final int DEBUGLEFT = 1;
     public static final int DEBUGRIGHT = 2;
+
+    public static int pointerX;
+    public static int pointerY;
 
     public CustomCanvas(JFrame mainWindow, GameColour gameColour, Geometry geometry,
                         Board board, GameConfig config) {
@@ -517,9 +518,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         fontblack.drawString(g, state.name(),20,20,0);
     }
 
-    public static int pointerX;
-    public static int pointerY;
-
     private void loadImages() {
         log("Attempting to loadImages()");
         splashScreenLogo = utils.loadImage("/midokura-logo.png");
@@ -598,7 +596,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         String gameCompleteString = "White has won the game!";
         if (board.gameIsOver()) {
             gameComplete = true;
-            showRollButton = false;
         }
         if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             gameCompleteString = "Black has won the game!";
@@ -679,8 +676,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "Roll";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
 
-        //only show roll button when required
-        if (CustomCanvas.showRollButton) {
+        if (board.showRollButton()) {
             //draw in centre:
             xposTmp = ((geometry.boardWidth() / 2)) - widthOfPrintMe / 2;
 
@@ -760,7 +756,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 break;
             //////////////////////////////////////
             case GAME_IN_PROGRESS:
-                if (showRollButton) {
+                if (board.showRollButton()) {
                     checkAndDealWithRollDiceButton(x, y);
                 }
                 // Other in game buttons go here, like double up, resign etc.
@@ -826,32 +822,19 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 log("Roll Dice button clicked.");
                 sfxDiceRoll.playSound();
                 dealWithOrdinaryRolls();
-                showRollButton = false;
             }
         }
     }
- 
-    //deals with an ordinary roll, that is sets the 2 die values to new random ones
+
     private void dealWithOrdinaryRolls() {
-        log("----------- dealWithOrdinaryRolls -----------");
         if (board.whoseTurnIsIt() == PlayerColor.WHITE) {
             log("white will roll both die now.");
-            // note we pass in null in here which tells it to roll both die for us directly
-            playerRolls(PlayerColor.WHITE);
         } else if (board.whoseTurnIsIt() == PlayerColor.BLACK) {
             log("black will roll both die now.");
-            // note we pass in null in here which tells it to roll both die for us directly
-            playerRolls(PlayerColor.BLACK);
-        } else {
-            Utils.log("dealWithOrdinaryRolls does not know whoseTurnIsIt!");
         }
+        playerRolls(board.whoseTurnIsIt());
     }
 
-     // deals with a player rolling a dice, accepts an int representing either
-     // BLACK or WHITE, die is the die which the player should roll.
-     // note that:
-     // if Die is null it means that its an ordinary roll (not an opening roll) and we simply do 2 rolls for that player
-     // accessing the dice objects directly, since we really want them to roll simulatenously so to speak
     private void playerRolls(PlayerColor player) {
         board.rollDies();
         int val = board.die1.getValue();
@@ -871,11 +854,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             tellPlayers(String.format("%s rolled:%d-%d (Double)", playerStr, val, val2));
             sfxDoubleRolled.playSound();
         }
-    }
-
-    private void resetVarsTurn() {
-        log("resetVarsTurn");
-        showRollButton = true;
     }
 
     private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
@@ -1249,10 +1227,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 break;
             case GAME_IN_PROGRESS:
                 touchedButton(x, y);
-                if (showRollButton) {
-                    log("respond to no clicks as the roll button is up");
-                    checkIfPrefsButtonClickedOn(x, y);
-                } else {
+                checkIfPrefsButtonClickedOn(x, y);
+                if (!board.showRollButton()) {
                     board.checkIfPieceClickedOn(x, y);
                     board.checkIfSpikeClickedOn(x, y);
                     board.checkIfPieceContainerClickedOn(x, y);
@@ -1264,14 +1240,12 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     }
 
     private void RESET_ENTIRE_GAME_VARS() {
-        showRollButton = true;
-        resetVarsTurn();
         message2Players = VERSION;
         gameComplete = false;
         whiteResigned = false;
         blackResigned = false;
 
-        // so it doesnt continuing playin on its own
+        // so it doesnt continuing playing on its own
         HUMAN_VS_COMPUTER = false;
         Bot.dead = true;
         splashCounter = 0;
@@ -1291,7 +1265,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             Bot.dead = !Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER &&
                 (board.getCurrentPlayer().getColour() == PlayerColor.WHITE);
         }
-        resetVarsTurn();
     }
 
     //checks if the preferences button is pressed and deals with it if so

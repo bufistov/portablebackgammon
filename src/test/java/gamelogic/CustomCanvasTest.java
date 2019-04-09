@@ -126,7 +126,7 @@ class CustomCanvasTest {
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.setCurrentPlayer(board.getWhitePlayer());
-        assertTrue(CustomCanvas.showRollButton);
+        assertTrue(board.showRollButton());
 
         Field rollButtonX = makeCanvasFieldPublic("rollButtonX");
         Field rollButtonY = makeCanvasFieldPublic("rollButtonY");

@@ -19,7 +19,7 @@ public class TestableBoard extends Board {
 
     @Override
     public void rollDies(){
-        die1.setActualValue(roll1Value);
-        die2.setActualValue(roll2Value);
+        die1.setValue(roll1Value);
+        die2.setValue(roll2Value);
     }
 }
