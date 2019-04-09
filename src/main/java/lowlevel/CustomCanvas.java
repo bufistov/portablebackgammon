@@ -1260,8 +1260,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             tellPlayers("White's turn to roll.");
         }
         board.nextTurn();
-        Bot.dead = !Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER &&
-            (board.getCurrentPlayer().getColour() == PlayerColor.WHITE);
+        Bot.dead = !Bot.getFullAutoPlay() &&
+            (board.getCurrentPlayer().getColour() == PlayerColor.WHITE || !HUMAN_VS_COMPUTER);
     }
 
     //checks if the preferences button is pressed and deals with it if so
