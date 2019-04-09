@@ -23,7 +23,7 @@ public class Board {
     private Spike theBarBLACK;
     private Vector whitePiecesSafelyInContainer = new Vector(15);
     private Vector blackPiecesSafelyInContainer = new Vector(15);
-    protected boolean diesRolled = false;
+    private boolean diesRolled = false;
 
     private Utils utils = new Utils();
     private Sound sfxNoMove;

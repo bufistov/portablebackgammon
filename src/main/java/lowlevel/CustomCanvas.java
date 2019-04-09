@@ -677,7 +677,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "Roll";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
 
-        if (board.showRollButton()) {
+        if (!gameComplete() && board.showRollButton()) {
             //draw in centre:
             xposTmp = ((geometry.boardWidth() / 2)) - widthOfPrintMe / 2;
 
