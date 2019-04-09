@@ -84,6 +84,10 @@ public class Spike {
         return position == thatSpike.getPosition();
     }
 
+    boolean isEmpty() {
+        return pieces.isEmpty();
+    }
+
     boolean userClickedOnThis(int mouseX, int mouseY) {
         return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
             (mouseY >= collision_y && mouseY <= collision_y + height());

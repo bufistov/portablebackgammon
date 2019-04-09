@@ -23,6 +23,7 @@ public class Board {
     private Spike theBarBLACK;
     private Vector whitePiecesSafelyInContainer = new Vector(15);
     private Vector blackPiecesSafelyInContainer = new Vector(15);
+    protected boolean diesRolled = false;
 
     private Utils utils = new Utils();
     private Sound sfxNoMove;
@@ -173,7 +174,7 @@ public class Board {
             } else {
                 pulsatePotentialSpikes(mouseX, mouseY);
             }
-            if (die1.enabled() || die2.enabled()) {
+            if (!turnOver()) {
                 calculatePotentialMoves();
             }
         }
@@ -234,6 +235,10 @@ public class Board {
     // given the die this method will add spikes to spikesAllowedToMoveToFromBar
     // for current player so that the spikes available will flash and be ready to have a piece added to them
     private boolean canWeGetOffTheBarWithThisDie(Die die, DieType whichDie, ArrayList<Spike> spikesAllowedToMoveToFromBar) {
+        Spike barSpike = currentPlayer.isWhite() ? theBarWHITE : theBarBLACK;
+        if (barSpike.isEmpty()) {
+            return false;
+        }
         int destinationSpikeId = whoseTurnIsIt() == PlayerColor.BLACK ? die.getValue() - 1 : 24 - die.getValue();
         if (destinationSpikeId >= 0 && destinationSpikeId < spikes.size()) {
             Spike destinationSpike = spikes.get(destinationSpikeId);
@@ -258,6 +263,13 @@ public class Board {
         whitePiecesSafelyInContainer.clear();
         blackPiecesSafelyInContainer.clear();
         SPtheMoveToMake = null;
+        diesRolled = false;
+        if (die1.enabled()) {
+            die1.noOptions();
+        }
+        if (die2.enabled()) {
+            die2.noOptions();
+        }
         initialiseBoard(INIT_CONFIGURATION);
     }
 
@@ -463,7 +475,7 @@ public class Board {
                 Enumeration ee = spikePairs.elements();
                 while (ee.hasMoreElements()) {
                     SpikePair sp = (SpikePair) ee.nextElement();
-                    botOptions += "->" + sp.pickMyPiece.getName() + "->" + sp.dropPiecesOnMe.getName() + " ";
+                    botOptions += sp.pickMyPiece.getName() + "->" + sp.dropPiecesOnMe.getName() + " ";
                 }
                 log("valid options: " + botOptions);
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
@@ -473,8 +485,7 @@ public class Board {
                     CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.getName() + "->Container");
                     Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
                     Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    setBotDestination(firstPiece.getCenterX(), firstPiece.getCenterY(),
-                        "TAKE A PIECE TO CONTAINER");
+                    setBotDestination(firstPiece.getCenterX(), firstPiece.getCenterY(), "TAKE A PIECE TO CONTAINER");
                 } else {
                     log("-randomly chose to go to spike:" +
                         SPtheMoveToMake.pickMyPiece + " and drop off at spike:" +
@@ -488,11 +499,6 @@ public class Board {
                     setBotDestination(goToX, goToY, "RANDOMLY CHOOSE A PIECE");
                     log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
                 }
-            } else if (spikesToMoveToFromBar(whoseTurnIsIt()).isEmpty()){
-                log("NO OPTIONS!");
-                die1.noOptions();
-                die2.noOptions();
-                sfxNoMove.playSound();
             }
         } else if (pieceStuckToMouse() != null) {
             // Point robot the final destination after it took the piece
@@ -509,15 +515,17 @@ public class Board {
         log("Getting valid spike pairs");
         Vector spikePairs = new Vector(5);
         int diceRoll = -1;
+        Die die = die1;
         if (die1.enabled()) {
             diceRoll = die1.getValue();
             log("using DIE1 value " + diceRoll);
         } else if (die2.enabled()) {
             diceRoll = die2.getValue();
+            die = die2;
             log("using DIE2 value " + diceRoll);
         }
         if (diceRoll > 0) {
-            for (Spike spike: spikes) {
+            for (Spike spike : spikes) {
                 if (spike.getAmountOfPieces(currentPlayer.getColour()) > 0) {
                     Integer potentialSpike = currentPlayer.getDestinationSpikeId(spike, diceRoll);
                     ArrayList<Integer> reachableSpikes = reachableSpikes(spike, currentPlayer, die1, die2);
@@ -528,12 +536,12 @@ public class Board {
                     }
                 }
             }
-        }
-        if (spikePairs.isEmpty()) {
-            if (diceRoll == die1.getValue() && !canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, null))
-                die1.noOptions();
-            if (diceRoll == die2.getValue() && !canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, null))
-                die2.noOptions();
+            if (spikePairs.isEmpty()) {
+                if (!haveToMovePieceFromBar(currentPlayer.getColour())) {
+                    die.noOptions();
+                    sfxNoMove.playSound();
+                }
+            }
         }
         log("finished getValidOptions");
         return spikePairs;
@@ -592,6 +600,7 @@ public class Board {
             log("WHITES TURN");
         }
         assert die1.disabled() && die2.disabled();
+        diesRolled = false;
         SPtheMoveToMake = null;
     }
 
@@ -633,6 +642,7 @@ public class Board {
             die1.doubleRoll();
             die2.doubleRoll();
         }
+        diesRolled = true;
     }
 
     public boolean rolledDouble() {
@@ -756,24 +766,27 @@ public class Board {
             reachableSpikes(spikes.get(sourceSpikeId), player, die1, die2).contains(player.containerId());
     }
 
-    public int drawBarPieces(Graphics g) {
+    public void drawBarPieces(Graphics g) {
         int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
         Enumeration eW = theBarWHITE.pieces.elements();
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
-            p.paint(g,
-                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
-                pieceOnBarY -= geometry.pieceDiameter());
+            if (!p.stickToMouse()) {
+                p.paint(g,
+                    (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                    pieceOnBarY -= geometry.pieceDiameter());
+            }
         }
         pieceOnBarY = (geometry.boardHeight() / 2);
         Enumeration eB = theBarBLACK.pieces.elements();
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
-            p.paint(g,
-                (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
-                pieceOnBarY += geometry.pieceDiameter());
+            if (!p.stickToMouse()) {
+                p.paint(g,
+                    (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                    pieceOnBarY += geometry.pieceDiameter());
+            }
         }
-        return pieceOnBarY;
     }
 
     public void drawPieceStuckToMouse(Graphics g, int mouseX, int mouseY) {
@@ -930,15 +943,10 @@ public class Board {
             spikes.get(pieceStuckToMouse.sourceSpikeId()).removePiece(pieceStuckToMouse);
 
         if (destinationSpikeId == currentPlayer.containerId()) {
-            if (whoseTurnIsIt() == PlayerColor.WHITE) {
-                whitePiecesSafelyInContainer.add(pieceStuckToMouse);
-                log("whitePiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" +
-                    whitePiecesSafelyInContainer.size());
-            } else if (whoseTurnIsIt() == PlayerColor.BLACK) {
-                blackPiecesSafelyInContainer.add(pieceStuckToMouse);
-                log("blackPiecesSafelyInContainer HAS HAD ONE ADDED TO IT, NEW SIZE:" +
-                    blackPiecesSafelyInContainer.size());
-            }
+            Vector container = (whoseTurnIsIt() == PlayerColor.WHITE) ? whitePiecesSafelyInContainer :
+            blackPiecesSafelyInContainer;
+            container.add(pieceStuckToMouse);
+            log(String.format("%s Container HAS HAD ONE ADDED TO IT, NEW SIZE: %d", whoseTurnIsIt(), container.size()));
             sfxPutPieceInContainer.playSound();
         } else {
             Spike destinationSpike = spikes.get(destinationSpikeId);
@@ -946,7 +954,6 @@ public class Board {
             PlayerColor otherColor = currentPlayer.isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
             Spike piecesOnBar = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
             if (destinationSpike.getAmountOfPieces(otherColor) > 0) {
-                //// SPECIAL CONDITION - A PIECE KILLED////////////////////
                 log(String.format("%s KILLED A %s", thisColor, otherColor));
                 Piece firstPiece = (Piece) destinationSpike.pieces.firstElement();
                 destinationSpike.removePiece(firstPiece);
@@ -1011,7 +1018,7 @@ public class Board {
     }
 
     public boolean turnOver() {
-        return die1.disabled() && die2.disabled();
+        return diesRolled && die1.disabled() && die2.disabled();
     }
 
     private boolean allowPieceToStickToMouse(Spike activeSpike) {

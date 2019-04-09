@@ -16,27 +16,6 @@ import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TestableBoard extends Board {
-    private final int roll1Value;
-    private final int roll2Value;
-    TestableBoard(GameColour gameColour, Geometry geometry, GameConfig config, int roll1Value,
-                  int roll2Value) {
-        super(gameColour, geometry, config);
-        this.roll1Value = roll1Value;
-        this.roll2Value = roll2Value;
-    }
-
-    TestableBoard(GameColour gameColour, Geometry geometry, GameConfig config, int rollValue) {
-        this(gameColour, geometry, config, rollValue, rollValue);
-    }
-
-    @Override
-    public void rollDies(){
-        die1.setValue(roll1Value);
-        die2.setValue(roll2Value);
-    }
-}
-
 class BoardTest {
 
     private GameConfig config;
@@ -228,5 +207,47 @@ class BoardTest {
         assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 21));
         assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 22));
         assertFalse((Boolean) pulsateContainer.invoke(board, board.getBlackPlayer(), 18));
+    }
+
+    @Test
+    @DisplayName("can we get of the bar with this dies")
+    void test8() throws Exception {
+        Board board = new Board(colours, geometry, config);
+        Method canWeGetOffTheBarWithThisDie = Board.class.getDeclaredMethod("canWeGetOffTheBarWithThisDie",
+            Die.class, DieType.class, ArrayList.class);
+        canWeGetOffTheBarWithThisDie.setAccessible(true);
+        board.checkConsistent();
+        board.rollDies();
+        board.setCurrentPlayer(board.getWhitePlayer());
+        Die die = new Die(geometry);
+        die.setValue(3);
+        assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+
+        int[] whiteHome = {
+            0,0,0,0,14,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,6,8,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.checkConsistent();
+        assertTrue((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+        assertTrue((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE2, null));
+        die.setValue(4);
+        assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+        die.setValue(5);
+        assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+        die.roll();
+        die.setValue(6);
+        assertTrue((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+        die.roll();
+        die.disable();
+        assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
     }
 }
