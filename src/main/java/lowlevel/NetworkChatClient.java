@@ -315,7 +315,7 @@ public class NetworkChatClient implements Runnable {
                if (nextLine.contains("ZZZ "+nick)) {
                    System.out.println("RECEIVED PLAY");
                    //Bot.FULL_AUTO_PLAY=true;
-                   Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER=true;
+                   //Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER=true;
                  //  Bot.NETWORK_OPPONENT=true;
                    Bot.dead=false;
                    this.customCanvas.startGame();
@@ -325,7 +325,7 @@ public class NetworkChatClient implements Runnable {
                if (nextLine.contains("ZZZ ROLL")) {
                    System.out.println("RECEIVED ROLL");
                    //Bot.FULL_AUTO_PLAY=true;
-                   Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER=true;
+                   //Board.NOT_A_BOT_BUT_A_NETWORKED_PLAYER=true;
                  //  Bot.NETWORK_OPPONENT=true;
                    Bot.dead=false;
                    this.customCanvas.startGame();

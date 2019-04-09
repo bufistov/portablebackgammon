@@ -15,84 +15,86 @@ public class Piece {
     public static int BLACK_PIECE_INNER_COLOUR = 0x452402;
     private static Color white_piece_color, black_piece_color;
 
-    public static int PIECE_DIAMETER = 0;
-    
-    // these variables (along with PIECE_DIAMETER) are used to work out if the player has clicked on the piece
-    int collision_x;
-    int collision_y;
+    private Geometry geometry;
+    private int centerX;
+    private int centerY;
 
-    private PlayerColor colour;
+    private final PlayerColor colour;
     private Utils utils = new Utils();
     private boolean stickToMouse;
+    private int sourceSpikeId;
 
-    Piece(Player father) {
+    Piece(Geometry geometry, Player father) {
         if (father == null) {
             Utils._E("Piece was made with a null father");
         }
         log("Piece made. father is " + father.getColour());
+        this.geometry = geometry;
         colour = father.getColour();
-        makeColourObjects(false);
+        makeColourObjects();
     }
 
-    public static void makeColourObjects(boolean forceRecreation) {
-        if (white_piece_color==null || forceRecreation) {
-            white_piece_color=new Color(WHITE_PIECE_COLOUR);
-        }
-        if (black_piece_color==null || forceRecreation) {
-            black_piece_color=new Color(BLACK_PIECE_COLOUR);
-        }
+    public static void makeColourObjects() {
+        white_piece_color = new Color(WHITE_PIECE_COLOUR);
+        black_piece_color = new Color(BLACK_PIECE_COLOUR);
     }
 
-    public PlayerColor getColour()
-    {
+    public PlayerColor getColour() {
         return colour;
     }
 
-    public void drawPieceOnMouse(Graphics g, Geometry geometry) {
-        paint( g, geometry, 0, 0);
+    public int getCenterX() {
+        return centerX;
     }
 
-    public void paint(Graphics g, Geometry geometry, int x, int y) {
-        PIECE_DIAMETER = geometry.pieceDiameter();
+    public int getCenterY() {
+        return centerY;
+    }
+
+    public void drawPieceOnMouse(Graphics g, int mouseX, int mouseY) {
+        paint( g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
+    }
+
+    public void paint(Graphics g, int x, int y) {
+        int pieceDiameter = geometry.pieceDiameter();
         if (colour == PlayerColor.WHITE) {
             utils.setColor(g, white_piece_color);
         } else if (colour == PlayerColor.BLACK) {
             utils.setColor(g, black_piece_color);
-        } else {
-            Utils._E("Dave, Im a bit worried that this piece doesnt know what colour it is.");
         }
 
-        if (stickToMouse) {
-            x = Board.mouseHoverX;
-            y = Board.mouseHoverY;
-        }
-        utils.fillCircle(g, x, y, PIECE_DIAMETER, PIECE_DIAMETER);
+        utils.fillCircle(g, x, y, pieceDiameter, pieceDiameter);
         utils.setColor(g, Color.BLACK);
-        utils.drawCircle(g, x, y, PIECE_DIAMETER, PIECE_DIAMETER);
+        utils.drawCircle(g, x, y, pieceDiameter, pieceDiameter);
 
-        collision_x = x;
-        collision_y = y;
+        centerX = x + geometry.pieceRadius();
+        centerY = y + geometry.pieceRadius();
         if (CustomCanvas.showBoundaryBoxes) {
             utils.setColor(g,Color.RED);
-            utils.drawRect(g,collision_x, collision_y,PIECE_DIAMETER, PIECE_DIAMETER);
+            utils.drawRect(g, x, y, pieceDiameter, pieceDiameter);
         }
     }
 
-    //this is called to tell the piece to use the x, y vals from the mouse
-    //instead of its usual ones as the user is placing it and it needs to stick to the
-    //mouse point until they do place it.
-    public void stickToMouse() {
+    public void stickToMouse(int spikeId) {
         stickToMouse = true;
+        sourceSpikeId = spikeId;
+    }
+
+    public int sourceSpikeId() {
+        return sourceSpikeId;
+    }
+
+    public boolean stickToMouse() {
+        return stickToMouse;
     }
     
     public void unstickFromMouse() {
         stickToMouse = false;
     }
 
-
     public boolean userClickedOnThis(int mouseX, int mouseY) {
-       return (mouseX >= collision_x && mouseX <= collision_x + PIECE_DIAMETER)
-        && (mouseY >= collision_y && mouseY <= collision_y + PIECE_DIAMETER);
+       return Math.abs(mouseX - centerX) <= geometry.pieceRadius()
+        && Math.abs(mouseY - centerY) <= geometry.pieceRadius();
     }
 
     private void log(String s) {

@@ -24,15 +24,12 @@ public class Spike {
     private Color black_spike_colour, white_spike_colour;
     private static final Color flashColor = new Color(255,225,0);
 
-    public  Vector pieces = new Vector();
+    Vector pieces = new Vector();
     private int position; // 1 to 24
     private final SpikeType type;
     private final String spikeName;
     private Geometry geometry;
     private Utils utils = new Utils();
-
-    private int TRIANGLE_WIDTH = 0;
-    private int TRIANGLE_HEIGHT = 0;
 
     // these variables (along with TRIANGLE_WIDTH & TRIANGLE_HEIGHT) are used to work out if the player has clicked on the piece
     private int collision_x;
@@ -52,10 +49,15 @@ public class Spike {
         this.position = position;
         assert position != 0;
         if (position < 0) {
-            log("Special spike made, this isnt a spike at all, its a piece container");
+            log("Container spike is made");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
             this.spikeName = "Container";
             this.type = SpikeType.CONTAINER;
+        } else if (position > 24) {
+            log("Bar spike is make");
+            this.position = NOT_A_REAL_SPIKE_MINUS_99;
+            this.spikeName = "Bar";
+            this.type = SpikeType.BAR;
         } else {
             spikeName = Integer.toString(position - 1);
             this.type = position <= 12 ? STALECTITE : STALECMITE;
@@ -73,13 +75,26 @@ public class Spike {
         return spikeName;
     }
 
-    public boolean userClickedOnThis(int mouseX, int mouseY) {
+    @Override
+    public boolean equals(Object that) {
+        if (! (that instanceof Spike)) {
+            return false;
+        }
+        Spike thatSpike = (Spike)that;
+        return position == thatSpike.getPosition();
+    }
+
+    boolean isEmpty() {
+        return pieces.isEmpty();
+    }
+
+    boolean userClickedOnThis(int mouseX, int mouseY) {
         return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
             (mouseY >= collision_y && mouseY <= collision_y + height());
     }
 
     // add a piece to this spike
-    public boolean addPiece(Piece p) {
+    boolean addPiece(Piece p) {
         if (spikeName != null) {
             log("Spike "+ getSpikeNumber()+ " just has a piece added.");
         }
@@ -89,7 +104,7 @@ public class Spike {
 
     // remove this piece from the spike, pass spike in to remove, or pass null and the
     // first one will be removed.
-    public boolean removePiece(Piece p) {
+    boolean removePiece(Piece p) {
         if (spikeName != null) {
             log("Spike "+getSpikeNumber()+" just has a piece removed.");
         } else {
@@ -99,28 +114,24 @@ public class Spike {
         return true;
     }
 
-    public int getAmountOfPieces(PlayerColor playerColor) {
+    int getAmountOfPieces(PlayerColor playerColor) {
         if (pieces.size() == 0 || ((Piece)pieces.get(0)).getColour() != playerColor)
             return 0;
         return pieces.size();
     }
 
-    void paint(Graphics g, int boardWidth, int boardHeightWithBorder) {
-        int boardHeight = boardHeightWithBorder - geometry.borderWidth() * 2;
-        int spikesTotalWidth = boardWidth - ((geometry.borderWidth() * 2) + geometry.centralBarWidth());
-        TRIANGLE_WIDTH            = (spikesTotalWidth + 6) / 12;
-        TRIANGLE_HEIGHT           = boardHeight / 2;
-
-        workOutPositionsOfSpike(boardHeight, TRIANGLE_WIDTH);
+    void paint(Graphics g, Board board) {
+        workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
+            geometry.spikeWidth());
         drawSpike(g);
         drawPieces(g, spikeName);
         if (flash) {
-            drawPotentialDieMoves(g);
+            drawPotentialDieMoves(g, board);
         }
         flash = false;
     }
 
-    public int getSpikeNumber() {
+    int getSpikeNumber() {
         return position - 1;
     }
 
@@ -154,12 +165,16 @@ public class Spike {
         storedDie = die;
     }
 
-    public Die get_stored_die() {
+    Die get_stored_die() {
         return storedDie;
     }
 
     boolean isContainer() {
         return type == SpikeType.CONTAINER;
+    }
+
+    boolean isBar() {
+        return type == SpikeType.BAR;
     }
 
     Point getMiddlePoint() {
@@ -169,48 +184,36 @@ public class Spike {
 
     private void drawPieces(Graphics g, String spikeName) {
         Enumeration e = pieces.elements();
-        int yPosForPieces = y1 - Piece.PIECE_DIAMETER;
-
-        //adjust the starting point of the pieces pending on type of spike:
-        /////////////////////////////////////////////
-        if(getType() == STALECTITE) {
-           yPosForPieces = y1 - Piece.PIECE_DIAMETER;
-        } else if(getType() == STALECMITE) {
+        int yPosForPieces = y1 - geometry.pieceDiameter();
+        if(getType() == STALECMITE) {
            yPosForPieces = y1;
-        } else {
-            Utils._E(spikeName+">>>Cannot work out the Y value for a piece since the spike claims to have no type!");
         }
 
         int overlapOnPieces = 0;
         if (pieces.size() > 5) {
-            overlapOnPieces = Piece.PIECE_DIAMETER / 3;
+            overlapOnPieces = geometry.pieceDiameter() / 3;
         }
         if (pieces.size() > 7) {
-            overlapOnPieces = Piece.PIECE_DIAMETER / 2;
+            overlapOnPieces = geometry.pieceDiameter() / 2;
         }
         if (pieces.size() > 9) {
-            overlapOnPieces = (Piece.PIECE_DIAMETER / 2) + pieces.size() / 3;
+            overlapOnPieces = geometry.pieceDiameter() / 2 + pieces.size() / 3;
         }
+        int piecex = x2 - geometry.pieceDiameter() / 2;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
-            int piecex = x2 - Piece.PIECE_DIAMETER / 2;
-            int piecey = -1;
-
-            //caters for overlappin pieces when manny are added.
-            // we need a different y value for top and bottom spikes
-            // so that on top spikes the pieces move down
-            // and on bottom spikes the pieces move up
-            if(getType() == STALECTITE) {
-               piecey = yPosForPieces += (Piece.PIECE_DIAMETER-overlapOnPieces);
-            } else if(getType() == STALECMITE) {
-                piecey = yPosForPieces -= (Piece.PIECE_DIAMETER-overlapOnPieces);
-            } else {
-                Utils._E(spikeName+"---Cannot work out the Y value for a piece since the spike claims to have no type!");
-            }
-            if(getType() == STALECTITE) {  // overlap here just squares them up to the bottom/top of spike if there overlapping
-                 p.paint(g, geometry, piecex,piecey + overlapOnPieces);
-            } else {
-                 p.paint(g, geometry, piecex,piecey - overlapOnPieces);
+            if (!p.stickToMouse()) {
+                int piecey = -1;
+                if (getType() == STALECTITE) {
+                    piecey = yPosForPieces += (geometry.pieceDiameter() - overlapOnPieces);
+                } else if (getType() == STALECMITE) {
+                    piecey = yPosForPieces -= (geometry.pieceDiameter() - overlapOnPieces);
+                }
+                if (getType() == STALECTITE) {
+                    p.paint(g, piecex, piecey + overlapOnPieces);
+                } else {
+                    p.paint(g, piecex, piecey - overlapOnPieces);
+                }
             }
         }
     }
@@ -240,28 +243,28 @@ public class Spike {
         }
     }
 
-    private void drawPotentialDieMoves(Graphics g) {
+    private void drawPotentialDieMoves(Graphics g, Board board) {
         final int miniDieX = x2 - geometry.miniDieSize() / 2;
         final int miniDieHeight = geometry.miniDieSize();
         if (whichDiei == DIE1) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, miniDieX, y1);
+                board.die1.drawMiniDie(g, miniDieX, y1);
             }
         } else if (whichDiei == DIE2) {
             if (getType() == STALECMITE) {
-                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die2.drawMiniDie(g, miniDieX, y1);
+                board.die2.drawMiniDie(g, miniDieX, y1);
             }
         } else if (whichDiei == DIE1AND2) {
             if (getType() == STALECMITE) {
-                Board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
-                Board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
+                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                Board.die1.drawMiniDie(g, miniDieX, y1);
-                Board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
+                board.die1.drawMiniDie(g, miniDieX, y1);
+                board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
         }
     }
@@ -281,6 +284,8 @@ public class Spike {
     // and boundaries for mouse click event
     private void workOutPositionsOfSpike(int boardHeight, int TRIANGLE_WIDTH) {
         int widthMinusBorderAndPieceComponent = geometry.boardWidth() - geometry.borderWidth();
+        int total = geometry.spikeWidth() * 12 + geometry.centralBarWidth() + 2 * geometry.borderWidth();
+        assert total == geometry.boardWidth();
         y1 = geometry.borderWidth();
         if (position <= 6) {
             //TOP RIGHT SEGMENT OF BOARD (6 spikes_
@@ -317,11 +322,10 @@ public class Spike {
     }
 
     private int height() {
-        assert TRIANGLE_HEIGHT > 0;
-        return TRIANGLE_HEIGHT - TRIANGLE_HEIGHT / 10;
+        return geometry.spikeHeight();
     }
 
     private int width() {
-        return TRIANGLE_WIDTH;
+        return geometry.spikeWidth();
     }
 }

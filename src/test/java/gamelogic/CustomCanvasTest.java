@@ -14,8 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestableCanvas extends CustomCanvas {
 
@@ -78,14 +77,14 @@ class CustomCanvasTest {
     }
 
     @Test
-    @DisplayName("Infinite loop bug repro")
+    @DisplayName("All at home, double, no valid options")
     void test2() throws Exception {
         GameConfig config = Mockito.mock(GameConfig.class);
         Mockito.when(config.maxSplashCounter()).thenReturn(50);
 
         JFrame frame = new JFrame();
         Geometry geometry = new Geometry(0, 0);
-        TestableBoard board = new TestableBoard(new GameColour(), geometry, config, 1);
+        Board board = new TestableBoard(new GameColour(), geometry, config, 1);
         CustomCanvas canvas = new TestableCanvas(frame, geometry, board, config);
 
         assertEquals(GuiState.SPLASH_SCREEN, canvas.getState());
@@ -125,8 +124,8 @@ class CustomCanvasTest {
             0,0,13,0,0,0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
-        board.setCurrentPlayer(PlayerColor.WHITE);
-        assertTrue(CustomCanvas.showRollButton);
+        board.setCurrentPlayer(board.getWhitePlayer());
+        assertTrue(board.showRollButton());
 
         Field rollButtonX = makeCanvasFieldPublic("rollButtonX");
         Field rollButtonY = makeCanvasFieldPublic("rollButtonY");
@@ -136,9 +135,14 @@ class CustomCanvasTest {
         buttonX = (int)rollButtonX.get(canvas) + (int)rollButtonW.get(canvas) / 2;
         buttonY = (int)rollButtonY.get(canvas) + (int)rollButtonH.get(canvas) / 2;
         MouseEvent clickRollButton = new MouseEvent(canvas, 0, System.nanoTime(), 0, buttonX, buttonY, 1, false);
+        assertTrue(board.showRollButton());
         canvas.mouseClicked(clickRollButton);
+        assertTrue(board.getCurrentPlayer().isWhite());
+
         assertTrue(board.rolledDouble());
         canvas.paint(graphics);
         canvas.paint(graphics);
+        assertFalse(board.getCurrentPlayer().isWhite());
+        assertTrue(board.showRollButton());
     }
 }

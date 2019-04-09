@@ -7,8 +7,8 @@ package gamelogic;
 class SpikePair {
 
     SpikePair(Spike pickMyPiece_,Spike dropPiecesOnMe_) {
-        pickMyPiece=pickMyPiece_;
-        dropPiecesOnMe=dropPiecesOnMe_;
+        pickMyPiece = pickMyPiece_;
+        dropPiecesOnMe = dropPiecesOnMe_;
     }
     Spike pickMyPiece;
     Spike dropPiecesOnMe;

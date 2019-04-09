@@ -5,6 +5,7 @@
 package lowlevel;
 import gamelogic.Board;
 import gamelogic.GameConfig;
+import gamelogic.TestableBoard;
 import graphics.GameColour;
 import graphics.Geometry;
 import org.aeonbits.owner.ConfigFactory;
@@ -35,6 +36,7 @@ public class Main {
         frame = new JFrame();
         GameColour colours = new GameColour();
         Geometry geometry = new Geometry(0, 0);
+        // board = new TestableBoard(colours, geometry, config, 1, 2);
         board = new Board(colours, geometry, config);
         canvas = new CustomCanvas(frame, colours, geometry, board, config);
         initMainWindow(frame, true);

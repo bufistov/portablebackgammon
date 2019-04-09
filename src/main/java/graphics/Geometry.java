@@ -32,11 +32,13 @@ public class Geometry {
     }
 
     public int boardWidth() {
-        return getCanvasWidth() / panelSizeFraction() * (panelSizeFraction() - 1);
+        int initWidth = getCanvasWidth() / panelSizeFraction() * (panelSizeFraction() - 1);
+        int spikeArea = initWidth - 2 * borderWidth() - centralBarWidth();
+        return initWidth - spikeArea % 12;
     }
 
     public int borderWidth() {
-        return boardWidth() / 64;
+        return canvasWidth / 80;
     }
 
     public int boardHeight() {
@@ -48,11 +50,11 @@ public class Geometry {
     }
 
     public int panelWidth() {
-        return (getCanvasWidth() / panelSizeFraction()) - borderWidth();
+        return getCanvasWidth() - boardWidth() - borderWidth();
     }
 
     public int spikeWidth() {
-        return (boardWidth() - (borderWidth() * 4) + 6) / 12;
+        return (boardWidth() - (borderWidth() * 4)) / 12;
     }
 
     public int spikeHeight() {
@@ -78,5 +80,41 @@ public class Geometry {
 
     public int miniDieSize() {
         return dieSize() - 6;
+    }
+
+    public int pieceRadius() {
+        return pieceDiameter() / 2;
+    }
+
+    public int containerWidth() {
+        return panelWidth() / 3;
+    }
+
+    public int containerHeight() {
+        return containerSubSize() * 15;
+    }
+
+    public int containerSubSize() {
+        return boardHeight() / 70;
+    }
+
+    public int panelFontHeight() {
+        return 20;
+    }
+
+    public int containerX() {
+        return boardWidth() + ((panelWidth() / 4) - (containerWidth() / 2));
+    }
+
+    public int containerMargin() {
+        return panelFontHeight() * 3 + borderWidth() * 2 + tinyGap();
+    }
+
+    public int whiteContainerY() {
+        return containerMargin();
+    }
+
+    public int blackContainerY() {
+        return boardHeight() - (containerHeight() + containerMargin());
     }
 }

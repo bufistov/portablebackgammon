@@ -105,6 +105,8 @@ class doComms implements Runnable {
             server.close();
         } catch (IOException ioe) {
             System.out.println("IOException on socket listen (already a server running on this ip and port???) : " + ioe);//HAPPENS WHEN YOU TRY TO RUN 2 SERVERS ON ONE MACHINE.
+        } catch (Exception exception) {
+            Utils._E(String.format("GameNetworkServer exception %s", exception));
         }
     }
 }
