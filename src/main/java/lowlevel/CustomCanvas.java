@@ -555,9 +555,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         int boardHeight = getHeight();
         board.paint(g, boardWidth, boardHeight, !gameComplete(), mouseHoverX, mouseHoverY);
 
-        // FIXME: check this when turn is over to avoid races
-        checkIfGameIsOver();
-
         //paint the message panel to the right with players name etc
         utils.setColor(g, panel_colour);
         utils.fillRect(g, boardWidth, geometry.borderWidth(),
@@ -587,8 +584,12 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         int xpos = boardWidth + geometry.tinyGap();
         drawHUDtext(g, xpos);
         board.drawPieceStuckToMouse(g, mouseHoverX, mouseHoverY);
-        if (board.turnOver()) {
-            turnOver();
+        if (!gameComplete() && board.turnOver()) {
+            log("---- THIS TURN IS OVER ----");
+            checkIfGameIsOver();
+            if (!gameComplete()) {
+                nextTurn();
+            }
         }
     }
 
@@ -1252,19 +1253,15 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         loadSounds(soundOn);
     }
 
-    void turnOver() {
-        log("---- THIS TURN IS OVER ----");
+    void nextTurn() {
         if (board.getCurrentPlayer().getColour() ==  PlayerColor.WHITE) {
             tellPlayers("Black's turn to roll.");
         } else {
             tellPlayers("White's turn to roll.");
         }
-        if (!gameComplete()) {
-            log("GO TO NEW TURN AA");
-            board.nextTurn();
-            Bot.dead = !Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER &&
-                (board.getCurrentPlayer().getColour() == PlayerColor.WHITE);
-        }
+        board.nextTurn();
+        Bot.dead = !Bot.getFullAutoPlay() && HUMAN_VS_COMPUTER &&
+            (board.getCurrentPlayer().getColour() == PlayerColor.WHITE);
     }
 
     //checks if the preferences button is pressed and deals with it if so
