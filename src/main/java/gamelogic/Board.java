@@ -213,23 +213,14 @@ public class Board {
 
     private void pulsatePotentialSpikesFromBar() {
         ArrayList<Spike> spikesAllowedToMoveToFromBar = new ArrayList<>();
-        boolean cantGetOfBarWithDie1 = !canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, spikesAllowedToMoveToFromBar);
-        if (!cantGetOfBarWithDie1) {
-            getOffTheBarOptions(spikesAllowedToMoveToFromBar);
-        } else {
-            log("NO OPTIONS FOR GETTING OFF BAR WITH DIE1");
-        }
-        boolean cantGetOfBarWithDie2 = !canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, spikesAllowedToMoveToFromBar);
-        if (!cantGetOfBarWithDie2) {
-            getOffTheBarOptions(spikesAllowedToMoveToFromBar);
-        } else {
-            log("NO OPTIONS FOR GETTING OFF BAR WITH DIE2");
-        }
-
-        if (cantGetOfBarWithDie1 && cantGetOfBarWithDie2) {
-            log("NO OPTIONS FROM BAR NEXT TURN!!!!!!!!!!!!!!");
+        canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, spikesAllowedToMoveToFromBar);
+        canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, spikesAllowedToMoveToFromBar);
+        if (spikesAllowedToMoveToFromBar.isEmpty()) {
+            log("NO OPTIONS FROM BAR!!!!!!!!!!!!!!");
             die1.noOptions();
             die2.noOptions();
+        } else {
+            getOffTheBarOptions(spikesAllowedToMoveToFromBar);
         }
     }
 
@@ -303,13 +294,9 @@ public class Board {
                 sourceSpikeId = -2;
             }
         }
-        if (sourceSpikeId == -1) {
-            ArrayList<Spike> possibleSpikes = this.spikesToMoveToFromBar(whoseTurnIsIt());
-            for (Spike spike: possibleSpikes) {
-                int neededValue = currentPlayer.isWhite() ? spike.getPosition() : 24 - spike.getPosition();
-                spike.flash(neededValue == die1.getValue() ? DieType.DIE1 : DieType.DIE2);
-            }
-        } else if (sourceSpikeId >= 0){
+
+        assert sourceSpikeId != -1;
+        if (sourceSpikeId >= 0){
             ArrayList<Integer> possibleSpikes = reachableSpikes(spikes.get(sourceSpikeId), currentPlayer, die1, die2);
             for (Integer spikeId: possibleSpikes) {
                 int neededValue = Math.abs(sourceSpikeId - spikeId);
