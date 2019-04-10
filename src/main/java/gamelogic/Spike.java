@@ -25,7 +25,7 @@ public class Spike {
     private static final Color flashColor = new Color(255,225,0);
 
     Vector pieces = new Vector();
-    private int position; // 1 to 24
+    private final int position; // index in the array of spikes
     private final SpikeType type;
     private final String spikeName;
     private Geometry geometry;
@@ -46,8 +46,6 @@ public class Spike {
 
     Spike(Geometry geometry, int position) {
         this.geometry = geometry;
-        this.position = position;
-        assert position != 0;
         if (position < 0) {
             log("Container spike is made");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
@@ -59,6 +57,7 @@ public class Spike {
             this.spikeName = "Bar";
             this.type = SpikeType.BAR;
         } else {
+            this.position = position;
             spikeName = Integer.toString(position - 1);
             this.type = position <= 12 ? STALECTITE : STALECMITE;
         }
