@@ -8,7 +8,9 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -120,6 +122,7 @@ class BoardTest {
         board.setCurrentPlayer(board.getBlackPlayer());
         board.rollDies();
         assertEquals(DieType.DIE2, board.whichDieGetsUsToPieceContainer(board.getBlackPlayer(), 19));
+        assertThrows(Exception.class, ()->board.whichDieGetsUsToPieceContainer(board.getBlackPlayer(), 20));
     }
 
     @Test
@@ -249,5 +252,40 @@ class BoardTest {
         die.roll();
         die.disable();
         assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
+    }
+
+    @Test
+    @DisplayName("4 moves with double to container")
+    void test9() throws Exception {
+        Board board = new TestableBoard(colours, geometry, config, 5);
+        int[] whiteHome = {
+            0,0,0,0,4,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,11
+        };
+        int[] blackHome = {
+            0,2,2,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,6,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.checkConsistent();
+        board.rollDies();
+        assertTrue(board.getCurrentPlayer().isWhite());
+        Graphics graphics = Mockito.mock(Graphics.class);
+        board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+        for (int i = 0; i < 4; ++i) {
+            assertFalse(board.turnOver());
+            Point spike = board.getSpikes().get(4).leftMostPoint();
+            board.checkIfPieceClickedOn(spike.x + geometry.spikeWidth() / 2, spike.y + geometry.pieceRadius());
+            Point containerMiddle = new Point(geometry.containerX(), geometry.whiteContainerY() + geometry.containerHeight() / 2);
+            board.checkIfPieceContainerClickedOn(containerMiddle.x, containerMiddle.y);
+            // repaint to update coordinates of pieces on spike
+            board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+        }
+        assertTrue(board.turnOver());
+        assertTrue(board.gameIsOver());
     }
 }

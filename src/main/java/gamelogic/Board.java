@@ -8,6 +8,8 @@ import graphics.GameColour;
 import graphics.Geometry;
 import lowlevel.*;
 
+import javax.swing.*;
+
 public class Board {
 
     private Color board_colour, bar_colour;
@@ -118,19 +120,33 @@ public class Board {
             spike.pieces.clear();
         }
         int whitePiecesOnBoard = 0;
-        for (int i = 0; i < whiteInitPositions.length; ++i) {
+        for (int i = 0; i < 24; ++i) {
             whitePiecesOnBoard += whiteInitPositions[i];
             for (int j = 0; j < whiteInitPositions[i]; ++j) {
                 Piece newPiece = new Piece(geometry, whitePlayer);
                 spikes.get(i).addPiece(newPiece);
             }
         }
+        if (whiteInitPositions.length > 24) {
+            whitePiecesOnBoard += whiteInitPositions[24];
+            for (int j = 0; j < whiteInitPositions[24]; ++j) {
+                Piece containerPiece = new Piece(geometry, whitePlayer);
+                whitePiecesSafelyInContainer.add(containerPiece);
+            }
+        }
         int blackPiecesOnBoard = 0;
-        for (int i = 0; i < blackInitPositions.length; ++i) {
+        for (int i = 0; i < 24; ++i) {
             blackPiecesOnBoard += blackInitPositions[i];
             for (int j = 0; j < blackInitPositions[i]; ++j) {
                 Piece newPiece = new Piece(geometry, blackPlayer);
                 spikes.get(i).addPiece(newPiece);
+            }
+        }
+        if (blackInitPositions.length > 24) {
+            blackPiecesOnBoard += blackInitPositions[24];
+            for (int j = 0; j < blackInitPositions[24]; ++j) {
+                Piece containerPiece = new Piece(geometry, blackPlayer);
+                blackPiecesSafelyInContainer.add(containerPiece);
             }
         }
         for (int j = whitePiecesOnBoard; j < 15; ++j) {
@@ -772,8 +788,7 @@ public class Board {
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g,
-                    (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                p.paint(g, geometry.boardWidth() / 2 - geometry.pieceRadius(),
                     pieceOnBarY -= geometry.pieceDiameter());
             }
         }
@@ -782,8 +797,7 @@ public class Board {
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g,
-                    (geometry.boardWidth() / 2) - geometry.pieceDiameter() / 2,
+                p.paint(g, geometry.boardWidth() / 2 - geometry.pieceRadius(),
                     pieceOnBarY += geometry.pieceDiameter());
             }
         }
@@ -978,7 +992,7 @@ public class Board {
         unstickPieceFromMouse();
     }
 
-    public void checkIfPieceClickedOn(int x,int y) {
+    public void checkIfPieceClickedOn(int x, int y) {
         if (pieceStuckToMouse() != null) {
             return;
         }

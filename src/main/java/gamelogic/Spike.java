@@ -124,7 +124,7 @@ public class Spike {
         workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
             geometry.spikeWidth());
         drawSpike(g);
-        drawPieces(g, spikeName);
+        drawPieces(g);
         if (flash) {
             drawPotentialDieMoves(g, board);
         }
@@ -182,7 +182,11 @@ public class Spike {
         return new Point(x2, y2 + dy);
     }
 
-    private void drawPieces(Graphics g, String spikeName) {
+    Point leftMostPoint() {
+        return new Point(x1, y1);
+    }
+
+    private void drawPieces(Graphics g) {
         Enumeration e = pieces.elements();
         int yPosForPieces = y1 - geometry.pieceDiameter();
         if(getType() == STALECMITE) {
