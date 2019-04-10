@@ -255,7 +255,7 @@ public class Board {
         return false;
     }
 
-    public void RESET_ENTIRE_GAME_VARS(boolean soundOn) {
+    public void init(boolean soundOn) {
         loadSounds(soundOn);
         currentPlayer = whitePlayer;
         theBarBLACK.pieces.clear();

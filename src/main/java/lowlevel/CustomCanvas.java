@@ -213,7 +213,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     /**
      * Must be called after canvas has window associated.
      */
-    public void init() {
+    void init() {
         requestFocus();
         if (enableDoubleBuffering) {
             createBufferStrategy(2);
@@ -1194,8 +1194,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             return;
         }
         if (gameComplete && e.getButton() == LEFT_MOUSE_BUTTON) {
-            board.RESET_ENTIRE_GAME_VARS(soundOn);
-            RESET_ENTIRE_GAME_VARS();
+            board.init(soundOn);
+            resetGame();
             state = SPLASH_SCREEN;
             return;
         }
@@ -1240,7 +1240,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         }
     }
 
-    private void RESET_ENTIRE_GAME_VARS() {
+    private void resetGame() {
         message2Players = VERSION;
         gameComplete = false;
         whiteResigned = false;
