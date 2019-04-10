@@ -36,8 +36,13 @@ public class Die {
         this.usesCounter = 2;
     }
 
+    boolean isDoubleRolled() {
+        return usesCounter == 2;
+    }
+
     void setValue(int newValue) {
         assert newValue >= 0 && newValue <= 6;
+        usesCounter = 1;
         value = newValue;
     }
 

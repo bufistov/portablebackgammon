@@ -288,4 +288,60 @@ class BoardTest {
         assertTrue(board.turnOver());
         assertTrue(board.gameIsOver());
     }
+
+    @Test
+    @DisplayName("4 moves with double to container, double move")
+    void test10() throws Exception {
+        Board board = new TestableBoard(colours, geometry, config, 2);
+        int[] whiteHome = {
+            0,0,0,4,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,11
+        };
+        int[] blackHome = {
+            2,0,2,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,6,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+
+        for (int i = 0; i < 2; ++i) {
+            board.checkConsistent();
+            board.setCurrentPlayer(board.getWhitePlayer());
+            board.rollDies();
+            assertTrue(board.getCurrentPlayer().isWhite());
+            Graphics graphics = Mockito.mock(Graphics.class);
+            board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+
+            Point sourceSpike = board.getSpikes().get(3).leftMostPoint();
+            board.checkIfPieceClickedOn(sourceSpike.x + geometry.spikeWidth() / 2, sourceSpike.y + geometry.pieceRadius());
+            Point destinationSpike = board.getSpikes().get(1).leftMostPoint();
+            destinationSpike = new Point(destinationSpike.x + geometry.spikeWidth() / 2,
+                destinationSpike.y + geometry.pieceRadius());
+            board.checkIfSpikeClickedOn(destinationSpike.x, destinationSpike.y);
+            board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+
+            board.checkIfPieceClickedOn(destinationSpike.x, destinationSpike.y);
+            Point containerMiddle = new Point(geometry.containerX(), geometry.whiteContainerY() + geometry.containerHeight() / 2);
+            board.checkIfPieceContainerClickedOn(containerMiddle.x, containerMiddle.y);
+            board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+
+            // Container still have to be reachable from source spike
+            assertTrue(board.die1.enabled());
+            assertTrue(board.die2.enabled());
+
+            board.checkIfPieceClickedOn(sourceSpike.x + geometry.spikeWidth() / 2, sourceSpike.y + geometry.pieceRadius());
+            board.checkIfSpikeClickedOn(destinationSpike.x, destinationSpike.y);
+            board.paint(graphics, geometry.boardWidth(), geometry.boardHeight(), true, 0, 0);
+            board.checkIfPieceClickedOn(destinationSpike.x, destinationSpike.y);
+            board.checkIfPieceContainerClickedOn(containerMiddle.x, containerMiddle.y);
+            assertTrue(board.turnOver());
+            if (!board.gameIsOver())
+                board.nextTurn();
+        }
+        assertTrue(board.turnOver());
+        assertTrue(board.gameIsOver());
+    }
 }

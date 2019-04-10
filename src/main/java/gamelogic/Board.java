@@ -887,7 +887,7 @@ public class Board {
                                 Die theDieThatGotUsHere = sp.get_stored_die();
                                 if (theDieThatGotUsHere.getValue() == die1.getValue()) {
                                     log("DIE1 USED GETTING OFF BAR " + die1.getValue());
-                                    die1.disable();
+                                    disableDie1();
                                 } else {
                                     log("DIE2 USED GETTING OFF BAR " + die2.getValue());
                                     die2.disable();
@@ -979,7 +979,7 @@ public class Board {
             }
         }
         if (dieToSetUnused == DieType.DIE1) {
-            die1.disable();
+            disableDie1();
             log("die1HasBeenUsed A.");
         } else if (dieToSetUnused == DieType.DIE2) {
             die2.disable();
@@ -1041,5 +1041,14 @@ public class Board {
 
     public boolean showRollButton() {
         return die1.disabled() && die2.disabled();
+    }
+
+    private void disableDie1() {
+        die1.disable();
+        if (die2.isDoubleRolled() && die1.disabled()) {
+            // So both dies is still an option
+            die1.setValue(die2.getValue());
+            die2.disable();
+        }
     }
 }
