@@ -253,7 +253,6 @@ public class Board {
                 doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
                 destinationSpike.flash(whichDie);
                 if (spikesAllowedToMoveToFromBar != null && !spikesAllowedToMoveToFromBar.contains(destinationSpike)) {
-                    destinationSpike.store_this_die(die);
                     spikesAllowedToMoveToFromBar.add(destinationSpike);
                 }
                 return true;
@@ -299,16 +298,8 @@ public class Board {
         if (sourceSpikeId >= 0){
             ArrayList<Integer> possibleSpikes = reachableSpikes(spikes.get(sourceSpikeId), currentPlayer, die1, die2);
             for (Integer spikeId: possibleSpikes) {
-                int neededValue = Math.abs(sourceSpikeId - spikeId);
-                DieType dieType = DieType.DIE1;
-                if (neededValue == die1.getValue()) {
-                    dieType = DieType.DIE1;
-                } else if (neededValue == die2.getValue()) {
-                    dieType = DieType.DIE2;
-                } else if (neededValue == die1.getValue() + die2.getValue()) {
-                    dieType = DieType.DIE1AND2;
-                }
                 if (spikeId != currentPlayer.containerId()) {
+                    DieType dieType = dieThatGotAsHere(spikes.get(sourceSpikeId), spikes.get(spikeId));
                     spikes.get(spikeId).flash(dieType);
                 }
             }
@@ -389,11 +380,6 @@ public class Board {
         return piecesInHomeArea;
     }
 
-    private void pulsatePotentialSpike(Spike spike, DieType whichDice) {
-        //this makes the spike colour pulse nicely to indicate its an option
-        spike.flash(whichDice);
-    }
-
     /**
      * Checks if current player can make a valid move from given spike using given die.
      * @param currentSpike Spike under consideration.
@@ -414,19 +400,6 @@ public class Board {
         return (potentialSpike >= FIRST_SPIKE) && (potentialSpike <= LAST_SPIKE) &&
             (isThisSpikeEmpty(spikes.get(potentialSpike)) ||
                 doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt()));
-    }
-
-    private Spike doesThisSpikeBelongToPlayer(int mouseHoverX, int mouseHoverY) {
-        Spike hoverSpike = grabSpikeHoveringOver(mouseHoverX, mouseHoverY);
-        boolean containsOneOfTheirPieces = false;
-        if (hoverSpike != null) {
-           containsOneOfTheirPieces = doesThisSpikeBelongToPlayer(hoverSpike, whoseTurnIsIt());
-        }
-        if (containsOneOfTheirPieces) {
-            return hoverSpike;
-        } else {
-            return null;
-        }
     }
 
     private Spike grabSpikeHoveringOver(int mouseHoverX, int mouseHoverY) {
@@ -718,10 +691,6 @@ public class Board {
         return null;
     }
 
-    private Spike lastNotEmptySpike() {
-        return currentPlayer.isWhite() ? lastNotEmptyWhiteSpike() : lastNotEmptyBlackSpike();
-    }
-
     /**
      * Calculates which dies get current piece to container, assuming that such die combination exist
      * @param player player
@@ -752,7 +721,7 @@ public class Board {
         return DieType.DIE1AND2;
     }
 
-    ArrayList<Spike> spikesToMoveToFromBar(PlayerColor playerColor) {
+    ArrayList<Spike> spikesToMoveToFromBar() {
         ArrayList<Spike> result = new ArrayList<>();
         canWeGetOffTheBarWithThisDie(die1, DieType.DIE1, result);
         canWeGetOffTheBarWithThisDie(die2, DieType.DIE2, result);
@@ -841,7 +810,7 @@ public class Board {
                 log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
                 if (pieceStuckToMouse != null) {
                     if (pieceStuckToMouse.sourceSpikeId() < 0) {
-                        ArrayList<Spike> spikesAllowedToMoveToFromBar = spikesToMoveToFromBar(whoseTurnIsIt());
+                        ArrayList<Spike> spikesAllowedToMoveToFromBar = spikesToMoveToFromBar();
                         log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + spikesAllowedToMoveToFromBar.size());
                         for (Spike sp : spikesAllowedToMoveToFromBar) {
                             if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
@@ -871,12 +840,12 @@ public class Board {
                                 }
                                 sp.addPiece(pieceStuckToMouse);
                                 unstickPieceFromMouse();
-                                Die theDieThatGotUsHere = sp.get_stored_die();
-                                if (theDieThatGotUsHere.getValue() == die1.getValue()) {
-                                    log("DIE1 USED GETTING OFF BAR " + die1.getValue());
+                                DieType theDieThatGotUsHere = dieThatGotAsHere(null, sp);
+                                log(String.format("%s USED GETTING OFF BAR ", theDieThatGotUsHere));
+                                if (theDieThatGotUsHere == DieType.DIE1) {
                                     disableDie1();
                                 } else {
-                                    log("DIE2 USED GETTING OFF BAR " + die2.getValue());
+                                    assert theDieThatGotUsHere == DieType.DIE2;
                                     die2.disable();
                                 }
                                 return;
@@ -887,16 +856,8 @@ public class Board {
                         ArrayList<Integer> reachable = reachableSpikes(sourceSpike, currentPlayer, die1, die2);
                         Integer idx = reachable.indexOf(spike.getSpikeNumber());
                         if (idx >= 0) {
-                            int neededValue = Math.abs(spike.getPosition() - sourceSpike.getPosition());
-                            assert neededValue > 0;
-                            DieType dieType = DieType.DIE1AND2;
-                            if (neededValue == die1.getValue())
-                                dieType = DieType.DIE1;
-                            else if (neededValue == die2.getValue())
-                                dieType = DieType.DIE2;
-                            else
-                                assert neededValue == die1.getValue() + die2.getValue();
-                            placePieceRemoveOldOneAndSetDieToUsed(reachable.get(idx), dieType);
+                            placePieceRemoveOldOneAndSetDieToUsed(reachable.get(idx),
+                                dieThatGotAsHere(sourceSpike, spike));
                         }
                     }
                 }
@@ -987,7 +948,7 @@ public class Board {
         Enumeration e = piecesOnTheBar.pieces.elements();
         ArrayList<Spike> possibleDestinationsFromBar = new ArrayList<>();
         if (piecesOnTheBar.pieces.size() > 0)
-            possibleDestinationsFromBar = spikesToMoveToFromBar(whoseTurnIsIt());
+            possibleDestinationsFromBar = spikesToMoveToFromBar();
         while (!possibleDestinationsFromBar.isEmpty() && e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
             if (p.userClickedOnThis(x, y)) {
@@ -1037,5 +998,22 @@ public class Board {
             die1.setValue(die2.getValue());
             die2.disable();
         }
+    }
+
+    private DieType dieThatGotAsHere(Spike sourceSpike, Spike destinationSpike) {
+        int sourcePosition = sourceSpike == null ? currentPlayer.barSpikePosition() : sourceSpike.getPosition();
+        int neededValue = Math.abs(destinationSpike.getPosition() - sourcePosition);
+        assert neededValue > 0;
+        DieType dieType = DieType.DIE1AND2;
+        if (neededValue == die1.getValue())
+            dieType = DieType.DIE1;
+        else if (neededValue == die2.getValue())
+            dieType = DieType.DIE2;
+        else {
+            if(neededValue != die1.getValue() + die2.getValue()) {
+                throw new RuntimeException("Cannot get to spike: " + destinationSpike.getPosition());
+            }
+        }
+        return dieType;
     }
 }

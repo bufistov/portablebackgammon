@@ -94,7 +94,7 @@ class BoardTest {
         ((Spike)theBarWHITE.get(board)).addPiece(new Piece(geometry, board.getWhitePlayer()));
         board.setCurrentPlayer(board.getWhitePlayer());
         board.rollDies();
-        ArrayList<Spike> spikes = board.spikesToMoveToFromBar(PlayerColor.WHITE);
+        ArrayList<Spike> spikes = board.spikesToMoveToFromBar();
         assertEquals(2, spikes.size());
         assertEquals(24, spikes.get(0).getPosition());
         assertEquals(23 , spikes.get(1).getPosition());

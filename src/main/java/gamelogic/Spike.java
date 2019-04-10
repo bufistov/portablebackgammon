@@ -155,19 +155,6 @@ public class Spike {
         white_spike_colour = new Color(WHITE_SPIKE_COLOUR);
     }
 
-    /*
-     * when a piece is on the bar,and we are checking which spikes it can go to, and this spike is a valid option
-     * for ease we store the die which would get it there in this spike, and grab it later, this is the only instance in which this
-     * method is used.
-     */
-    void store_this_die(Die die) {
-        storedDie = die;
-    }
-
-    Die get_stored_die() {
-        return storedDie;
-    }
-
     boolean isContainer() {
         return type == SpikeType.CONTAINER;
     }

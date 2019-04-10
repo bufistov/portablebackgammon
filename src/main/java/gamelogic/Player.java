@@ -42,8 +42,8 @@ public class Player {
         return colour == WHITE ? -1 : 24;
     }
 
-    int barSpikeId() {
-        return colour == WHITE ? 24 : -1;
+    int barSpikePosition() {
+        return colour == WHITE ? 25 : 0;
     }
 
     int getDestinationSpike(Spike source, int roll) {
