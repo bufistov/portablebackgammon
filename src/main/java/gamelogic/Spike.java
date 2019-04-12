@@ -142,6 +142,10 @@ public class Spike {
         return type;
     }
 
+    boolean isFlashed() {
+        return flash;
+    }
+
     // makes a colour that flashes, this gets called from board
     // when the spike needs to indicate its a potential move to the player.
     // whichDice tells us which die would be causing this move, so we can show player.

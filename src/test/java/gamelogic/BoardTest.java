@@ -344,4 +344,144 @@ class BoardTest {
         assertTrue(board.turnOver());
         assertTrue(board.gameIsOver());
     }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, init configuration")
+    void test11() {
+        Board board = new TestableBoard(colours, geometry, config, 5, 2);
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        // When dies are rolled
+        board.rollDies();
+        // And mouse is hovering over spike 23, which belongs to white player and have two pieces at start
+        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),
+            true, spikeMiddle.x, spikeMiddle.y);
+
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(21);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // TODO: check containers are not flushed
+        board.setCurrentPlayer(board.getBlackPlayer());
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),
+            true, spikeMiddle.x, spikeMiddle.y);
+
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(0).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),
+            true, spikeMiddle.x, spikeMiddle.y);
+
+        flashed.clear();
+        flashed.add(2);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(1).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(11).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+
+        flashed.clear();
+        flashed.add(13);
+        flashed.add(16);
+        flashed.add(18);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(18).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+        flashed.clear();
+        flashed.add(20);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+    }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, init configuration")
+    void test12() {
+        Board board = new TestableBoard(colours, geometry, config, 5, 3);
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        // When dies are rolled
+        board.rollDies();
+        // And mouse is hovering over spike 23, which belongs to white player and have two pieces at start
+        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(20);
+        flashed.add(15);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(12).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+        flashed.clear();
+        flashed.add(9);
+        flashed.add(7);
+        flashed.add(4);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(11).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(7).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+        flashed.clear();
+        flashed.add(4);
+        flashed.add(2);
+
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(6).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(5).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
+        flashed.clear();
+        flashed.add(2);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+    }
 }

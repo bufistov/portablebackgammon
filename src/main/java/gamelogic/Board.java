@@ -114,6 +114,7 @@ public class Board {
 
 
     // puts the pieces where they need to be to initialise a new game of backgammon
+    // [24] provides the number of pieces in container
     void initialiseBoardForNewGame(int[] whiteInitPositions, int[] blackInitPositions) {
         log("initialiseBoardForNewGame");
         for (Spike spike: spikes) {
@@ -159,6 +160,7 @@ public class Board {
     
     public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress,
                       int mouseX, int mouseY) {
+
         utils.setColor(g, Color.BLACK);
         int borderWidth = geometry.borderWidth();
         int barWidth = geometry.centralBarWidth();
