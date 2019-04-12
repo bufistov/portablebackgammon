@@ -484,4 +484,74 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
     }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, piece on bar")
+    void test13() {
+        Board board = new TestableBoard(colours, geometry, config, 5, 2);
+        int[] whiteHome = {
+            0,0,0,4,0,0,
+            0,10,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            2,0,2,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,6,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+        for (Spike spike : board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+
+        // When dies are rolled
+        board.rollDies();
+        // And mouse is hovering over any spike, spike 22 must be only pulsated
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(22);
+        for (Spike spike: board.getSpikes()) {
+            Point spikeMiddle = spike.getMiddlePoint();
+            board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+            for (Spike spike1 : board.getSpikes()) {
+                assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
+            }
+        }
+
+        board.setCurrentPlayer(board.getBlackPlayer());
+        Point spikeMiddle = board.getSpikes().get(20).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+
+        flashed.clear();
+        flashed.add(22);
+        for (Spike spike1 : board.getSpikes()) {
+            assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(0).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+
+        flashed.clear();
+        flashed.add(2);
+        flashed.add(5);
+        for (Spike spike1 : board.getSpikes()) {
+            assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
+        }
+
+        spikeMiddle = board.getSpikes().get(2).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
+
+        flashed.clear();
+        flashed.add(4);
+        flashed.add(9);
+        for (Spike spike1 : board.getSpikes()) {
+            assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
+        }
+    }
 }
