@@ -554,4 +554,90 @@ class BoardTest {
             assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
         }
     }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, piece on bar, double, one move")
+    void test14() {
+        Board board = new TestableBoard(colours, geometry, config, 3);
+        int[] whiteHome = {
+            14,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            0,0,2,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            2,6,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+
+        board.rollDies();
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        board.drawBarPieces(graphics);
+        assertTrue(board.getSpikes().get(21).isFlashed());
+
+        // When piece on bar is clicked
+        Point pieceOnBar = new Point(geometry.boardWidth() / 2,
+            geometry.boardHeight() / 2 - geometry.pieceDiameter() - geometry.pieceRadius());
+        board.checkIfPieceClickedOn(pieceOnBar.x, pieceOnBar.y);
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        // Destination spike is still flashed
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(21);
+        for (Spike spike: board.getSpikes())
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+
+        // When destination spike is clicked
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+
+        // No spikes are flashed
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+    }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, no options from bar")
+    void test15() {
+        Board board = new TestableBoard(colours, geometry, config, 4);
+        int[] whiteHome = {
+            14, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0
+        };
+        int[] blackHome = {
+            0, 0, 2, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            2, 6, 5, 0, 0, 0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+
+        board.rollDies();
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        board.drawBarPieces(graphics);
+
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+        assertTrue(board.turnOver());
+    }
 }
