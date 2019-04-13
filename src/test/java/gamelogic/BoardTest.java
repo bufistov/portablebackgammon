@@ -709,4 +709,78 @@ class BoardTest {
 
         assertTrue(board.turnOver());
     }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, piece on bar, double, two moves")
+    void test17() {
+        Board board = new TestableBoard(colours, geometry, config, 3);
+        int[] whiteHome = {
+            0,0,13,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            0,0,0,2,0,0,
+            0,0,0,0,0,0,
+            0,6,0,0,0,0,
+            2,0,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.checkConsistent();
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+
+        board.rollDies();
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(21);
+        for (Spike spike: board.getSpikes())
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+
+        // When first piece on bar is clicked
+        Point pieceOnBar = new Point(geometry.boardWidth() / 2,
+            geometry.boardHeight() / 2 - geometry.pieceDiameter() - geometry.pieceRadius());
+        board.drawBarPieces(graphics);
+        board.checkIfPieceClickedOn(pieceOnBar.x, pieceOnBar.y);
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        // Destination spike are still flashed
+        for (Spike spike: board.getSpikes())
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+
+        // When destination spike is clicked
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+
+        // Same spike is still flashed
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // Second piece is clicked
+        board.drawBarPieces(graphics);
+        board.checkIfPieceClickedOn(pieceOnBar.x, pieceOnBar.y);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // And placed to the possible spike
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+
+        // Two paints to disable both dies
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+
+        assertTrue(board.turnOver());
+        assertEquals(2, board.getSpikes().get(21).getAmountOfPieces(PlayerColor.WHITE));
+    }
 }

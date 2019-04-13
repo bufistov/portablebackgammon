@@ -120,6 +120,10 @@ public class Board {
         for (Spike spike: spikes) {
             spike.pieces.clear();
         }
+        theBarBLACK.pieces.clear();
+        theBarWHITE.pieces.clear();
+        whitePiecesSafelyInContainer.clear();
+        blackPiecesSafelyInContainer.clear();
         int whitePiecesOnBoard = 0;
         for (int i = 0; i < 24; ++i) {
             whitePiecesOnBoard += whiteInitPositions[i];
