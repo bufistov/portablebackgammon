@@ -783,4 +783,113 @@ class BoardTest {
         assertTrue(board.turnOver());
         assertEquals(2, board.getSpikes().get(21).getAmountOfPieces(PlayerColor.WHITE));
     }
+
+    @Test
+    @DisplayName("Pulsate not-container spikes, piece on bar, double, four moves")
+    void test18() {
+        Board board = new TestableBoard(colours, geometry, config, 3);
+        int[] whiteHome = {
+            0,0,0,0,0,0,
+            13,0,0,0,0,0,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0
+        };
+        int[] blackHome = {
+            0,0,2,0,0,0,
+            0,0,0,0,0,0,
+            0,6,0,0,0,0,
+            2,0,5,0,0,0
+        };
+        board.initialiseBoardForNewGame(whiteHome, blackHome);
+        board.checkConsistent();
+        Graphics graphics = Mockito.mock(Graphics.class);
+
+        // No rolls, no flashing
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        assertTrue(board.showRollButton());
+
+        board.rollDies();
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        ArrayList<Integer> flashed = new ArrayList<>();
+        flashed.add(21);
+        for (Spike spike: board.getSpikes())
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+
+        // When first piece on bar is clicked
+        Point pieceOnBar = new Point(geometry.boardWidth() / 2,
+            geometry.boardHeight() / 2 - geometry.pieceDiameter() - geometry.pieceRadius());
+        board.drawBarPieces(graphics);
+        board.checkIfPieceClickedOn(pieceOnBar.x, pieceOnBar.y);
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        // Destination spike are still flashed
+        for (Spike spike: board.getSpikes())
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+
+        // When destination spike is clicked
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+
+        // Same spike is still flashed
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // Second piece is clicked
+        board.drawBarPieces(graphics);
+        board.checkIfPieceClickedOn(pieceOnBar.x, pieceOnBar.y);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // And placed to the possible spike
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        for (Spike spike: board.getSpikes()) {
+            assertFalse(spike.isFlashed());
+        }
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+
+        assertFalse(board.turnOver());
+        assertEquals(2, board.getSpikes().get(21).getAmountOfPieces(PlayerColor.WHITE));
+
+        // When the mouse points spike with white  pieces
+        Point sourceSpike = board.getSpikes().get(6).getMiddlePoint();
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, sourceSpike.x,sourceSpike.y);
+
+        flashed.clear();
+        flashed.add(3);
+        flashed.add(0);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+        assertEquals(DieType.DIE1AND2, board.getSpikes().get(0).whichDieI());
+        assertEquals(DieType.DIE1, board.getSpikes().get(3).whichDieI());
+
+        board.checkIfPieceClickedOn(sourceSpike.x, sourceSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        destinatioinSpike = board.getSpikes().get(3).getMiddlePoint();
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, sourceSpike.x, sourceSpike.y);
+        // Now only one spike is flashed
+        flashed.remove(new Integer(0));
+        for (Spike spike: board.getSpikes()) {
+            assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
+        }
+
+        // When spike "6" is clicked again
+        board.checkIfPieceClickedOn(sourceSpike.x, sourceSpike.y);
+        // And piece placed on spike "3"
+        board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
+        board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, sourceSpike.x, sourceSpike.y);
+        assertEquals(2, board.getSpikes().get(3).getAmountOfPieces(PlayerColor.WHITE));
+        assertTrue(board.turnOver());
+    }
 }

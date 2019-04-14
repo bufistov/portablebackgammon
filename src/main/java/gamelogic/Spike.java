@@ -92,6 +92,10 @@ public class Spike {
             (mouseY >= collision_y && mouseY <= collision_y + height());
     }
 
+    DieType whichDieI() {
+        return whichDiei;
+    }
+
     // add a piece to this spike
     boolean addPiece(Piece p) {
         if (spikeName != null) {
