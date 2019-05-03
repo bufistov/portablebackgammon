@@ -20,7 +20,7 @@ public class Board {
     private ArrayList<Spike> spikes;
     private Player whitePlayer, blackPlayer;
     private Player currentPlayer;
-    public Die die1, die2;
+    protected Die die1, die2;
     private Spike theBarWHITE;
     private Spike theBarBLACK;
     private Vector whitePiecesSafelyInContainer = new Vector(15);
@@ -161,7 +161,15 @@ public class Board {
             theBarBLACK.addPiece(new Piece(geometry, blackPlayer));
         }
     }
-    
+
+    public int die1Value() {
+        return die1.getValue();
+    }
+
+    public int die2Value() {
+        return die2.getValue();
+    }
+
     public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress,
                       int mouseX, int mouseY) {
 
@@ -183,7 +191,7 @@ public class Board {
         utils.drawRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
-           spike.paint(g, this);
+           spike.paint(g);
         }
 
         paintDice(g, boardWidth, boardHeight);
@@ -257,7 +265,7 @@ public class Board {
             Spike destinationSpike = spikes.get(destinationSpikeId);
             if (destinationSpike.pieces.size() <= 1 ||
                 doesThisSpikeBelongToPlayer(destinationSpike, whoseTurnIsIt())) {
-                destinationSpike.flash(whichDie);
+                destinationSpike.flash(whichDie, die1.getValue(), die2.getValue());
                 if (spikesAllowedToMoveToFromBar != null && !spikesAllowedToMoveToFromBar.contains(destinationSpike)) {
                     spikesAllowedToMoveToFromBar.add(destinationSpike);
                 }
@@ -306,7 +314,7 @@ public class Board {
             for (Integer spikeId: possibleSpikes) {
                 if (spikeId != currentPlayer.containerId()) {
                     DieType dieType = dieThatGotAsHere(spikes.get(sourceSpikeId), spikes.get(spikeId));
-                    spikes.get(spikeId).flash(dieType);
+                    spikes.get(spikeId).flash(dieType, die1.getValue(), die2.getValue());
                 }
             }
         }

@@ -838,8 +838,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
     private void playerRolls(PlayerColor player) {
         board.rollDies();
-        int val = board.die1.getValue();
-        int val2 = board.die2.getValue();
+        int val = board.die1Value();
+        int val2 = board.die2Value();
 
         D1lastDieRoll_toSendOverNetwork = val;
         GameNetworkClient.SENDCLICK_AND_DIEVALUE1 = true; // tells it to send a click over network

@@ -36,8 +36,9 @@ public class Spike {
     private int collision_y;
 
     private static final int NOT_A_REAL_SPIKE_MINUS_99 = -99;
-    private Die storedDie;
-    private DieType whichDiei; // the die combination that brings piece at mouse to given spike
+    private Die die1;
+    private Die die2;
+    private DieType flashDieType; // the die combination that brings piece at mouse to given spike
     private boolean flash = false;
 
     private int x1 = 0, y1 = 0; // left most point
@@ -46,6 +47,8 @@ public class Spike {
 
     Spike(Geometry geometry, int position) {
         this.geometry = geometry;
+        this.die1 = new Die(geometry);
+        this.die2 = new Die(geometry);
         if (position < 0) {
             log("Container spike is made");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
@@ -92,15 +95,13 @@ public class Spike {
             (mouseY >= collision_y && mouseY <= collision_y + height());
     }
 
-    DieType whichDieI() {
-        return whichDiei;
+    DieType flashDieType() {
+        return flashDieType;
     }
 
     // add a piece to this spike
     boolean addPiece(Piece p) {
-        if (spikeName != null) {
-            log("Spike "+ getSpikeNumber()+ " just has a piece added.");
-        }
+        log("Spike "+ getSpikeNumber() + " just has a piece added.");
         pieces.add(p);
         return true;
     }
@@ -108,11 +109,7 @@ public class Spike {
     // remove this piece from the spike, pass spike in to remove, or pass null and the
     // first one will be removed.
     boolean removePiece(Piece p) {
-        if (spikeName != null) {
-            log("Spike "+getSpikeNumber()+" just has a piece removed.");
-        } else {
-            Utils._E("removePiece:spikeName is null");
-        }
+        log("Spike " + getSpikeNumber()+" just has a piece removed.");
         pieces.remove(p);
         return true;
     }
@@ -123,15 +120,17 @@ public class Spike {
         return pieces.size();
     }
 
-    void paint(Graphics g, Board board) {
+    void paint(Graphics g) {
         workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
             geometry.spikeWidth());
         drawSpike(g);
         drawPieces(g);
         if (flash) {
-            drawPotentialDieMoves(g, board);
+            drawPotentialDieMoves(g);
         }
         flash = false;
+        die1.noOptions();
+        die2.noOptions();
     }
 
     int getSpikeNumber() {
@@ -153,9 +152,15 @@ public class Spike {
     // makes a colour that flashes, this gets called from board
     // when the spike needs to indicate its a potential move to the player.
     // whichDice tells us which die would be causing this move, so we can show player.
-    void flash(DieType whichDice) {
+    void flash(DieType dieType, int die1Value, int die2Value) {
         flash = true;
-        whichDiei = whichDice;
+        flashDieType = dieType;
+        if (dieType != DieType.DIE2) {
+            die1.setValue(die1Value);
+        }
+        if (dieType != DieType.DIE1) {
+            die2.setValue(die2Value);
+        }
     }
 
     void makeColourObjects() {
@@ -234,35 +239,30 @@ public class Spike {
         //draw outline after otherwise it gets distored by the filled shape
         utils.setColor(g, Color.BLACK);
         utils.drawTriangle(g, x1, y1, x2, y2, x3, y3);
-
-        if (CustomCanvas.showBoundaryBoxes) {
-            utils.setColor(g, Color.RED);
-            utils.drawRect(g, collision_x, collision_y, width(), height());
-        }
     }
 
-    private void drawPotentialDieMoves(Graphics g, Board board) {
+    private void drawPotentialDieMoves(Graphics g) {
         final int miniDieX = x2 - geometry.miniDieSize() / 2;
         final int miniDieHeight = geometry.miniDieSize();
-        if (whichDiei == DIE1) {
+        if (flashDieType == DIE1) {
             if (getType() == STALECMITE) {
-                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                board.die1.drawMiniDie(g, miniDieX, y1);
+                die1.drawMiniDie(g, miniDieX, y1);
             }
-        } else if (whichDiei == DIE2) {
+        } else if (flashDieType == DIE2) {
             if (getType() == STALECMITE) {
-                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                board.die2.drawMiniDie(g, miniDieX, y1);
+                die2.drawMiniDie(g, miniDieX, y1);
             }
-        } else if (whichDiei == DIE1AND2) {
+        } else if (flashDieType == DIE1AND2) {
             if (getType() == STALECMITE) {
-                board.die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
-                board.die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
+                die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
+                die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
-                board.die1.drawMiniDie(g, miniDieX, y1);
-                board.die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
+                die1.drawMiniDie(g, miniDieX, y1);
+                die2.drawMiniDie(g, miniDieX, y1 + miniDieHeight);
             }
         }
     }

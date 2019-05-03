@@ -866,8 +866,8 @@ class BoardTest {
         for (Spike spike: board.getSpikes()) {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
-        assertEquals(DieType.DIE1AND2, board.getSpikes().get(0).whichDieI());
-        assertEquals(DieType.DIE1, board.getSpikes().get(3).whichDieI());
+        assertEquals(DieType.DIE1AND2, board.getSpikes().get(0).flashDieType());
+        assertEquals(DieType.DIE1, board.getSpikes().get(3).flashDieType());
 
         board.checkIfPieceClickedOn(sourceSpike.x, sourceSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
