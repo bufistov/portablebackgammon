@@ -8,6 +8,7 @@ import lowlevel.*;
 public class Die {
     public static int DIE_COLOUR = 0xFFFFFF;
     public static int DOT_COLOUR = 0x000000;
+
     private static Color die_colour, dot_colour;
 
     private Geometry geometry;
@@ -16,7 +17,7 @@ public class Die {
     private int usesCounter;
 
     Die(Geometry geometry) {
-        log("Die made");
+        Utils.log("Die{}: Die made");
         this.geometry = geometry;
         makeColourObjects();
     }
@@ -26,10 +27,9 @@ public class Die {
         dot_colour = new Color(DOT_COLOUR);
     }
 
-    int roll() {
+    void roll() {
         value = Utils.getRand(1,6);
         usesCounter = 1;
-        return value;
     }
 
     void doubleRoll() {
@@ -50,7 +50,7 @@ public class Die {
         return value;
     }
 
-    // disables a die so that the value is zero and this no logic will work out potential moves with this die now etc
+    // disables a die so that the value is zero and this no logic will work out potential moves with this die
     void disable() {
         if (usesCounter <= 0) {
             throw new RuntimeException("Disabling disabled die, value: " + value);
@@ -144,9 +144,5 @@ public class Die {
             default:
                 break;
         }
-    }
-
-    private void log(String s) {
-        Utils.log("Die{}:" + s);
     }
 }
