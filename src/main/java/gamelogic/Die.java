@@ -73,12 +73,10 @@ public class Die {
     }
 
     void paint(Graphics g, int x, int y) {
-        if (enabled()) {
-            int dotDiameter = geometry.dieDotDiameter();
-            int halfDotDiameter = dotDiameter / 2;
-            drawOutline(g, x, y, geometry.dieSize(), geometry.dieSize());
-            drawDots(g, x, y, geometry.dieSize(), geometry.dieSize(), dotDiameter, halfDotDiameter);
-        }
+        int dotDiameter = geometry.dieDotDiameter();
+        int halfDotDiameter = dotDiameter / 2;
+        drawOutline(g, x, y, geometry.dieSize(), geometry.dieSize());
+        drawDots(g, x, y, geometry.dieSize(), geometry.dieSize(), dotDiameter, halfDotDiameter);
     }
 
     void drawMiniDie(Graphics g, int x, int y) {
@@ -94,11 +92,6 @@ public class Die {
         utils.fillRoundRect(g, x, y, DIE_WIDTH, DIE_HEIGHT);
         utils.setColor(g, Color.black);
         utils.drawRoundRect(g, x, y, DIE_WIDTH, DIE_HEIGHT);
-        
-        if (CustomCanvas.showBoundaryBoxes) {
-            utils.setColor(g,Color.RED);
-            utils.drawRect(g,x, y,DIE_WIDTH, DIE_HEIGHT);
-        }
     }
 
     private void drawDots(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT,
