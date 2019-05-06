@@ -32,5 +32,9 @@ class GeometryTest {
         assertEquals(geometry.boardWidth(),
             2*geometry.borderWidth() + geometry.centralBarWidth() + 12 * geometry.spikeWidth());
         assertEquals(654, geometry.containerX());
+
+        assertEquals(304, geometry.pieceOnBarX());
+        assertEquals(191, geometry.whitePieceOnBarY());
+        assertEquals(255, geometry.blackPieceOnBarY());
     }
 }

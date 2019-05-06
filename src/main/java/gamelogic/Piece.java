@@ -39,15 +39,15 @@ public class Piece {
         black_piece_color = new Color(BLACK_PIECE_COLOUR);
     }
 
-    public PlayerColor getColour() {
+    PlayerColor getColour() {
         return colour;
     }
 
-    public int getCenterX() {
+    int getCenterX() {
         return centerX;
     }
 
-    public int getCenterY() {
+    int getCenterY() {
         return centerY;
     }
 
@@ -55,7 +55,7 @@ public class Piece {
         paint( g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
     }
 
-    public void paint(Graphics g, int x, int y) {
+    public void paint(Graphics g, int upperLeftX, int upperLeftY) {
         int pieceDiameter = geometry.pieceDiameter();
         if (colour == PlayerColor.WHITE) {
             utils.setColor(g, white_piece_color);
@@ -63,15 +63,15 @@ public class Piece {
             utils.setColor(g, black_piece_color);
         }
 
-        utils.fillCircle(g, x, y, pieceDiameter, pieceDiameter);
+        utils.fillCircle(g, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
         utils.setColor(g, Color.BLACK);
-        utils.drawCircle(g, x, y, pieceDiameter, pieceDiameter);
+        utils.drawCircle(g, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
 
-        centerX = x + geometry.pieceRadius();
-        centerY = y + geometry.pieceRadius();
+        centerX = upperLeftX + geometry.pieceRadius();
+        centerY = upperLeftY + geometry.pieceRadius();
         if (CustomCanvas.showBoundaryBoxes) {
             utils.setColor(g,Color.RED);
-            utils.drawRect(g, x, y, pieceDiameter, pieceDiameter);
+            utils.drawRect(g, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
         }
     }
 

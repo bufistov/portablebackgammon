@@ -8,8 +8,6 @@ import graphics.GameColour;
 import graphics.Geometry;
 import lowlevel.*;
 
-import javax.swing.*;
-
 public class Board {
 
     private Color board_colour, bar_colour;
@@ -753,22 +751,23 @@ public class Board {
     }
 
     public void drawBarPieces(Graphics g) {
-        int pieceOnBarY = (geometry.boardHeight() / 2) - geometry.pieceDiameter();
+        int pieceOnBarY = geometry.whitePieceOnBarY();
         Enumeration eW = theBarWHITE.pieces.elements();
+        final int pieceX = geometry.pieceOnBarX();
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, geometry.boardWidth() / 2 - geometry.pieceRadius(),
-                    pieceOnBarY -= geometry.pieceDiameter());
+                p.paint(g, pieceX, pieceOnBarY);
+                pieceOnBarY -= geometry.pieceDiameter();
             }
         }
-        pieceOnBarY = (geometry.boardHeight() / 2);
+        pieceOnBarY = geometry.blackPieceOnBarY();
         Enumeration eB = theBarBLACK.pieces.elements();
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, geometry.boardWidth() / 2 - geometry.pieceRadius(),
-                    pieceOnBarY += geometry.pieceDiameter());
+                p.paint(g, pieceX, pieceOnBarY);
+                pieceOnBarY += geometry.pieceDiameter();
             }
         }
     }

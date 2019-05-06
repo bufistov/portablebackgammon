@@ -117,4 +117,16 @@ public class Geometry {
     public int blackContainerY() {
         return boardHeight() - (containerHeight() + containerMargin());
     }
+
+    public int pieceOnBarX() {
+        return boardWidth() / 2 - pieceRadius();
+    }
+
+    public int whitePieceOnBarY() {
+        return boardHeight() / 2 - pieceDiameter() - pieceRadius();
+    }
+
+    public int blackPieceOnBarY() {
+        return boardHeight() / 2 + pieceRadius();
+    }
 }
