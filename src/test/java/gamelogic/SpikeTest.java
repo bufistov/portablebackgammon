@@ -37,4 +37,27 @@ class SpikeTest {
         assertEquals(middleY, spike.getMiddlePoint().y);
         assertTrue(spike.userClickedOnThis(middleX, middleY));
     }
+
+    @Test
+    @DisplayName("Spike calculates center of the first piece")
+    void test2() {
+        int canvasWidth = 810;
+        int canvasHeight = 500;
+        Geometry geometry = new Geometry(canvasWidth, canvasHeight);
+        Spike spike = new Spike(geometry, 2);
+        spike.paint(Mockito.mock(Graphics.class));
+        Point actual = spike.firstPieceCenter();
+        Point expected = spike.getMiddlePoint();
+        expected.y -= geometry.spikeHeight() / 2;
+        expected.y += geometry.pieceRadius();
+        assertEquals(expected, actual);
+
+        Spike spike2 = new Spike(geometry, 14);
+        spike2.paint(Mockito.mock(Graphics.class));
+
+        actual = spike2.firstPieceCenter();
+        expected.x = geometry.borderWidth() + geometry.spikeWidth() * 3 / 2;
+        expected.y = geometry.boardHeight() - geometry.borderWidth() - geometry.pieceRadius();
+        assertEquals(expected, actual);
+    }
 }

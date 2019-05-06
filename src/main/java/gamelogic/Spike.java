@@ -86,6 +86,9 @@ public class Spike {
         return position == thatSpike.getPosition();
     }
 
+    Point firstPieceCenter() {
+        return new Point(x2, y1 + ysign() * geometry.pieceRadius());
+    }
     boolean isEmpty() {
         return pieces.isEmpty();
     }
@@ -99,19 +102,14 @@ public class Spike {
         return flashDieType;
     }
 
-    // add a piece to this spike
-    boolean addPiece(Piece p) {
+    void addPiece(Piece p) {
         log("Spike "+ getSpikeNumber() + " just has a piece added.");
         pieces.add(p);
-        return true;
     }
 
-    // remove this piece from the spike, pass spike in to remove, or pass null and the
-    // first one will be removed.
-    boolean removePiece(Piece p) {
-        log("Spike " + getSpikeNumber()+" just has a piece removed.");
+    void removePiece(Piece p) {
+        log("Spike " + getSpikeNumber() + " just has a piece removed.");
         pieces.remove(p);
-        return true;
     }
 
     int getAmountOfPieces(PlayerColor playerColor) {
@@ -177,8 +175,7 @@ public class Spike {
     }
 
     Point getMiddlePoint() {
-        int dy = type == STALECTITE ? -height() / 2 : height() / 2;
-        return new Point(x2, y2 + dy);
+        return new Point(x2, y2 - ysign() * height() / 2);
     }
 
     Point leftMostPoint() {
@@ -187,9 +184,9 @@ public class Spike {
 
     private void drawPieces(Graphics g) {
         Enumeration e = pieces.elements();
-        int yPosForPieces = y1 - geometry.pieceDiameter();
-        if(getType() == STALECMITE) {
-           yPosForPieces = y1;
+        int piecey = y1 - geometry.pieceDiameter();
+        if (getType() == STALECMITE) {
+           piecey = y1;
         }
 
         int overlapOnPieces = 0;
@@ -202,21 +199,12 @@ public class Spike {
         if (pieces.size() > 9) {
             overlapOnPieces = geometry.pieceDiameter() / 2 + pieces.size() / 3;
         }
-        int piecex = x2 - geometry.pieceDiameter() / 2;
+        final int piecex = x2 - geometry.pieceDiameter() / 2;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
             if (!p.stickToMouse()) {
-                int piecey = -1;
-                if (getType() == STALECTITE) {
-                    piecey = yPosForPieces += (geometry.pieceDiameter() - overlapOnPieces);
-                } else if (getType() == STALECMITE) {
-                    piecey = yPosForPieces -= (geometry.pieceDiameter() - overlapOnPieces);
-                }
-                if (getType() == STALECTITE) {
-                    p.paint(g, piecex, piecey + overlapOnPieces);
-                } else {
-                    p.paint(g, piecex, piecey - overlapOnPieces);
-                }
+                piecey += ysign() * (geometry.pieceDiameter() - overlapOnPieces);
+                p.paint(g, piecex, piecey + ysign() * overlapOnPieces);
             }
         }
     }
@@ -303,16 +291,12 @@ public class Spike {
 
         x3 = x1 + TRIANGLE_WIDTH;
         y3 = y1;
+
+        x2 = x1 + TRIANGLE_WIDTH / 2;
+        y2 = y1 + ysign() * height();
+
         collision_x = x1;
-        if (type == STALECTITE) {
-            x2 = x1 + TRIANGLE_WIDTH / 2;
-            y2 = y1 + height();
-            collision_y = y1;
-        } else {
-            x2 = x1 + TRIANGLE_WIDTH / 2;
-            y2 = y1 - height();
-            collision_y = y1 - height();
-        }
+        collision_y = (type == STALECTITE) ? y1 : y1 - height();
     }
 
     private void log(String s) {
@@ -325,5 +309,9 @@ public class Spike {
 
     private int width() {
         return geometry.spikeWidth();
+    }
+
+    private int ysign() {
+        return type == STALECTITE ? 1 : -1;
     }
 }
