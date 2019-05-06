@@ -111,17 +111,21 @@ class CustomCanvasTest {
         canvas.paint(graphics);
 
         int[] whiteHome = {
+            0,
             0,15,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            0
         };
 
         int[] blackHome = {
-            2,0,0,0,0,0,
+            0,
+            0,0,0,13,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,13,0,0,0
+            0,0,0,0,0,2,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.setCurrentPlayer(board.getWhitePlayer());
