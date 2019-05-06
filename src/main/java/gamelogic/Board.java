@@ -246,8 +246,9 @@ public class Board {
             setBotDestination(spikeMiddle.x, spikeMiddle.y, "PLACE FROM BAR ONTO AVAIL SPIKES");
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
-            Piece p = (Piece) theBarPieces.pieces.firstElement();
-            setBotDestination(p.getCenterX(), p.getCenterY(),"DESTINATION FOR BOT, PIECE ON BAR......");
+            setBotDestination(geometry.pieceOnBarX() + geometry.pieceRadius(),
+                geometry.blackPieceOnBarY() + geometry.pieceRadius(),
+                "DESTINATION FOR BOT, PIECE ON BAR......");
         }
     }
 
@@ -453,7 +454,7 @@ public class Board {
         Utils.log(String.format("thread-%s Board{}:%s", Thread.currentThread().getName(), s));
     }
 
-    void calculatePotentialMoves() {
+    private void calculatePotentialMoves() {
         if (pieceStuckToMouse() == null && SPtheMoveToMake == null) {
             log("_______________________RECALCULATE MOVES die1:" + die1.disabled() + " die2:" + die2.disabled());
             Vector spikePairs = getValidOptions();
@@ -467,26 +468,13 @@ public class Board {
                 }
                 log("valid options: " + botOptions);
                 SPtheMoveToMake = (SpikePair) spikePairs.elementAt(Utils.getRand(0, spikePairs.size() - 1));
-                if (SPtheMoveToMake.dropPiecesOnMe.isContainer()) {
-                    log("SPECIAL CASE randomly chose to go to spike:" +
-                        SPtheMoveToMake.pickMyPiece.getName() + " and drop off at CONTAINER");
-                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece.getName() + "->Container");
-                    Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
-                    Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    setBotDestination(firstPiece.getCenterX(), firstPiece.getCenterY(), "TAKE A PIECE TO CONTAINER");
-                } else {
-                    log("-randomly chose to go to spike:" +
-                        SPtheMoveToMake.pickMyPiece + " and drop off at spike:" +
-                        SPtheMoveToMake.dropPiecesOnMe);
-                    CustomCanvas.tellRobot(true, "->" + SPtheMoveToMake.pickMyPiece +
-                        "->" + SPtheMoveToMake.dropPiecesOnMe);
-                    Spike takeMyPiece = SPtheMoveToMake.pickMyPiece;
-                    Piece firstPiece = ((Piece) takeMyPiece.pieces.firstElement());
-                    int goToX = firstPiece.getCenterX();
-                    int goToY = firstPiece.getCenterY();
-                    setBotDestination(goToX, goToY, "RANDOMLY CHOOSE A PIECE");
-                    log("***************PIECE IM LOOKING FOR IS AT: " + goToX + "," + goToY);
-                }
+                log("randomly chose to go to spike:" + SPtheMoveToMake.pickMyPiece + " and drop off at " +
+                    SPtheMoveToMake.dropPiecesOnMe);
+                CustomCanvas.tellRobot(true,  SPtheMoveToMake.pickMyPiece.getName() + "->" +
+                    SPtheMoveToMake.dropPiecesOnMe);
+                Point firstPiece =  SPtheMoveToMake.pickMyPiece.firstPieceCenter();
+                setBotDestination(firstPiece.x, firstPiece.y, "TAKE A PIECE TO CONTAINER");
+                log("***************PIECE IM LOOKING FOR IS AT: " + firstPiece.x + "," + firstPiece.y);
             }
         } else if (pieceStuckToMouse() != null) {
             // Point robot the final destination after it took the piece

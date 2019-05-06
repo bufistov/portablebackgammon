@@ -43,14 +43,6 @@ public class Piece {
         return colour;
     }
 
-    int getCenterX() {
-        return centerX;
-    }
-
-    int getCenterY() {
-        return centerY;
-    }
-
     public void drawPieceOnMouse(Graphics g, int mouseX, int mouseY) {
         paint( g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
     }
