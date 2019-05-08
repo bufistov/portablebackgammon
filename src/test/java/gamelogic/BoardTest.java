@@ -46,17 +46,21 @@ class BoardTest {
         Board board = new TestableBoard(colours, geometry, config, 1, 2);
 
         int[] whiteHome = {
+            0,
             0,15,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            0
         };
 
         int[] blackHome = {
-            2,0,0,0,0,0,
+            0,
+            0,0,0,13,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,13,0,0,0
+            0,0,0,0,0,2,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.setCurrentPlayer(board.getWhitePlayer());
@@ -77,16 +81,20 @@ class BoardTest {
         Board board = new TestableBoard(colours, geometry, config, 1, 2);
 
         int[] whiteHome = {
+            0,
             0, 0, 0, 0, 0, 14,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0
+            0, 0, 0, 0, 0, 0,
+            1
         };
         int[] blackHome = {
-            0, 0, 0, 0, 2, 0,
+            0,
+            0, 0, 2, 11, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 11, 2, 0, 0
+            0, 2, 0, 0, 0, 0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Field theBarWHITE = Board.class.getDeclaredField("theBarWHITE");
@@ -106,17 +114,21 @@ class BoardTest {
         Board board = new TestableBoard(colours, geometry, config, 0, 5);
 
         int[] whiteHome = {
+            0,
             0,15,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            0
         };
 
         int[] blackHome = {
+            0,
+            0,0,0,8,7,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,7,8,0,0,0
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.setCurrentPlayer(board.getBlackPlayer());
@@ -145,16 +157,20 @@ class BoardTest {
     void test6() throws Exception {
         Board board = new Board(colours, geometry, config);
         int[] whiteHome = {
+            0,
             0,14,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            1
         };
         int[] blackHome = {
+            0,
+            0,0,0,8,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,8,0,0,0
+            1
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Field theBarWHITE = Board.class.getDeclaredField("theBarWHITE");
@@ -184,16 +200,20 @@ class BoardTest {
         }
 
         int[] whiteHome = {
+            0,
             0,0,0,0,14,1,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            0
         };
         int[] blackHome = {
+            0,
+            0,0,0,9,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,9,0,0,0
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.checkConsistent();
@@ -227,16 +247,20 @@ class BoardTest {
         assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
 
         int[] whiteHome = {
+            0,
             0,0,0,0,14,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            1
         };
         int[] blackHome = {
+            0,
+            0,0,0,8,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,8,0,0,0
+            1
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.checkConsistent();
@@ -259,16 +283,20 @@ class BoardTest {
     void test9() throws Exception {
         Board board = new TestableBoard(colours, geometry, config, 5);
         int[] whiteHome = {
+            11,
             0,0,0,0,4,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0,11
+            0,0,0,0,0,0,
+            0
         };
         int[] blackHome = {
-            0,2,2,0,0,0,
+            0,
+            0,0,0,5,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,5,0,0,0
+            0,0,0,2,2,0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.checkConsistent();
@@ -294,16 +322,20 @@ class BoardTest {
     void test10() throws Exception {
         Board board = new TestableBoard(colours, geometry, config, 2);
         int[] whiteHome = {
+            11,
             0,0,0,4,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0,11
+            0,0,0,0,0,0,
+            0
         };
         int[] blackHome = {
-            2,0,2,0,0,0,
+            0,
+            0,0,0,5,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,5,0,0,0
+            0,0,0,2,0,2,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
 
@@ -490,16 +522,20 @@ class BoardTest {
     void test13() {
         Board board = new TestableBoard(colours, geometry, config, 5, 2);
         int[] whiteHome = {
+            0,
             0,0,0,4,0,0,
             0,10,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            1
         };
         int[] blackHome = {
-            2,0,2,0,0,0,
+            0,
+            0,0,0,5,6,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,6,5,0,0,0
+            0,0,0,2,0,2,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -560,16 +596,20 @@ class BoardTest {
     void test14() {
         Board board = new TestableBoard(colours, geometry, config, 3);
         int[] whiteHome = {
+            0,
             14,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            1
         };
         int[] blackHome = {
-            0,0,2,0,0,0,
+            0,
+            0,0,0,5,6,2,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            2,6,5,0,0,0
+            0,0,0,2,0,0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -612,16 +652,20 @@ class BoardTest {
     void test15() {
         Board board = new TestableBoard(colours, geometry, config, 4);
         int[] whiteHome = {
+            0,
             14, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0
+            0, 0, 0, 0, 0, 0,
+            1
         };
         int[] blackHome = {
-            0, 0, 2, 0, 0, 0,
+            0,
+            0, 0, 0, 5, 6, 2,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            2, 6, 5, 0, 0, 0
+            0, 0, 0, 2, 0, 0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -646,16 +690,20 @@ class BoardTest {
     void test16() {
         Board board = new TestableBoard(colours, geometry, config, 5, 3);
         int[] whiteHome = {
+            0,
             13,0,0,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            2
         };
         int[] blackHome = {
-            0,0,2,0,0,0,
+            0,
+            0,0,0,5,0,2,
+            0,0,0,0,6,0,
             0,0,0,0,0,0,
-            0,6,0,0,0,0,
-            2,0,5,0,0,0
+            0,0,0,2,0,0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Graphics graphics = Mockito.mock(Graphics.class);
@@ -715,16 +763,20 @@ class BoardTest {
     void test17() {
         Board board = new TestableBoard(colours, geometry, config, 3);
         int[] whiteHome = {
+            0,
             0,0,13,0,0,0,
             0,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            2
         };
         int[] blackHome = {
-            0,0,0,2,0,0,
+            0,
+            0,0,0,5,0,2,
+            0,0,0,0,6,0,
             0,0,0,0,0,0,
-            0,6,0,0,0,0,
-            2,0,5,0,0,0
+            0,0,2,0,0,0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.checkConsistent();
@@ -789,16 +841,20 @@ class BoardTest {
     void test18() {
         Board board = new TestableBoard(colours, geometry, config, 3);
         int[] whiteHome = {
+            0,
             0,0,0,0,0,0,
             13,0,0,0,0,0,
             0,0,0,0,0,0,
-            0,0,0,0,0,0
+            0,0,0,0,0,0,
+            2
         };
         int[] blackHome = {
-            0,0,2,0,0,0,
+            0,
+            0,0,0,5,0,2,
+            0,0,0,0,6,0,
             0,0,0,0,0,0,
-            0,6,0,0,0,0,
-            2,0,5,0,0,0
+            0,0,0,2,0,0,
+            0
         };
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         board.checkConsistent();

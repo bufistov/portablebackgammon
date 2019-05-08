@@ -23,12 +23,12 @@ public class Board {
     private Spike theBarBLACK;
     private Vector whitePiecesSafelyInContainer = new Vector(15);
     private Vector blackPiecesSafelyInContainer = new Vector(15);
+    private int[] whitePieces = new int[26]; // 0 - container, 25 - bar
+    private int[] blackPieces = new int[26];
     private boolean diesRolled = false;
 
     private Utils utils = new Utils();
-    private Sound sfxNoMove;
-    private Sound sfxKilled;
-    private Sound sfxPutPieceInContainer;
+    private Sound sfxNoMove, sfxKilled, sfxPutPieceInContainer;
 
     private static final int LAST_SPIKE = 23;
     private static final int FIRST_SPIKE = 0;
@@ -36,21 +36,14 @@ public class Board {
     private static final int BOARD_NEW_GAME = 0;
     private static final int DEBUG_PIECES_IN_THEIR_HOME = 1;
     private static final int INIT_CONFIGURATION = BOARD_NEW_GAME;
-    private static final int[] whiteInitPositions = {
+    private static final int[] initPositions = {
+        0,
         0, 0, 0, 0, 0, 5,
         0, 3, 0, 0, 0, 0,
         5, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 2
+        0, 0, 0, 0, 0, 2,
+        0
     };
-
-    private static final int[] blackInitPositioin = new int[24];
-    static {
-        int blackIdx = 23;
-        for (int i = 0; i < whiteInitPositions.length; ++i, --blackIdx) {
-            blackInitPositioin[blackIdx] = whiteInitPositions[i];
-        }
-    }
-
     private SpikePair SPtheMoveToMake; // stores the move they will make
 
     public Board(GameColour gameColour, Geometry geometry, GameConfig config) {
@@ -92,19 +85,23 @@ public class Board {
 
     void initialiseBoard(int mode) {
         log("mode: BOARD_NEW_GAME");
-        initialiseBoardForNewGame(whiteInitPositions, blackInitPositioin);
+        initialiseBoardForNewGame(initPositions, initPositions);
         if (mode == DEBUG_PIECES_IN_THEIR_HOME) {
             int[] whiteHome = {
+                0,
                 0, 5, 5, 5, 0, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0
+                0, 0, 0, 0, 0, 0,
+                0
             };
             int[] blackHome = {
+                0,
+                0, 0, 2, 11, 2, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0,
-                0, 2, 11, 2, 0, 0
+                0
             };
             initialiseBoardForNewGame(whiteHome, blackHome);
         }
@@ -112,9 +109,16 @@ public class Board {
 
 
     // puts the pieces where they need to be to initialise a new game of backgammon
-    // [24] provides the number of pieces in container
+    // [0] provides the number of pieces in container
+    // [25] provides the number of pieces on the bar
     void initialiseBoardForNewGame(int[] whiteInitPositions, int[] blackInitPositions) {
         log("initialiseBoardForNewGame");
+        if (whiteInitPositions.length != 26) {
+            throw new RuntimeException("Wrong format of white configuration array, length: " + whiteInitPositions.length);
+        }
+        if (blackInitPositions.length != 26) {
+            throw new RuntimeException("Wrong format of black configuration array, length: " + blackInitPositions.length);
+        }
         for (Spike spike: spikes) {
             spike.pieces.clear();
         }
@@ -123,41 +127,40 @@ public class Board {
         whitePiecesSafelyInContainer.clear();
         blackPiecesSafelyInContainer.clear();
         int whitePiecesOnBoard = 0;
-        for (int i = 0; i < 24; ++i) {
+        for (int i = 1; i <= 24; ++i) {
             whitePiecesOnBoard += whiteInitPositions[i];
             for (int j = 0; j < whiteInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(geometry, whitePlayer);
-                spikes.get(i).addPiece(newPiece);
+                spikes.get(i - 1).addPiece(new Piece(geometry, whitePlayer));
             }
         }
-        if (whiteInitPositions.length > 24) {
-            whitePiecesOnBoard += whiteInitPositions[24];
-            for (int j = 0; j < whiteInitPositions[24]; ++j) {
-                Piece containerPiece = new Piece(geometry, whitePlayer);
-                whitePiecesSafelyInContainer.add(containerPiece);
-            }
+        whitePiecesOnBoard += whiteInitPositions[0];
+        for (int j = 0; j < whiteInitPositions[0]; ++j) {
+            Piece containerPiece = new Piece(geometry, whitePlayer);
+            whitePiecesSafelyInContainer.add(containerPiece);
         }
         int blackPiecesOnBoard = 0;
-        for (int i = 0; i < 24; ++i) {
+        for (int i = 1; i <= 24; ++i) {
             blackPiecesOnBoard += blackInitPositions[i];
             for (int j = 0; j < blackInitPositions[i]; ++j) {
                 Piece newPiece = new Piece(geometry, blackPlayer);
-                spikes.get(i).addPiece(newPiece);
+                spikes.get(24 - i).addPiece(newPiece);
             }
         }
-        if (blackInitPositions.length > 24) {
-            blackPiecesOnBoard += blackInitPositions[24];
-            for (int j = 0; j < blackInitPositions[24]; ++j) {
-                Piece containerPiece = new Piece(geometry, blackPlayer);
-                blackPiecesSafelyInContainer.add(containerPiece);
-            }
+        blackPiecesOnBoard += blackInitPositions[0];
+        for (int j = 0; j < blackInitPositions[0]; ++j) {
+            Piece containerPiece = new Piece(geometry, blackPlayer);
+            blackPiecesSafelyInContainer.add(containerPiece);
         }
+        assert 15 - whitePiecesOnBoard == whiteInitPositions[25];
         for (int j = whitePiecesOnBoard; j < 15; ++j) {
             theBarWHITE.addPiece(new Piece(geometry, whitePlayer));
         }
+        assert 15 - blackPiecesOnBoard == blackInitPositions[25];
         for (int j = blackPiecesOnBoard; j < 15; ++j) {
             theBarBLACK.addPiece(new Piece(geometry, blackPlayer));
         }
+        whitePieces = Arrays.copyOf(whiteInitPositions, whiteInitPositions.length);
+        blackPieces = Arrays.copyOf(blackInitPositions, blackInitPositions.length);
     }
 
     public int die1Value() {
@@ -179,9 +182,9 @@ public class Board {
         //draw the board:
         // outline:
         utils.setColor(g, board_colour);
-        utils.fillRect(g,borderWidth,borderWidth,widthMinusBorder,boardHeight-borderWidth*2);
+        utils.fillRect(g, borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
         utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,borderWidth,borderWidth,widthMinusBorder,boardHeight-borderWidth*2);
+        utils.drawRect(g, borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
         // bar between 2 halves
         utils.setColor(g, bar_colour);
         utils.fillRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
