@@ -786,13 +786,11 @@ public class Board {
             if (y > myY && y < (myY + geometry.containerHeight())) {
                 log(String.format("%s CONTAINER CLICKED ON", whoseTurnIsIt()));
                 Piece pieceStuckToMouse = pieceStuckToMouse();
-                if (pieceStuckToMouse != null && pieceStuckToMouse.sourceSpikeId() >= 0) {
-                    DieType correctDie = whichDieGetsUsToPieceContainer(currentPlayer,
-                        pieceStuckToMouse.sourceSpikeId());
-                    if (pulsateContainer(getCurrentPlayer(), pieceStuckToMouse.sourceSpikeId())) {
-                        log(String.format("%s put in container", whoseTurnIsIt()));
-                        placePieceRemoveOldOneAndSetDieToUsed(currentPlayer.containerId(), correctDie);
-                    }
+                if (pieceStuckToMouse != null &&
+                    pulsateContainer(getCurrentPlayer(), pieceStuckToMouse.sourceSpikeId())) {
+                    DieType correctDie = whichDieGetsUsToPieceContainer(currentPlayer, pieceStuckToMouse.sourceSpikeId());
+                    log(String.format("%s put in container", whoseTurnIsIt()));
+                    placePieceRemoveOldOneAndSetDieToUsed(currentPlayer.containerId(), correctDie);
                 }
             }
         }
@@ -800,62 +798,50 @@ public class Board {
 
     public void checkIfSpikeClickedOn(int x, int y) {
         Piece pieceStuckToMouse = pieceStuckToMouse();
-        for (Spike spike: spikes) {
-            if (spike.userClickedOnThis(x, y)) {
-                log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
-                if (pieceStuckToMouse != null) {
-                    if (pieceStuckToMouse.sourceSpikeId() < 0) {
-                        ArrayList<Spike> spikesAllowedToMoveToFromBar = spikesToMoveToFromBar();
-                        log("barPieceStuckOnouse spikesAllowedToMoveToFromBar.size()" + spikesAllowedToMoveToFromBar.size());
-                        for (Spike sp : spikesAllowedToMoveToFromBar) {
-                            if (spike.getSpikeNumber() == sp.getSpikeNumber()) {
-                                log("WE CAN DROP OFF AT THIS SPIKE " + sp.getSpikeNumber());
-                                if (whoseTurnIsIt() == PlayerColor.WHITE) {
-                                    log("WHITE PIECE REMOVED FROM BAR");
-                                    theBarWHITE.removePiece(pieceStuckToMouse);
-                                    // IF this spike contains an enemy piece Kill it
-                                    if (sp.getAmountOfPieces(PlayerColor.BLACK) == 1) {
-                                        log("WHITE KILLED A BLACK WHILE GETTING OFF BAR");
-                                        Piece piece = (Piece) sp.pieces.firstElement();
-                                        theBarBLACK.addPiece(piece);
-                                        sp.removePiece(piece);
-                                        sfxKilled.playSound();
-                                    }
-                                }
-                                if (whoseTurnIsIt() == PlayerColor.BLACK) {
-                                    log("BLACK PIECE REMOVED FROM BAR");
-                                    theBarBLACK.removePiece(pieceStuckToMouse);
-                                    if (sp.getAmountOfPieces(PlayerColor.WHITE) == 1) {
-                                        Piece piece = (Piece) sp.pieces.firstElement();
-                                        theBarWHITE.addPiece(piece);
-                                        log("BLACK KILLED A WHITE WHILE GETTING OFF BAR");
-                                        sp.removePiece((Piece) sp.pieces.firstElement());
-                                        sfxKilled.playSound();
-                                    }
-                                }
-                                sp.addPiece(pieceStuckToMouse);
-                                unstickPieceFromMouse();
-                                DieType theDieThatGotUsHere = dieThatGotAsHere(null, sp);
-                                log(String.format("%s USED GETTING OFF BAR ", theDieThatGotUsHere));
-                                if (theDieThatGotUsHere == DieType.DIE1) {
-                                    disableDie1();
-                                } else {
-                                    assert theDieThatGotUsHere == DieType.DIE2;
-                                    die2.disable();
-                                }
-                                return;
-                            }
-                        }
-                    } else {
-                        Spike sourceSpike = spikes.get(pieceStuckToMouse.sourceSpikeId());
-                        ArrayList<Integer> reachable = reachableSpikes(sourceSpike, currentPlayer, die1, die2);
-                        Integer idx = reachable.indexOf(spike.getSpikeNumber());
-                        if (idx >= 0) {
-                            placePieceRemoveOldOneAndSetDieToUsed(reachable.get(idx),
-                                dieThatGotAsHere(sourceSpike, spike));
-                        }
-                    }
-                }
+        if (pieceStuckToMouse == null) {
+            return;
+        }
+        Spike spike = getSpikeAt(x, y);
+        if (spike == null) {
+            return;
+        }
+        log("Spike was clicked on (" + spike.getSpikeNumber() + ")");
+        if (pieceStuckToMouse.sourceSpikeId() < 0) {
+            ArrayList<Spike> spikesAllowedToMoveToFromBar = spikesToMoveToFromBar();
+            log("barPieceStuckOnMouse spikesAllowedToMoveToFromBar.size() " + spikesAllowedToMoveToFromBar.size());
+            if (spikesAllowedToMoveToFromBar.indexOf(spike) < 0) {
+                return;
+            }
+            log("WE CAN DROP OFF AT THIS SPIKE " + spike.getSpikeNumber());
+            PlayerColor thisPlayer = currentPlayer.getColour();
+            PlayerColor otherPlayer = currentPlayer.isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
+            Spike toRemoveFrom = currentPlayer.isWhite() ? theBarWHITE : theBarBLACK;
+            Spike toPutOn = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
+            log(String.format("%s PIECE REMOVED FROM BAR", currentPlayer.getColour()));
+            toRemoveFrom.removePiece(pieceStuckToMouse);
+            if (spike.getAmountOfPieces(otherPlayer) == 1) {
+                log(String.format("%s KILLED A %s WHILE GETTING OFF BAR", thisPlayer, otherPlayer));
+                Piece piece = (Piece) spike.pieces.firstElement();
+                toPutOn.addPiece(piece);
+                spike.removePiece(piece);
+                sfxKilled.playSound();
+            }
+            spike.addPiece(pieceStuckToMouse);
+            unstickPieceFromMouse();
+            DieType theDieThatGotUsHere = dieThatGotAsHere(null, spike);
+            log(String.format("%s USED GETTING OFF BAR ", theDieThatGotUsHere));
+            if (theDieThatGotUsHere == DieType.DIE1) {
+                disableDie1();
+            } else {
+                assert theDieThatGotUsHere == DieType.DIE2;
+                die2.disable();
+            }
+        } else {
+            Spike sourceSpike = spikes.get(pieceStuckToMouse.sourceSpikeId());
+            ArrayList<Integer> reachable = reachableSpikes(sourceSpike, currentPlayer, die1, die2);
+            if (reachable.indexOf(spike.getSpikeNumber()) >= 0) {
+                placePieceRemoveOldOneAndSetDieToUsed(spike.getSpikeNumber(),
+                    dieThatGotAsHere(sourceSpike, spike));
             }
         }
     }
@@ -896,8 +882,7 @@ public class Board {
             " destinationSpikeId: " + destinationSpikeId);
         Piece pieceStuckToMouse = pieceStuckToMouse();
         assert pieceStuckToMouse != null;
-        if (pieceStuckToMouse.sourceSpikeId() >= 0)
-            spikes.get(pieceStuckToMouse.sourceSpikeId()).removePiece(pieceStuckToMouse);
+        spikes.get(pieceStuckToMouse.sourceSpikeId()).removePiece(pieceStuckToMouse);
 
         if (destinationSpikeId == currentPlayer.containerId()) {
             Vector container = (whoseTurnIsIt() == PlayerColor.WHITE) ? whitePiecesSafelyInContainer :
@@ -914,12 +899,10 @@ public class Board {
                 log(String.format("%s KILLED A %s", thisColor, otherColor));
                 Piece firstPiece = (Piece) destinationSpike.pieces.firstElement();
                 destinationSpike.removePiece(firstPiece);
-                destinationSpike.addPiece(pieceStuckToMouse);
                 piecesOnBar.addPiece(firstPiece);
                 sfxKilled.playSound();
-            } else {
-                destinationSpike.addPiece(pieceStuckToMouse);
             }
+            destinationSpike.addPiece(pieceStuckToMouse);
         }
         if (dieToSetUnused == DieType.DIE1) {
             disableDie1();
@@ -1010,5 +993,14 @@ public class Board {
             }
         }
         return dieType;
+    }
+
+    private Spike getSpikeAt(int x, int y) {
+        for (Spike spike: spikes) {
+            if (spike.userClickedOnThis(x, y)) {
+                return spike;
+            }
+        }
+        return null;
     }
 }
