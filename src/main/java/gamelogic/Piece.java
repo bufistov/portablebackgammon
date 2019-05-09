@@ -1,7 +1,6 @@
 package gamelogic;
 
 import data.PlayerColor;
-import graphics.GameColour;
 import graphics.Geometry;
 import lowlevel.Utils;
 
@@ -9,7 +8,6 @@ import java.awt.*;
 
 class Piece {
 
-    private Geometry geometry;
     private int centerX;
     private int centerY;
 
@@ -19,7 +17,6 @@ class Piece {
 
     Piece(Geometry geometry, PlayerColor playerColor) {
         log("Piece made. father is " + playerColor);
-        this.geometry = geometry;
         colour = playerColor;
     }
 
@@ -27,9 +24,8 @@ class Piece {
         return colour;
     }
 
-    void paint(Graphics g, GameColour colours, int upperLeftX, int upperLeftY) {
+    void paint(Graphics g, Color color, Geometry geometry, int upperLeftX, int upperLeftY) {
         int pieceDiameter = geometry.pieceDiameter();
-        Color color = (colour == PlayerColor.WHITE) ? colours.getWhitePiece() : colours.getBlackPiece();
         Utils.fillCircle(g, color, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
         Utils.drawCircle(g, Color.BLACK, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
 
@@ -54,9 +50,9 @@ class Piece {
         stickToMouse = false;
     }
 
-    boolean userClickedOnThis(int mouseX, int mouseY) {
-       return Math.abs(mouseX - centerX) <= geometry.pieceRadius()
-        && Math.abs(mouseY - centerY) <= geometry.pieceRadius();
+    boolean userClickedOnThis(int mouseX, int mouseY, int pieceRadius) {
+       return Math.abs(mouseX - centerX) <= pieceRadius
+        && Math.abs(mouseY - centerY) <= pieceRadius;
     }
 
     private void log(String s) {

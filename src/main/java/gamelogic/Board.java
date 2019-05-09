@@ -17,7 +17,6 @@ import java.util.Vector;
 
 public class Board {
 
-    private Color board_colour, bar_colour;
     private GameColour gameColour;
     private Geometry geometry;
 
@@ -739,7 +738,7 @@ public class Board {
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, gameColour, pieceX, pieceOnBarY);
+                p.paint(g, gameColour.getWhitePiece(), geometry, pieceX, pieceOnBarY);
                 pieceOnBarY -= geometry.pieceDiameter();
             }
         }
@@ -748,7 +747,7 @@ public class Board {
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, gameColour, pieceX, pieceOnBarY);
+                p.paint(g, gameColour.getBlackPiece(), geometry, pieceX, pieceOnBarY);
                 pieceOnBarY += geometry.pieceDiameter();
             }
         }
@@ -757,7 +756,8 @@ public class Board {
     public void drawPieceStuckToMouse(Graphics g, int mouseX, int mouseY) {
         Piece piece = pieceStuckToMouse();
         if (piece != null) {
-            piece.paint(g, gameColour, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
+            piece.paint(g, currentPlayer.isWhite() ? gameColour.getWhitePiece() : gameColour.getBlackPiece(),
+                geometry, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
         }
     }
 
@@ -946,7 +946,7 @@ public class Board {
             possibleDestinationsFromBar = spikesToMoveToFromBar();
         while (!possibleDestinationsFromBar.isEmpty() && e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
-            if (p.userClickedOnThis(x, y)) {
+            if (p.userClickedOnThis(x, y, geometry.pieceRadius())) {
                 log("PIECE ON THE BAR CLICKED ON.");
                 p.stickToMouse(-1);
                 return;
@@ -957,7 +957,7 @@ public class Board {
             Enumeration pieces_e = spike.pieces.elements();
             while (pieces_e.hasMoreElements()) {
                 Piece piece = (Piece) pieces_e.nextElement();
-                if (piece.userClickedOnThis(x, y)) {
+                if (piece.userClickedOnThis(x, y, geometry.pieceRadius())) {
                     if (allowPieceToStickToMouse(spike) && piece.getColour() == whoseTurnIsIt()) {
                         log("PICKED UP PIECE: " + piece.getColour());
                         piece.stickToMouse(spike.getSpikeNumber());

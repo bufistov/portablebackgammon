@@ -195,7 +195,8 @@ public class Spike {
             Piece p = (Piece) e.nextElement();
             if (!p.stickToMouse()) {
                 piecey += ysign() * (geometry.pieceDiameter() - overlapOnPieces);
-                p.paint(g, colours, piecex, piecey + ysign() * overlapOnPieces);
+                p.paint(g, p.getColour() == PlayerColor.WHITE ? colours.getWhitePiece() : colours.getBlackPiece(),
+                    geometry, piecex, piecey + ysign() * overlapOnPieces);
             }
         }
     }
