@@ -1,8 +1,5 @@
 package lowlevel;
 
-import java.awt.*;
-import java.awt.event.*;
-
 import data.GuiState;
 import data.PlayerColor;
 import gamelogic.*;
@@ -10,12 +7,16 @@ import graphics.GameColour;
 import graphics.Geometry;
 import utils.MouseClickAndMoveListener;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.MemoryImageSource;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import javax.swing.JFrame;
 
 import static data.GuiState.*;
 import static java.awt.event.MouseEvent.BUTTON1;
@@ -161,17 +162,17 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     private boolean firstThemeSet = true; // so we dont tell players when the theme is set upon loading but we do othertimes
 
     private int debugMenuPos = 0;
-    public static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
-    public static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
-    public static final int DEBUG_OPTION_paintRobotMessages=2;
-    public static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
-    public static final int LAST_DEBUG_OPTION=3;
+    private static final int DEBUG_OPTION_TIME_DELAY_BETWEEN_CLICKS=0;
+    private static final int DEBUG_OPTION_ROBOT_DELAY_AFTER_CLICKS=1;
+    private static final int DEBUG_OPTION_paintRobotMessages=2;
+    private static final int DEBUG_OPTION_FULL_AUTO_PLAY=3;
+    private static final int LAST_DEBUG_OPTION=3;
 
-    public static final int DEBUGLEFT = 1;
-    public static final int DEBUGRIGHT = 2;
+    private static final int DEBUGLEFT = 1;
+    private static final int DEBUGRIGHT = 2;
 
-    public static int pointerX;
-    public static int pointerY;
+    static int pointerX;
+    static int pointerY;
 
     public CustomCanvas(JFrame mainWindow, GameColour gameColour, Geometry geometry,
                         Board board, GameConfig config) {
@@ -1515,32 +1516,20 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 case 6:
                     Spike.WHITE_SPIKE_COLOUR = themecolours[i];
                     break;
-                case 7:
-                    Piece.WHITE_PIECE_COLOUR = themecolours[i];
-                    break;
-                case 8:
-                    Piece.BLACK_PIECE_COLOUR = themecolours[i];
-                    break;
                 case 9:
-                    Piece.WHITE_PIECE_INNER_COLOUR = themecolours[i];
-                    break;
-                case 10:
-                    Piece.BLACK_PIECE_INNER_COLOUR = themecolours[i];
-                    break;
-                case 11:
                     Die.DIE_COLOUR = themecolours[i];
                     break;
-                case 12:
+                case 10:
                     Die.DOT_COLOUR = themecolours[i];
                     break;
                 default:
-                    if (i > 12)
+                    if (i > 10)
                         Utils._E("theme state error, should not exceed 12!");
             }
         }
         makeColourObjects();
         board.makeColourObjects();
-        Piece.makeColourObjects();
+        Piece.makeColourObjects(themecolours[7], themecolours[8]);
         Die.makeColourObjects();
         log("Theme is loaded now and working.");
     }
@@ -1639,15 +1628,13 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         0x993300,
         Spike.BLACK_SPIKE_COLOUR,
         Spike.WHITE_SPIKE_COLOUR,
-        Piece.WHITE_PIECE_COLOUR,
-        Piece.BLACK_PIECE_COLOUR,
-        Piece.WHITE_PIECE_INNER_COLOUR,
-        Piece.BLACK_PIECE_INNER_COLOUR,
+        0xe4e4d8,
+        0x612d00,
         Die.DIE_COLOUR,
         Die.DOT_COLOUR
     };
 
-    public static int metalic[] = {
+    private static int metalic[] = {
         /*BACKGROUND_COLOUR*/               0xffffff,
         /*PANEL_COLOUR*/                    0x828284,
         /*ROLL_BUTTON_COLOUR*/              0xffffff,
@@ -1657,13 +1644,11 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         /*Spike.WHITE_SPIKE_COLOUR*/        0xa3a4a8,
         /*Piece.WHITE_PIECE_COLOUR*/        0xedf0f5,
         /*Piece.BLACK_PIECE_COLOUR*/        0x1a1a22,
-        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
         /*Die.DIE_COLOUR*/                  0x807875,
         /*Die.DOT_COLOUR*/                  0xe5e0da
     };
 
-    public static int classic[] = {
+    private static int classic[] = {
         /*BACKGROUND_COLOUR*/               0x2c632a,
         /*PANEL_COLOUR*/                    0x002001,
         /*ROLL_BUTTON_COLOUR*/              0xfe1e1c,
@@ -1673,14 +1658,12 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         /*Spike.WHITE_SPIKE_COLOUR*/        0xed974c,
         /*Piece.WHITE_PIECE_COLOUR*/        0xfefbf2,
         /*Piece.BLACK_PIECE_COLOUR*/        0x363b3f,
-        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
         /*Die.DIE_COLOUR*/                  0xfe1e1c,
         /*Die.DOT_COLOUR*/                  0xfffdfe
     };
 
 
-    public static int funnyman[] = {
+    private static int funnyman[] = {
         /*BACKGROUND_COLOUR*/               0x661913,
         /*PANEL_COLOUR*/                    0x210d0c,
         /*ROLL_BUTTON_COLOUR*/              0xffffff,
@@ -1690,13 +1673,11 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         /*Spike.WHITE_SPIKE_COLOUR*/        0x6e1213,
         /*Piece.WHITE_PIECE_COLOUR*/        0x4e3113,
         /*Piece.BLACK_PIECE_COLOUR*/        0x841b25,
-        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
         /*Die.DIE_COLOUR*/                  0xffffff,
         /*Die.DOT_COLOUR*/                  0x791216
     };
 
-    public static int bumblebee[] = {
+    private static int bumblebee[] = {
         /*BACKGROUND_COLOUR*/               0x202427,
         /*PANEL_COLOUR*/                    0x3a3a3a,
         /*ROLL_BUTTON_COLOUR*/              0xe4ff00,
@@ -1706,8 +1687,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         /*Spike.WHITE_SPIKE_COLOUR*/        0xe4ff00,
         /*Piece.WHITE_PIECE_COLOUR*/        0xb1995d,
         /*Piece.BLACK_PIECE_COLOUR*/        0x404443,
-        /*Piece.WHITE_PIECE_INNER_COLOUR*/  0xffffff,
-        /*Piece.BLACK_PIECE_INNER_COLOUR*/  0xffffff,
         /*Die.DIE_COLOUR*/                  0x000000,
         /*Die.DOT_COLOUR*/                  0xe4ff00
     };

@@ -1,12 +1,19 @@
 package gamelogic;
-import java.awt.*;
-import java.util.*;
 
 import data.DieType;
 import data.PlayerColor;
 import graphics.GameColour;
 import graphics.Geometry;
-import lowlevel.*;
+import lowlevel.Bot;
+import lowlevel.CustomCanvas;
+import lowlevel.Sound;
+import lowlevel.Utils;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Vector;
 
 public class Board {
 
@@ -130,34 +137,34 @@ public class Board {
         for (int i = 1; i <= 24; ++i) {
             whitePiecesOnBoard += whiteInitPositions[i];
             for (int j = 0; j < whiteInitPositions[i]; ++j) {
-                spikes.get(i - 1).addPiece(new Piece(geometry, whitePlayer));
+                spikes.get(i - 1).addPiece(new Piece(geometry, PlayerColor.WHITE));
             }
         }
         whitePiecesOnBoard += whiteInitPositions[0];
         for (int j = 0; j < whiteInitPositions[0]; ++j) {
-            Piece containerPiece = new Piece(geometry, whitePlayer);
+            Piece containerPiece = new Piece(geometry, PlayerColor.WHITE);
             whitePiecesSafelyInContainer.add(containerPiece);
         }
         int blackPiecesOnBoard = 0;
         for (int i = 1; i <= 24; ++i) {
             blackPiecesOnBoard += blackInitPositions[i];
             for (int j = 0; j < blackInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(geometry, blackPlayer);
+                Piece newPiece = new Piece(geometry, PlayerColor.BLACK);
                 spikes.get(24 - i).addPiece(newPiece);
             }
         }
         blackPiecesOnBoard += blackInitPositions[0];
         for (int j = 0; j < blackInitPositions[0]; ++j) {
-            Piece containerPiece = new Piece(geometry, blackPlayer);
+            Piece containerPiece = new Piece(geometry, PlayerColor.BLACK);
             blackPiecesSafelyInContainer.add(containerPiece);
         }
         assert 15 - whitePiecesOnBoard == whiteInitPositions[25];
         for (int j = whitePiecesOnBoard; j < 15; ++j) {
-            theBarWHITE.addPiece(new Piece(geometry, whitePlayer));
+            theBarWHITE.addPiece(new Piece(geometry, PlayerColor.WHITE));
         }
         assert 15 - blackPiecesOnBoard == blackInitPositions[25];
         for (int j = blackPiecesOnBoard; j < 15; ++j) {
-            theBarBLACK.addPiece(new Piece(geometry, blackPlayer));
+            theBarBLACK.addPiece(new Piece(geometry, PlayerColor.BLACK));
         }
         whitePieces = Arrays.copyOf(whiteInitPositions, whiteInitPositions.length);
         blackPieces = Arrays.copyOf(blackInitPositions, blackInitPositions.length);
@@ -766,7 +773,7 @@ public class Board {
     public void drawPieceStuckToMouse(Graphics g, int mouseX, int mouseY) {
         Piece piece = pieceStuckToMouse();
         if (piece != null) {
-            piece.drawPieceOnMouse(g, mouseX, mouseY);
+            piece.paint(g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
         }
     }
 

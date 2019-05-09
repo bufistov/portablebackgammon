@@ -1,42 +1,41 @@
 package lowlevel;
+
 import java.awt.*;
-import java.util.*;
-import java.awt.image.*;
+import java.awt.image.ImageObserver;
+import java.util.Random;
+import java.util.Vector;
 
 public class Utils {
 
     private static final String ERROR_STRING = "****ERROR**** ";
-    public static boolean CANVAS_LOGGING = false;
+    static boolean CANVAS_LOGGING = false;
     private static final Random randomizer = new Random();
 
     private static int LINES_THAT_FIT_VERTICALLY = 25;
     static Vector systemOuts = new Vector(0);
 
     private Color colour;
-    private Color transparent;
 
     public void setColor(Graphics g, Color colour_) {
         colour = colour_;
         g.setColor(colour_);
     }
 
-    public static void setColor(Graphics g, int c) {
+    static void setColor(Graphics g, int c) {
         Color cl = new Color(c);
         g.setColor(cl);
     }
 
-    public void setColor(Graphics g, int red, int green, int blue, int alpha) {
-        transparent = new Color(red,green,blue,alpha);
-        g.setColor(transparent);
+    void setColor(Graphics g, int red, int green, int blue, int alpha) {
+        g.setColor(new Color(red, green, blue, alpha));
     }
 
     public Color getColor() {
         return colour;
-
     }
 
     public void drawRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
-        g.drawRect(x,y, WIDTH, HEIGHT);
+        g.drawRect(x, y, WIDTH, HEIGHT);
     }
 
     public void fillRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
