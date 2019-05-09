@@ -2,7 +2,9 @@ package lowlevel;
 
 import data.GuiState;
 import data.PlayerColor;
-import gamelogic.*;
+import gamelogic.Board;
+import gamelogic.GameConfig;
+import gamelogic.Player;
 import graphics.GameColour;
 import graphics.Geometry;
 import utils.MouseClickAndMoveListener;
@@ -40,7 +42,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     private boolean I_AM_CLIENT = false;
     private boolean I_AM_SERVER = false;
 
-    public static final String VERSION = "v0.0.1";
+    private static final String VERSION = "v0.0.1";
     private static final boolean RELEASE_BUILD = false;
 
     private GameColour gameColour;
@@ -54,12 +56,9 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     private boolean gameComplete;
 
     // Debug
-    public static boolean showBoundaryBoxes = false;
+    private static boolean showBoundaryBoxes = false;
     private static boolean PAINT_STATE = false;
     private static final String DEBUG_HEADER = "Midokura Backgammon game (DEBUG MODE):";
-
-    // -- constants
-    private Color panel_colour, background_colour, roll_button_colour;
 
     private CustomFont fontwhite, fontblack;
     private boolean INFO = false;    // 'about box' toggle
@@ -200,7 +199,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         addKeyListener( this );
 
         setTheme(theme);
-        makeColourObjects();
         loadSounds(this.soundOn);
         loadImages();
         int[] pixels = new int[16 * 16];
@@ -310,7 +308,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             }
         }
         if (this.drawMousePointer && (NETWORK_GAME_IN_PROCESS || botIsPlaying)) {
-            utils.drawImage(g, pointer, mouseHoverX, mouseHoverY + 6, this); // this 6 lines it up
+            Utils.drawImage(g, pointer, mouseHoverX, mouseHoverY + 6, this); // this 6 lines it up
         }
     }
 
@@ -358,10 +356,13 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             INFO = false;
         }
 
-        utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, geometry.boardWidth()/4, geometry.boardHeight()/4, geometry.boardWidth()/2, geometry.boardHeight()/2);
-        utils.setColor(g, Color.white);
-        utils.drawRoundRect(g, geometry.boardWidth()/4, geometry.boardHeight()/4, geometry.boardWidth()/2, geometry.boardHeight()/2);
+        Color color = new Color(0,0,0,TRANSPARENCY_LEVEL);
+        Utils.fillRoundRect(g, color,
+            geometry.boardWidth()/4, geometry.boardHeight()/4,
+            geometry.boardWidth()/2, geometry.boardHeight()/2);
+        Utils.drawRoundRect(g, Color.white,
+            geometry.boardWidth()/4, geometry.boardHeight()/4,
+            geometry.boardWidth()/2, geometry.boardHeight()/2);
 
         int xabout = geometry.boardWidth() / 2;
         int yabout = (geometry.boardHeight()/4) + geometry.tinyGap();
@@ -390,13 +391,10 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             infoCounter = 0;
             INFO = false;
         }
-
-        utils.setColor(g, 0, 0, 0, 125);
         int x = 10;
         int y = 10;
-        utils.fillRoundRect(g, x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
-        utils.setColor(g, Color.yellow);
-        utils.drawRoundRect(g, x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
+        Utils.fillRoundRect(g, new Color(0, 0, 0, 125), x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
+        Utils.drawRoundRect(g, Color.yellow, x, y, geometry.boardWidth() / 2, geometry.boardHeight() - 40);
 
         x += 5;
         y += geometry.tinyGap();
@@ -408,7 +406,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "DELAY_BETWEEN_CLICKS_MILLIS:" + Bot.DELAY_BETWEEN_CLICKS_MILLIS;
         //Highlighter to indicate if its on this option
         if (debugMenuPos == 0) {
-            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+            Utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
         }
         //option itself,
         fontwhite.drawString(g, printme, x, y, 0);
@@ -418,7 +416,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "ROBOT_DELAY_AFTER_CLICKS:" + Bot.ROBOT_DELAY_AFTER_CLICKS;
         //Highlighter to indicate if its on this option
         if (debugMenuPos == 1) {
-            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+            Utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
         }
         //option itself,
         fontwhite.drawString(g, printme, x, y, 0);
@@ -427,7 +425,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "paintRobotMessages:" + paintRobotMessages;
         //Highlighter to indicate if its on this option
         if (debugMenuPos == 2) {
-            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+            Utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
         }
         //option itself,
         fontwhite.drawString(g, printme, x, y, 0);
@@ -436,7 +434,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "FULL_AUTO_PLAY:" + Bot.getFullAutoPlay();
         //Highlighter to indicate if its on this option
         if (debugMenuPos == 3) {
-            utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
+            Utils.drawRoundRect(g, x, y, fontwhite.stringWidth(printme + " "), fontwhite.getHeight());
         }
         //option itself,
         fontwhite.drawString(g, printme, x, y, 0);
@@ -530,9 +528,9 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
     ///////// ALL PAINT STATE METHODS //////////////////////
     private void paint_SPLASH_SCREEN(Graphics g) {
-        utils.backGround(g, Color.WHITE, getWidth(), getHeight());
-        utils.drawImage(g, splashScreenLogo, getWidth()/2, getHeight()/2,this);
-        utils.setColor(g, Color.BLACK);
+        Utils.backGround(g, Color.WHITE, getWidth(), getHeight());
+        Utils.drawImage(g, splashScreenLogo, getWidth()/2, getHeight()/2,this);
+        g.setColor(Color.BLACK);
         if (showBoundaryBoxes) {
              int ydebug = 10;
              int xdebug = 10;
@@ -549,32 +547,27 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     }
 
     private void paint_POST_SPLASH_SCREEN(Graphics g) {
-        utils.backGround(g, background_colour, getWidth(), getHeight()); // paint entire background
-        utils.setColor(g, Color.WHITE);
+        utils.backGround(g, gameColour.getBackground(), getWidth(), getHeight()); // paint entire background
 
         int boardWidth = (getWidth() / geometry.panelSizeFraction()) * (geometry.panelSizeFraction() - 1);
         int boardHeight = getHeight();
         board.paint(g, boardWidth, boardHeight, !gameComplete(), mouseHoverX, mouseHoverY);
 
-        //paint the message panel to the right with players name etc
-        utils.setColor(g, panel_colour);
-        utils.fillRect(g, boardWidth, geometry.borderWidth(),
+        // paint the message panel to the right with players name etc
+        Utils.fillRect(g, gameColour.getPanel(), boardWidth, geometry.borderWidth(),
             geometry.panelWidth(), boardHeight - (geometry.borderWidth() * 2));
 
-        //draw the preferences button
+        // draw the preferences button
         final int prefx = preferencesButtonX();
         final int prefy = preferencesButtonY();
 
-        //draw a circle with an 'i' inside.
-        utils.setColor(g, Color.blue);
-        utils.fillCircle(g, prefx, prefy, prefw, prefh);
-        utils.setColor(g, Color.white);
-        utils.drawCircle(g, prefx, prefy, prefw, prefh);
+        // draw a circle with an 'i' inside.
+        Utils.fillCircle(g, Color.blue, prefx, prefy, prefw, prefh);
+        Utils.drawCircle(g, Color.white, prefx, prefy, prefw, prefh);
         fontwhite.drawString(g, "i", prefx + 4, prefy + 2, 0);
 
         if (showBoundaryBoxes) {
-            utils.setColor(g, Color.RED);
-            utils.drawRect(g, prefx, prefy, prefw, prefh);
+            Utils.drawRect(g, Color.RED, prefx, prefy, prefw, prefh);
         }
 
         board.drawBlackPieceContainer(g, mouseHoverX, mouseHoverY);
@@ -653,14 +646,14 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
         fontwhite.drawString(g, printme, xposTmp, ypos, 0);
         ypos += fontwhite.getHeight();
-        utils.setColor(g, roll_button_colour);
+        g.setColor(gameColour.getRollButton());
 
         //---- draw buttons
         ///////// double button
         printme = "Double";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
         xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
-        utils.setColor(g, roll_button_colour);
+        g.setColor(gameColour.getRollButton());
         ypos += 10;
         utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
         fontwhite.drawString(g, printme, xposTmp, ypos + 1, 0);
@@ -670,8 +663,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         doubleWidth = widthOfPrintMe + 20;
         doubleHeight = (fontwhite.getHeight());
         if (showBoundaryBoxes) {
-            utils.setColor(g, Color.red);
-            utils.drawRect(g, doubleX, doubleY, doubleWidth, doubleHeight);
+            Utils.drawRect(g, Color.red, doubleX, doubleY, doubleWidth, doubleHeight);
         }
 
         // draw the 'Roll' button
@@ -682,8 +674,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             //draw in centre:
             xposTmp = ((geometry.boardWidth() / 2)) - widthOfPrintMe / 2;
 
-            utils.setColor(g, roll_button_colour);
-            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
+            g.setColor(gameColour.getRollButton());
+            Utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
 
             if (HUMAN_VS_COMPUTER && board.whoseTurnIsIt() == PlayerColor.BLACK || Bot.getFullAutoPlay()) {
                 Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2,
@@ -695,8 +687,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             rollButtonW = widthOfPrintMe + 20;
             rollButtonH = (fontwhite.getHeight());
             if (showBoundaryBoxes) {
-                utils.setColor(g, Color.RED);
-                utils.drawRect(g, rollButtonX, rollButtonY, rollButtonW, rollButtonH);
+                Utils.drawRect(g, Color.RED, rollButtonX, rollButtonY, rollButtonW, rollButtonH);
             }
             fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
             ypos += fontwhite.getHeight();
@@ -710,9 +701,9 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = "Resign";
         widthOfPrintMe = (fontwhite.stringWidth(printme));
         xposTmp = (geometry.boardWidth() + geometry.panelWidth() / 2) - ((widthOfPrintMe / 2) + geometry.tinyGap());
-        utils.setColor(g, roll_button_colour);
+        g.setColor(gameColour.getRollButton());
         ypos += 10;
-        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
+        Utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontwhite.getHeight()));
         fontwhite.drawString(g, printme, xposTmp, ypos + 1, 0);
 
         resignX = xposTmp - 10;
@@ -721,8 +712,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         resignHeight = (fontwhite.getHeight());
 
         if (showBoundaryBoxes) {
-            utils.setColor(g, Color.red);
-            utils.drawRect(g, resignX, resignY, resignWidth, resignHeight);
+            Utils.drawRect(g, Color.red, resignX, resignY, resignWidth, resignHeight);
         }
     }
 
@@ -859,7 +849,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
     }
 
     private void paint_OPTIONS_SCREEN_LOCAL_OR_NETWORK(Graphics g, String buttonAstr, String buttonBstr, String question) {
-        utils.backGround(g, Color.WHITE, getWidth(), getHeight());
+        Utils.backGround(g, Color.WHITE, getWidth(), getHeight());
         String printme = question;
         int widthOfPrintMe;
         int xposTmp;
@@ -877,15 +867,15 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         //make button glow if pointer is over it
         if (glowA) {
             if (glowCounter < 255) {
-                utils.setColor(g, new Color(glowCounter, 0, 0));
+                g.setColor(new Color(glowCounter, 0, 0));
             } else {
-                utils.setColor(g, new Color(255, 0, 0));
+                g.setColor(new Color(255, 0, 0));
             }
-            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+            Utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
             glowA = false;
         }
-        utils.setColor(g, Color.black);
-        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+
+        Utils.drawRoundRect(g, Color.black, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
 
         String robotMoveDesc = "Bot Loaded. Answer: (" + question + ") ";
         Board.setBotDestination((xposTmp - 10) + (widthOfPrintMe + 20) / 2, ypos + (fontblack.getHeight() / 2),
@@ -898,8 +888,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         buttonwA = widthOfPrintMe + 20;
         buttonhA = (fontblack.getHeight());
         if (showBoundaryBoxes) {
-            utils.setColor(g, Color.red);
-            utils.drawRect(g, buttonxA, buttonyA, buttonwA, buttonhA);
+            Utils.drawRect(g, Color.red, buttonxA, buttonyA, buttonwA, buttonhA);
         }
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
         printme = "or";
@@ -912,22 +901,20 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         printme = buttonBstr; // "Network Play";
         widthOfPrintMe = (fontblack.stringWidth(printme));
         xposTmp = (getWidth() / 2) - ((widthOfPrintMe / 2));
-        utils.setColor(g, Color.BLACK);
         ypos += fontblack.getHeight() * 2;
 
         //make button glow if pointer is over it
         if (glowB) {
             if (glowCounter < 255) {
-                utils.setColor(g, new Color(0, 0, glowCounter));
+                g.setColor(new Color(0, 0, glowCounter));
             } else {
-                utils.setColor(g, new Color(0, 0, 255));
+                g.setColor(new Color(0, 0, 255));
             }
 
-            utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+            Utils.fillRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
             glowB = false;
         }
-        utils.setColor(g, Color.black);
-        utils.drawRoundRect(g, xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
+        Utils.drawRoundRect(g, Color.black,xposTmp - 10, ypos, widthOfPrintMe + 20, (fontblack.getHeight()));
         fontblack.drawString(g, printme, xposTmp, ypos + 1, 0);
 
         /////for collision of button
@@ -936,11 +923,10 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         buttonwB = widthOfPrintMe + 20;
         buttonhB = (fontblack.getHeight());
         if (showBoundaryBoxes) {
-            utils.setColor(g, Color.red);
-            utils.drawRect(g, buttonxB, buttonyB, buttonwB, buttonhB);
+            Utils.drawRect(g, Color.red, buttonxB, buttonyB, buttonwB, buttonhB);
         }
         //draw a little version of the logo in the bottom right
-        utils.drawImage(g, splashScreenLogoSmall, getWidth() - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
+        Utils.drawImage(g, splashScreenLogoSmall, getWidth() - ((splashScreenLogoSmall.getWidth(this) / 2) + 20),
             getHeight() - splashScreenLogoSmall.getHeight(this), this);
     }
 
@@ -957,7 +943,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
         printme="Enter your name:";
         xposTmp=(getWidth()/2)-((widthOfPrintMe/2));
-        utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
+        Utils.drawRect(g, xposTmp, ypos, fontblack.stringWidth(printme), fontblack.getHeight());
 
         printme=NetworkChatClient.nick;
         widthOfPrintMe=(fontblack.stringWidth(printme));
@@ -967,8 +953,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
     private void paint_NETWORKING_LOBBY(Graphics g) {
         TRANSPARENCY_LEVEL=255;
-        utils.setColor(g, 0,0,0,TRANSPARENCY_LEVEL);
-        utils.fillRect(g,0,0,getWidth(),getHeight());
+        g.setColor(new Color(0,0,0,TRANSPARENCY_LEVEL));
+        Utils.fillRect(g,0,0,getWidth(),getHeight());
         int SMALLGAP=5;
 
         int x = SMALLGAP;
@@ -988,10 +974,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
 
         x = x + WIDTH_OF_MESSAGE_TEXT + SMALLGAP;
         //info box top right (amount of users and ops)
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        Utils.drawRoundRect(g, new Color(OUTLINE_FOR_CHAT_BOXES), x, y, WIDTH_OF_USERLIST, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
         fontblack.drawString(g, ""+NetworkChatClient.userList.size()+" users", x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
         ////////////////////////////////////////////
 
@@ -1002,10 +986,8 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         g.setClip(x-2, y+3, WIDTH_OF_MESSAGE_TEXT+5, HEIGHT_OF_MESSAGE_TEXT);
 
         //message text
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
+        Utils.drawRoundRect(g, new Color(OUTLINE_FOR_CHAT_BOXES), x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_MESSAGE_TEXT);
 
         int listY=y+SMALLGAP;
         int topofChatBox=listY;
@@ -1025,25 +1007,17 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
              String message = (String) e.nextElement();
              y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,HEIGHT_OF_ENTERTEXT_BOX-15,false);
              flip=!flip;
-             if (flip)
-             {
+             if (flip) {
                  ydiff=y-ydiff;
-                 //utils.setColor(g,0xFFFFFF);
-                 utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-                 utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
+                 Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
                 y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
-             }
-             else
-             {
-
+             } else {
                  ydiff=y-ydiff;
-               //  utils.setColor(g,0xd5d5d5);
-                 utils.setColor(g, 100,100,100,TRANSPARENCY_LEVEL);
-                 utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
+                 g.setColor(new Color(100,100,100,TRANSPARENCY_LEVEL));
+                 Utils.fillRoundRect(g,x+1,yorig-1,WIDTH_OF_ENTERTEXT_BOX-1,ydiff);
                  y=yorig;
-                y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
-
+                 y=drawMeWrapped(g,x,y,message,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX-15,false);
              }
          }
         }
@@ -1053,20 +1027,17 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         y = SMALLGAP;
 
         // header for topic and live news/////////draw here so it covers over scrolled text from messages
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
+        Utils.drawRoundRect(g, new Color(OUTLINE_FOR_CHAT_BOXES), x, y, WIDTH_OF_MESSAGE_TEXT, HEIGHT_OF_TOPIC_AND_NEWS_BOX);
 
         fontblack.drawString(g, NetworkChatClient.topic, x+SMALLGAP , y+(SMALLGAP*2)-2, 0);
 
         x += WIDTH_OF_MESSAGE_TEXT+SMALLGAP;
         y = 2+SMALLGAP+fontblack.getHeight()*2;
 
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
+        g.setColor(new Color(OUTLINE_FOR_CHAT_BOXES));
+        Utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, HEIGHT_OF_USERLIST);
 
         listY = y + SMALLGAP;
         e = NetworkChatClient.userList.elements();
@@ -1094,10 +1065,9 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         y += HEIGHT_OF_USERLIST + SMALLGAP + 2;
 
         //enter text box
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
+        g.setColor(new Color(OUTLINE_FOR_CHAT_BOXES));
+        Utils.drawRoundRect(g, x, y, WIDTH_OF_ENTERTEXT_BOX, HEIGHT_OF_ENTERTEXT_BOX);
 
         if (chatText != null) {
             drawMeWrapped(g,x,y,chatText,fontblack,false,false,true,WIDTH_OF_ENTERTEXT_BOX,false);
@@ -1106,30 +1076,24 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         //// 2 buttons in bottom right
         x += WIDTH_OF_MESSAGE_TEXT + SMALLGAP;
         //button 1
-        //utils.setColor(g, 0xFFFFFF);
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
-        utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        g.setColor(new Color(OUTLINE_FOR_CHAT_BOXES));
+        Utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
         String printme="Options";
         fontblack.drawString(g, printme, (x)+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
 
         y+=(HEIGHT_OF_ENTERTEXT_BOX+SMALLGAP)/2;
         //button 2
-        //  utils.setColor(g, 0xFFFFFF);
-        utils.setColor(g, 255,255,255,TRANSPARENCY_LEVEL);
-        utils.fillRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
-        utils.setColor(g, OUTLINE_FOR_CHAT_BOXES);
+        Utils.fillRoundRect(g, new Color(255,255,255,TRANSPARENCY_LEVEL), x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
+        g.setColor(new Color(OUTLINE_FOR_CHAT_BOXES));
         utils.drawRoundRect(g, x, y, WIDTH_OF_USERLIST, (HEIGHT_OF_ENTERTEXT_BOX-SMALLGAP)/2);
         printme="Leave";
         fontblack.drawString(g, printme, (x)+15+(fontblack.stringWidth(printme)/2) , y+(SMALLGAP*2)-3, 0);
         /////////////////////////
 
         if (showChallengeWindow) {
-            utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
-            utils.fillRoundRect(g, geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
-            utils.setColor(g, Color.white);
-            utils.drawRoundRect(g, geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
+            Utils.fillRoundRect(g, new Color(0, 0, 0, TRANSPARENCY_LEVEL),geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
+            Utils.drawRoundRect(g, Color.white, geometry.boardWidth() / 4, geometry.boardHeight() / 4, geometry.boardWidth() / 2, geometry.boardHeight() / 2);
 
             int xabout = geometry.boardWidth() / 2;
             int yabout = (geometry.boardHeight() / 4) + geometry.tinyGap();
@@ -1468,76 +1432,41 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 themeName = "default";
                 if (!firstThemeSet)
                     tellPlayers("Theme set to " + themeName);
-                themecolours = defaultms;
                 break;
             case METALIC:
                 log("THEME SET TO METALIC");
                 themeName = "metalic";
                 if (!firstThemeSet)
                     tellPlayers("Theme set to " + themeName);
-                themecolours = metalic;
                 break;
             case CLASSIC:
                 log("THEME SET TO CLASSIC");
                 themeName = "classic";
                 if (!firstThemeSet)
                     tellPlayers("Theme set to " + themeName);
-                themecolours = classic;
                 break;
             case FUNNYMAN:
                 log("THEME SET TO FUNNYMAN");
                 themeName = "funnyman";
                 if (!firstThemeSet)
                     tellPlayers("Theme set to " + themeName);
-                themecolours = funnyman;
                 break;
             case BUMBLEBEE:
                 log("THEME SET TO BUMBLEBEE");
                 themeName = "bumblebee";
                 if (!firstThemeSet)
                     tellPlayers("Theme set to " + themeName);
-                themecolours = bumblebee;
                 break;
             default:
                 Utils._E("theme is out of range!");
         }
+        gameColour.applyTheme(themeName);
         firstThemeSet = false;
-        //assigns each colour from the one specified
-        gameColour.setBackgroundColour(themecolours[0]);
-        gameColour.setRollButtonColour(themecolours[2]);
-        gameColour.setPanelColour(themecolours[1]);
-        gameColour.setBoardColour(themecolours[3]);
-        gameColour.setBarColour(themecolours[4]);
-        for (int i = 0; i < themecolours.length; i++) {
-            switch (i) {
-                case 5:
-                    Spike.BLACK_SPIKE_COLOUR = themecolours[i];
-                    break;
-                case 6:
-                    Spike.WHITE_SPIKE_COLOUR = themecolours[i];
-                    break;
-                case 9:
-                    Die.DIE_COLOUR = themecolours[i];
-                    break;
-                case 10:
-                    Die.DOT_COLOUR = themecolours[i];
-                    break;
-                default:
-                    if (i > 10)
-                        Utils._E("theme state error, should not exceed 12!");
-            }
-        }
-        makeColourObjects();
+        /*makeColourObjects();
         board.makeColourObjects();
         Piece.makeColourObjects(themecolours[7], themecolours[8]);
-        Die.makeColourObjects();
+        Die.makeColourObjects();*/
         log("Theme is loaded now and working.");
-    }
-
-    private void makeColourObjects() {
-        panel_colour = new Color(gameColour.getPanelColour());
-        background_colour = new Color(gameColour.getBackgroundColour());
-        roll_button_colour = new Color(gameColour.getRollButtonColour());
     }
 
     private void loadCustomFonts() {
@@ -1566,27 +1495,26 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         }
     }
 
-    public void tellPlayers(String s) {
+    private void tellPlayers(String s) {
         playerMessageSetTimeLong = System.currentTimeMillis();
         message2Players = s;
     }
 
-    static void robotExplain(String s) {
+    private static void robotExplain(String s) {
          robotMessageSetTimeLong = System.currentTimeMillis();
          robotMoveDesc = s;
     }
 
-    void paintMessageToPlayers(Graphics g) {
-        utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
+    private void paintMessageToPlayers(Graphics g) {
+        g.setColor(new Color(0, 0, 0, TRANSPARENCY_LEVEL));
         if (gameComplete) {
             messageWidth = fontwhite.stringWidth(message2Players + "  ");
             messagex = (geometry.boardWidth() / 2) - messageWidth / 2;
             messageHeight = fontwhite.getHeight();
             messagey = (geometry.boardHeight() / 2) - messageHeight / 2;
 
-            utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
-            utils.setColor(g, Color.WHITE);
-            utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            Utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            Utils.drawRoundRect(g, Color.WHITE, messagex, messagey, messageWidth, messageHeight);
             //draw message in middle of screen
             fontwhite.drawString(g, message2Players, messagex + 7, messagey + 1, 0);
         } else {
@@ -1595,101 +1523,23 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             messagey = geometry.boardHeight() - (fontwhite.getHeight() + geometry.tinyGap());
             messageHeight = fontwhite.getHeight();
             utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
-            utils.setColor(g, Color.WHITE);
-            utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+            utils.drawRoundRect(g, Color.WHITE, messagex, messagey, messageWidth, messageHeight);
             //draw message in bottom left.
             fontwhite.drawString(g, message2Players, messagex + 7, messagey + 1, 0);
         }
     }
 
-    void paintRobotMessage(Graphics g) {
-        utils.setColor(g, 0, 0, 0, TRANSPARENCY_LEVEL);
+    private void paintRobotMessage(Graphics g) {
+        g.setColor(new Color(0, 0, 0, TRANSPARENCY_LEVEL));
         messageWidth = fontwhite.stringWidth(robotMoveDesc + "  ");
         messagex = geometry.boardWidth() - (messageWidth + 10);
         messagey = 10;//(fontwhite.getHeight()+geometry.tinyGap());
         messageHeight = fontwhite.getHeight();
 
-        utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
-        utils.setColor(g, Color.RED);
-        utils.drawRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+        Utils.fillRoundRect(g, messagex, messagey, messageWidth, messageHeight);
+        Utils.drawRoundRect(g, Color.RED, messagex, messagey, messageWidth, messageHeight);
         fontwhite.drawString(g, robotMoveDesc, messagex + 7, messagey + 1, 0);
     }
-
-    /////////////////////ADJUST COLOURS HERE ////////////////////////////
-    //themes: specify colours for colour themes
-    private static int themecolours[]; // this gets assigned in constructor
-
-    // DEFAULT VALUES (ms xp backgammon colours)
-    static int defaultms[] = {
-        0x993300,
-        0x000000,
-        0xffcc66,
-        0x000000,
-        0x993300,
-        Spike.BLACK_SPIKE_COLOUR,
-        Spike.WHITE_SPIKE_COLOUR,
-        0xe4e4d8,
-        0x612d00,
-        Die.DIE_COLOUR,
-        Die.DOT_COLOUR
-    };
-
-    private static int metalic[] = {
-        /*BACKGROUND_COLOUR*/               0xffffff,
-        /*PANEL_COLOUR*/                    0x828284,
-        /*ROLL_BUTTON_COLOUR*/              0xffffff,
-        /*Board.BOARD_COLOUR*/              0x9b9b9b,
-        /*Board.BAR_COLOUR*/                0x8b898c,
-        /*Spike.BLACK_SPIKE_COLOUR*/        0xc7c8cd,
-        /*Spike.WHITE_SPIKE_COLOUR*/        0xa3a4a8,
-        /*Piece.WHITE_PIECE_COLOUR*/        0xedf0f5,
-        /*Piece.BLACK_PIECE_COLOUR*/        0x1a1a22,
-        /*Die.DIE_COLOUR*/                  0x807875,
-        /*Die.DOT_COLOUR*/                  0xe5e0da
-    };
-
-    private static int classic[] = {
-        /*BACKGROUND_COLOUR*/               0x2c632a,
-        /*PANEL_COLOUR*/                    0x002001,
-        /*ROLL_BUTTON_COLOUR*/              0xfe1e1c,
-        /*Board.BOARD_COLOUR*/              0xf4ebca,
-        /*Board.BAR_COLOUR*/                0x245223,
-        /*Spike.BLACK_SPIKE_COLOUR*/        0x99643c,
-        /*Spike.WHITE_SPIKE_COLOUR*/        0xed974c,
-        /*Piece.WHITE_PIECE_COLOUR*/        0xfefbf2,
-        /*Piece.BLACK_PIECE_COLOUR*/        0x363b3f,
-        /*Die.DIE_COLOUR*/                  0xfe1e1c,
-        /*Die.DOT_COLOUR*/                  0xfffdfe
-    };
-
-
-    private static int funnyman[] = {
-        /*BACKGROUND_COLOUR*/               0x661913,
-        /*PANEL_COLOUR*/                    0x210d0c,
-        /*ROLL_BUTTON_COLOUR*/              0xffffff,
-        /*Board.BOARD_COLOUR*/              0x9d581d,
-        /*Board.BAR_COLOUR*/                0x490f0e,
-        /*Spike.BLACK_SPIKE_COLOUR*/        0x290d0a,
-        /*Spike.WHITE_SPIKE_COLOUR*/        0x6e1213,
-        /*Piece.WHITE_PIECE_COLOUR*/        0x4e3113,
-        /*Piece.BLACK_PIECE_COLOUR*/        0x841b25,
-        /*Die.DIE_COLOUR*/                  0xffffff,
-        /*Die.DOT_COLOUR*/                  0x791216
-    };
-
-    private static int bumblebee[] = {
-        /*BACKGROUND_COLOUR*/               0x202427,
-        /*PANEL_COLOUR*/                    0x3a3a3a,
-        /*ROLL_BUTTON_COLOUR*/              0xe4ff00,
-        /*Board.BOARD_COLOUR*/              0x50555b,
-        /*Board.BAR_COLOUR*/                0x545454,
-        /*Spike.BLACK_SPIKE_COLOUR*/        0x030504,
-        /*Spike.WHITE_SPIKE_COLOUR*/        0xe4ff00,
-        /*Piece.WHITE_PIECE_COLOUR*/        0xb1995d,
-        /*Piece.BLACK_PIECE_COLOUR*/        0x404443,
-        /*Die.DIE_COLOUR*/                  0x000000,
-        /*Die.DOT_COLOUR*/                  0xe4ff00
-    };
 
     ///ROBOT STUFF
     public static void tellRobot(boolean b, String s) {
@@ -1829,11 +1679,7 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         sfxError.playSound();
     }
 
-    public boolean gameComplete() {
+    boolean gameComplete() {
         return this.gameComplete;
-    }
-
-    public boolean humanVsComputer() {
-        return HUMAN_VS_COMPUTER;
     }
 }

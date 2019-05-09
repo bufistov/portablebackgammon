@@ -1,12 +1,13 @@
 package gamelogic;
-import java.awt.*;
 
 import data.DieType;
 import data.PlayerColor;
 import data.SpikeType;
+import graphics.GameColour;
 import graphics.Geometry;
-import lowlevel.*;
+import lowlevel.Utils;
 
+import java.awt.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -19,17 +20,12 @@ import static data.SpikeType.STALECTITE;
  */
 public class Spike {
 
-    public static int BLACK_SPIKE_COLOUR = 0x993802;
-    public static int WHITE_SPIKE_COLOUR = 0xffcc7e;
-    private Color black_spike_colour, white_spike_colour;
-    private static final Color flashColor = new Color(255,225,0);
-
     Vector pieces = new Vector();
     private final int position; // index in the array of spikes
     private final SpikeType type;
     private final String spikeName;
+    private GameColour colours;
     private Geometry geometry;
-    private Utils utils = new Utils();
 
     // these variables (along with TRIANGLE_WIDTH & TRIANGLE_HEIGHT) are used to work out if the player has clicked on the piece
     private int collision_x;
@@ -45,10 +41,11 @@ public class Spike {
     private int x2 = 0, y2 = 0; // middle point, can go up or down depending on type
     private int x3 = 0, y3 = 0; // right most point
 
-    Spike(Geometry geometry, int position) {
+    Spike(GameColour colours, Geometry geometry, int position) {
+        this.colours = colours;
         this.geometry = geometry;
-        this.die1 = new Die(geometry);
-        this.die2 = new Die(geometry);
+        this.die1 = new Die(colours, geometry);
+        this.die2 = new Die(colours, geometry);
         if (position < 0) {
             log("Container spike is made");
             this.position = NOT_A_REAL_SPIKE_MINUS_99;
@@ -65,7 +62,6 @@ public class Spike {
             this.type = position <= 12 ? STALECTITE : STALECMITE;
         }
         log("Spike made "+ position);
-        makeColourObjects();
     }
 
     String getName() {
@@ -161,11 +157,6 @@ public class Spike {
         }
     }
 
-    void makeColourObjects() {
-        black_spike_colour = new Color(BLACK_SPIKE_COLOUR);
-        white_spike_colour = new Color(WHITE_SPIKE_COLOUR);
-    }
-
     boolean isContainer() {
         return type == SpikeType.CONTAINER;
     }
@@ -204,29 +195,21 @@ public class Spike {
             Piece p = (Piece) e.nextElement();
             if (!p.stickToMouse()) {
                 piecey += ysign() * (geometry.pieceDiameter() - overlapOnPieces);
-                p.paint(g, piecex, piecey + ysign() * overlapOnPieces);
+                p.paint(g, colours, piecex, piecey + ysign() * overlapOnPieces);
             }
         }
     }
 
     private void drawSpike(Graphics g) {
         if (isContainer()) {
-            assert false;
-            return;
+            throw new RuntimeException("Wrong method to draw container");
         }
-        if (paintBlackColour(g)) {
-            utils.setColor(g, black_spike_colour);
-        } else {
-            utils.setColor(g, white_spike_colour);
-        }
+        Color triangleColor = paintBlackColour() ? colours.getBlackSpike() : colours.getWhiteSpike();
         if (flash) {
-            utils.setColor(g, flashColor);
+            triangleColor = colours.flash();
         }
-        utils.fillTriangle(g, x1, y1, x2, y2, x3, y3);
-
-        //draw outline after otherwise it gets distored by the filled shape
-        utils.setColor(g, Color.BLACK);
-        utils.drawTriangle(g, x1, y1, x2, y2, x3, y3);
+        Utils.fillTriangle(g, triangleColor, x1, y1, x2, y2, x3, y3);
+        Utils.drawTriangle(g, Color.BLACK, x1, y1, x2, y2, x3, y3);
     }
 
     private void drawPotentialDieMoves(Graphics g) {
@@ -255,15 +238,8 @@ public class Spike {
         }
     }
 
-    // sets the colour based on odd and even to alternative spike colours
-    private boolean paintBlackColour(Graphics g) {
-        if (getSpikeNumber() % 2 == 0) {
-            g.setColor(Color.BLACK);
-            return true;
-        } else {
-            g.setColor(Color.WHITE);
-            return false;
-        }
+    private boolean paintBlackColour() {
+        return  getSpikeNumber() % 2 == 0;
     }
 
     // this calculates the 3 points for this spike, each with x,y value

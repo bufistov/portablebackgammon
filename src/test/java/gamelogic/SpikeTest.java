@@ -2,6 +2,7 @@ package gamelogic;
 
 import data.PlayerColor;
 import data.SpikeType;
+import graphics.GameColour;
 import graphics.Geometry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,8 @@ class SpikeTest {
         int canvasWidth = 810;
         int canvasHeight = 500;
         Geometry geometry = new Geometry(canvasWidth, canvasHeight);
-        Spike spike = new Spike(geometry,2);
+        GameColour colours = new GameColour();
+        Spike spike = new Spike(colours, geometry,2);
         assertEquals(2, spike.getPosition());
         assertEquals(1, spike.getSpikeNumber());
         assertEquals(0, spike.getAmountOfPieces(PlayerColor.WHITE));
@@ -44,7 +46,7 @@ class SpikeTest {
         int canvasWidth = 810;
         int canvasHeight = 500;
         Geometry geometry = new Geometry(canvasWidth, canvasHeight);
-        Spike spike = new Spike(geometry, 2);
+        Spike spike = new Spike(new GameColour(), geometry, 2);
         spike.paint(Mockito.mock(Graphics.class));
         Point actual = spike.firstPieceCenter();
         Point expected = spike.getMiddlePoint();
@@ -52,7 +54,7 @@ class SpikeTest {
         expected.y += geometry.pieceRadius();
         assertEquals(expected, actual);
 
-        Spike spike2 = new Spike(geometry, 14);
+        Spike spike2 = new Spike(new GameColour(), geometry, 14);
         spike2.paint(Mockito.mock(Graphics.class));
 
         actual = spike2.firstPieceCenter();

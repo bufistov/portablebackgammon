@@ -14,7 +14,7 @@ public class Utils {
     private static int LINES_THAT_FIT_VERTICALLY = 25;
     static Vector systemOuts = new Vector(0);
 
-    private Color colour;
+    /*private Color colour;
 
     public void setColor(Graphics g, Color colour_) {
         colour = colour_;
@@ -32,25 +32,46 @@ public class Utils {
 
     public Color getColor() {
         return colour;
-    }
+    }*/
 
-    public void drawRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+    public static void drawRect(Graphics g, Color color, int x, int y, int WIDTH, int HEIGHT) {
+        g.setColor(color);
         g.drawRect(x, y, WIDTH, HEIGHT);
     }
 
-    public void fillRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
-         g.fillRect(x, y, WIDTH, HEIGHT);
+    public static void drawRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+        drawRect(g, g.getColor(), x, y, WIDTH, HEIGHT);
     }
 
-    public void drawRoundRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
-        g.drawRoundRect(x,y, WIDTH, HEIGHT,10,10);
+    public static void fillRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+         fillRect(g, g.getColor(), x, y, WIDTH, HEIGHT);
     }
 
-    public void fillRoundRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+    public static void fillRect(Graphics g, Color color, int x, int y, int WIDTH, int HEIGHT) {
+        g.setColor(color);
+        g.fillRect(x, y, WIDTH, HEIGHT);
+    }
+
+    public static void drawRoundRect(Graphics g, Color color, int x, int y, int WIDTH, int HEIGHT) {
+        g.setColor(color);
+        g.drawRoundRect(x, y, WIDTH, HEIGHT,10,10);
+    }
+
+    public static void drawRoundRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+        drawRoundRect(g, g.getColor(), x, y, WIDTH, HEIGHT);
+    }
+
+    public static void fillRoundRect(Graphics g, Color color, int x, int y, int WIDTH, int HEIGHT) {
+        g.setColor(color);
         g.fillRoundRect(x,y, WIDTH, HEIGHT,10,10);
     }
 
-    public void drawTriangle(Graphics g, int x1, int y1, int x2, int y2, int x3, int y3) {
+    public static void fillRoundRect(Graphics g, int x, int y, int WIDTH, int HEIGHT) {
+        fillRoundRect(g, g.getColor(), x, y, WIDTH, HEIGHT);
+    }
+
+    public static void drawTriangle(Graphics g, Color color, int x1, int y1, int x2, int y2, int x3, int y3) {
+        g.setColor(color);
         Polygon poly = new Polygon();
         poly.addPoint(x1, y1);
         poly.addPoint(x2, y2);
@@ -58,7 +79,12 @@ public class Utils {
         g.drawPolygon(poly);
     }
 
-    public void fillTriangle(Graphics g, int x1, int y1, int x2, int y2, int x3, int y3) {
+    public static void drawTriangle(Graphics g, int x1, int y1, int x2, int y2, int x3, int y3) {
+        drawTriangle(g, g.getColor(), x1, y1, x2, y2, x3, y3);
+    }
+
+    public static void fillTriangle(Graphics g, Color color, int x1, int y1, int x2, int y2, int x3, int y3) {
+        g.setColor(color);
         Polygon poly = new Polygon();
         poly.addPoint(x1, y1);
         poly.addPoint(x2, y2);
@@ -66,12 +92,26 @@ public class Utils {
         g.fillPolygon(poly);
     }
 
-    public void drawCircle(Graphics g, int x, int y,int width, int height) {
-         g.drawArc(x, y,width, height, 1, 360);
+    public static void fillTriangle(Graphics g, int x1, int y1, int x2, int y2, int x3, int y3) {
+        fillTriangle(g, g.getColor(), x1, y1, x2, y2, x3, y3);
     }
 
-    public void fillCircle(Graphics g, int x, int y,int width, int height) {
-          g.fillArc(x, y, width, height, 1, 360);
+    public static void drawCircle(Graphics g, Color color, int x, int y,int width, int height) {
+        g.setColor(color);
+        g.drawArc(x, y,width, height, 1, 360);
+    }
+
+    public static void drawCircle(Graphics g, int x, int y,int width, int height) {
+        drawCircle(g, g.getColor(), x, y,width, height);
+    }
+
+    public static void fillCircle(Graphics g, Color color, int x, int y,int width, int height) {
+        g.setColor(color);
+        g.fillArc(x, y, width, height, 1, 360);
+    }
+
+    public static void fillCircle(Graphics g, int x, int y,int width, int height) {
+        fillCircle(g, g.getColor(), x, y, width, height);
     }
 
     static Image loadImage(String path) {
@@ -85,12 +125,12 @@ public class Utils {
         return image;
     }
 
-    void backGround(Graphics g, Color c, int WIDTH, int HEIGHT) {
-        setColor(g, c);
+    public static void backGround(Graphics g, Color c, int WIDTH, int HEIGHT) {
+        g.setColor(c);
         fillRect(g,0,0, WIDTH, HEIGHT);
     }
 
-    void drawImage(Graphics g, Image i, int x, int y, ImageObserver observer) {
+    static void drawImage(Graphics g, Image i, int x, int y, ImageObserver observer) {
         g.drawImage(i,x-(i.getWidth(observer)/2),y-(i.getHeight(observer)/2), observer);
     }
 
@@ -104,13 +144,13 @@ public class Utils {
         System.out.println(s);
     }
 
-    public static void _E(String s) {
+    static void _E(String s) {
         CustomCanvas.playErrorSound();
         log(ERROR_STRING+s);
     }
 
     // get random val between min and max, both inclusive
-    public static final int getRand(int min, int max) {
+    public static int getRand(int min, int max) {
         int r = Math.abs(randomizer.nextInt());
         return (r % ((max - min + 1))) + min;
     }

@@ -242,7 +242,7 @@ class BoardTest {
         board.checkConsistent();
         board.rollDies();
         board.setCurrentPlayer(board.getWhitePlayer());
-        Die die = new Die(geometry);
+        Die die = new Die(colours, geometry);
         die.setValue(3);
         assertFalse((Boolean) canWeGetOffTheBarWithThisDie.invoke(board, die, DieType.DIE1, null));
 

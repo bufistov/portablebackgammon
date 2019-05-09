@@ -65,13 +65,12 @@ public class Board {
         currentPlayer = whitePlayer;
         spikes = new ArrayList<>();
         for (int i = 1; i <= 24; i++) {
-            spikes.add(new Spike(geometry, i));
+            spikes.add(new Spike(gameColour, geometry, i));
         }
-        die1 = new Die(geometry);
-        die2 = new Die(geometry);
-        theBarWHITE = new Spike(geometry, 25);
-        theBarBLACK = new Spike(geometry, 25);
-        makeColourObjects();
+        die1 = new Die(gameColour, geometry);
+        die2 = new Die(gameColour, geometry);
+        theBarWHITE = new Spike(gameColour, geometry, 25);
+        theBarBLACK = new Spike(gameColour, geometry, 25);
         initialiseBoard(INIT_CONFIGURATION);
         log("Board made");
     }
@@ -80,14 +79,6 @@ public class Board {
         sfxNoMove.loadSound(soundOn);
         sfxKilled.loadSound(soundOn);
         sfxPutPieceInContainer.loadSound(soundOn);
-    }
-
-    public void makeColourObjects() {
-        board_colour = new Color(gameColour.getBoardColor());
-        bar_colour = new Color(gameColour.getBarColor());
-        for (Spike spike: spikes) {
-            spike.makeColourObjects();
-        }
     }
 
     void initialiseBoard(int mode) {
@@ -180,23 +171,20 @@ public class Board {
 
     public void paint(Graphics g, int boardWidth, int boardHeight, boolean gameInProgress,
                       int mouseX, int mouseY) {
-
-        utils.setColor(g, Color.BLACK);
         int borderWidth = geometry.borderWidth();
         int barWidth = geometry.centralBarWidth();
         int widthMinusBorder = boardWidth - barWidth;
 
         //draw the board:
         // outline:
-        utils.setColor(g, board_colour);
-        utils.fillRect(g, borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
-        utils.setColor(g, Color.BLACK);
-        utils.drawRect(g, borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
+        Utils.fillRect(g, gameColour.getBoard(),
+            borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
+        Utils.drawRect(g, Color.BLACK, borderWidth, borderWidth, widthMinusBorder,boardHeight-borderWidth*2);
         // bar between 2 halves
-        utils.setColor(g, bar_colour);
-        utils.fillRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
-        utils.setColor(g, Color.BLACK);
-        utils.drawRect(g,boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
+        Utils.fillRect(g,gameColour.getBar(),
+            boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
+        Utils.drawRect(g,Color.BLACK,
+            boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
            spike.paint(g);
@@ -517,7 +505,7 @@ public class Board {
                     ArrayList<Integer> reachableSpikes = reachableSpikes(spike, currentPlayer, die1, die2);
                     if (reachableSpikes.contains(potentialSpike)) {
                         Spike destinationSpike = potentialSpike == currentPlayer.containerId() ?
-                            new Spike(geometry, -1) : spikes.get(potentialSpike);
+                            new Spike(gameColour, geometry, -1) : spikes.get(potentialSpike);
                         spikePairs.add(new SpikePair(spike, destinationSpike));
                     }
                 }
@@ -657,25 +645,21 @@ public class Board {
 
     private void drawPieceContainer(Graphics g, int topY, boolean pulsateContainer, boolean allPiecesAreHome,
                                     int piecesOnContainer) {
+        Color color = Color.WHITE;
         if (allPiecesAreHome) {
-            utils.setColor(g, Color.GREEN);
+            color = Color.GREEN;
             if (pulsateContainer) {
-                utils.setColor(g, Color.YELLOW);
+                color = Color.YELLOW;
             }
-        } else {
-            utils.setColor(g, Color.WHITE);
         }
         final int myX = geometry.containerX();
         int myY = topY;
         for (int i = 0; i < 15; i++) {
             myY += geometry.containerSubSize();
             if (i < piecesOnContainer) {
-                Color originalColor = utils.getColor();
-                utils.setColor(g, Color.ORANGE);
-                utils.fillRect(g, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
-                utils.setColor(g, originalColor);
+                Utils.fillRect(g, Color.ORANGE, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
             }
-            utils.drawRect(g, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
+            Utils.drawRect(g, color, myX, myY, geometry.containerWidth(), geometry.containerSubSize());
         }
     }
 
@@ -755,7 +739,7 @@ public class Board {
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, pieceX, pieceOnBarY);
+                p.paint(g, gameColour, pieceX, pieceOnBarY);
                 pieceOnBarY -= geometry.pieceDiameter();
             }
         }
@@ -764,7 +748,7 @@ public class Board {
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, pieceX, pieceOnBarY);
+                p.paint(g, gameColour, pieceX, pieceOnBarY);
                 pieceOnBarY += geometry.pieceDiameter();
             }
         }
@@ -773,7 +757,7 @@ public class Board {
     public void drawPieceStuckToMouse(Graphics g, int mouseX, int mouseY) {
         Piece piece = pieceStuckToMouse();
         if (piece != null) {
-            piece.paint(g, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
+            piece.paint(g, gameColour, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
         }
     }
 
