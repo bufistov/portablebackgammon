@@ -348,14 +348,7 @@ public class Board {
 
             boolean die2AnOption = die2.enabled() && checkValidPotentialMove(currentSpike, die2.getValue());
             if (die2AnOption) {
-                Integer die2Destination = player.getDestinationSpikeId(currentSpike, die2.getValue());
-                if (die2Destination == player.containerId()) {
-                    if (die2.getValue() == die1.getValue() || result.isEmpty()) {
-                            result.add(die2Destination);
-                    }
-                } else {
-                    result.add(die2Destination);
-                }
+                result.add(player.getDestinationSpikeId(currentSpike, die2.getValue()));
             }
 
             boolean die1and2AnOption = die1.enabled() && die2.enabled() && (die1AnOption || die2AnOption)
