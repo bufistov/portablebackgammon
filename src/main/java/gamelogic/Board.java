@@ -186,7 +186,8 @@ public class Board {
             boardWidth / 2 - barWidth / 2, borderWidth, barWidth,boardHeight - borderWidth * 2);
 
         for (Spike spike: spikes) {
-           spike.paint(g);
+            Color color = spike.getColor(gameColour, spike.isFlashed(), false);
+            spike.paint(g, geometry, color, numPieces(spike.getPosition()));
         }
 
         paintDice(g, boardWidth, boardHeight);
@@ -239,7 +240,7 @@ public class Board {
         log("White pieces on bar potential pick ups: " + theBarPieces.pieces.size());
         if (pieceStuckToMouse() != null) {
             log("Destination PLACE ON AVAIL SPIKE:" + destinationSpike.getSpikeNumber());
-            Point spikeMiddle = destinationSpike.getMiddlePoint();
+            Point spikeMiddle = destinationSpike.getMiddlePoint(geometry);
             setBotDestination(spikeMiddle.x, spikeMiddle.y, "PLACE FROM BAR ONTO AVAIL SPIKES");
         } else {
             log("DESTINATION FOR BOT, PIECE ON BAR......");
@@ -296,7 +297,7 @@ public class Board {
         if (pieceStuckToMouse != null) {
             sourceSpikeId = pieceStuckToMouse.sourceSpikeId();
         } else {
-            Spike activeSpike = grabSpikeHoveringOver(mouseX, mouseY);
+            Spike activeSpike = getSpikeAt(mouseX, mouseY);
             if (activeSpike != null) {
                 sourceSpikeId = activeSpike.getSpikeNumber();
             } else {
@@ -405,15 +406,6 @@ public class Board {
                 doesThisSpikeBelongToPlayer(spikes.get(potentialSpike), whoseTurnIsIt()));
     }
 
-    private Spike grabSpikeHoveringOver(int mouseHoverX, int mouseHoverY) {
-       for (Spike currentSpike: spikes) {
-           if (currentSpike.userClickedOnThis(mouseHoverX, mouseHoverY)) {
-               return currentSpike;
-           }
-        }
-        return null;
-    }
-
     // ALSO RETURNS TRUE IF THERE IS ONLY ONE ENEMY PIECE ON THE SPIKE
     private boolean isThisSpikeEmpty(Spike checkme) {
         return  checkme.isBar() ? checkme.pieces.isEmpty() : checkme.pieces.size() <= 1;
@@ -462,7 +454,7 @@ public class Board {
                     SPtheMoveToMake.dropPiecesOnMe);
                 CustomCanvas.tellRobot(true,  SPtheMoveToMake.pickMyPiece.getName() + "->" +
                     SPtheMoveToMake.dropPiecesOnMe);
-                Point firstPiece =  SPtheMoveToMake.pickMyPiece.firstPieceCenter();
+                Point firstPiece =  SPtheMoveToMake.pickMyPiece.firstPieceCenter(geometry);
                 setBotDestination(firstPiece.x, firstPiece.y, "TAKE A PIECE TO CONTAINER");
                 log("***************PIECE IM LOOKING FOR IS AT: " + firstPiece.x + "," + firstPiece.y);
             }
@@ -543,7 +535,7 @@ public class Board {
                 setBotDestination(pieceContainerX + geometry.containerWidth() / 2,
                     pieceContainerY + geometry.containerHeight() / 2,"PIECE CONTAINER DESTINATION");
             } else {
-                Point middlePoint = dropOnMe.getMiddlePoint();
+                Point middlePoint = dropOnMe.getMiddlePoint(geometry);
                 setBotDestination(middlePoint.x, middlePoint.y, "NORMAL CASE DROP ON SPIKE A");
             }
         }
@@ -623,29 +615,34 @@ public class Board {
         boolean allPiecesAreHome = allPiecesAreHome(blackPlayer);
         boolean pulsateBlackContainer = allPiecesAreHome && pulsateContainer(blackPlayer, activeSpikeId(mouseX, mouseY))
             && !currentPlayer.isWhite();
-        drawPieceContainer(g, geometry.blackContainerY(), pulsateBlackContainer, allPiecesAreHome,
-            blackPiecesSafelyInContainer.size());
+        Color color = Color.WHITE;
+        if (allPiecesAreHome) {
+            color = Color.GREEN;
+            if (pulsateBlackContainer) {
+                color = Color.YELLOW;
+            }
+        }
+        drawPieceContainer(g, geometry, color, blackPiecesSafelyInContainer.size(), false);
     }
 
     public void drawWhitePieceContainer(Graphics g, int mouseX, int mouseY) {
         boolean allPiecesAreHome = allPiecesAreHome(whitePlayer);
         boolean pulsateWhiteContainer = allPiecesAreHome && pulsateContainer(whitePlayer, activeSpikeId(mouseX, mouseY)) &&
             currentPlayer.isWhite();
-        drawPieceContainer(g, geometry.whiteContainerY(), pulsateWhiteContainer, allPiecesAreHome,
-            whitePiecesSafelyInContainer.size());
-    }
-
-    private void drawPieceContainer(Graphics g, int topY, boolean pulsateContainer, boolean allPiecesAreHome,
-                                    int piecesOnContainer) {
         Color color = Color.WHITE;
         if (allPiecesAreHome) {
             color = Color.GREEN;
-            if (pulsateContainer) {
+            if (pulsateWhiteContainer) {
                 color = Color.YELLOW;
             }
         }
+        drawPieceContainer(g, geometry, color, whitePiecesSafelyInContainer.size(), true);
+    }
+
+    private void drawPieceContainer(Graphics g, Geometry geometry, Color color, int piecesOnContainer,
+                                    boolean isWhite) {
         final int myX = geometry.containerX();
-        int myY = topY;
+        int myY = isWhite ? geometry.whiteContainerY() : geometry.blackContainerY();
         for (int i = 0; i < 15; i++) {
             myY += geometry.containerSubSize();
             if (i < piecesOnContainer) {
@@ -764,7 +761,7 @@ public class Board {
         if (pieceStuckToMouse != null)
             spikeId = pieceStuckToMouse.sourceSpikeId();
         else {
-            Spike spike = grabSpikeHoveringOver(mouseX, mouseY);
+            Spike spike = getSpikeAt(mouseX, mouseY);
             if (spike != null && spike.getAmountOfPieces(whoseTurnIsIt()) > 0) {
                 spikeId = spike.getSpikeNumber();
             }
@@ -990,10 +987,14 @@ public class Board {
 
     private Spike getSpikeAt(int x, int y) {
         for (Spike spike: spikes) {
-            if (spike.userClickedOnThis(x, y)) {
+            if (spike.userClickedOnThis(x, y, geometry)) {
                 return spike;
             }
         }
         return null;
+    }
+
+    private int numPieces(int spikePosition) {
+        return spikes.get(spikePosition - 1).pieces.size();
     }
 }

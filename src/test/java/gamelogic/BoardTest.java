@@ -393,7 +393,7 @@ class BoardTest {
         // When dies are rolled
         board.rollDies();
         // And mouse is hovering over spike 23, which belongs to white player and have two pieces at start
-        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint();
+        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),
             true, spikeMiddle.x, spikeMiddle.y);
 
@@ -412,7 +412,7 @@ class BoardTest {
             assertFalse(spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(0).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(0).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),
             true, spikeMiddle.x, spikeMiddle.y);
 
@@ -422,13 +422,13 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(1).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(1).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
         for (Spike spike: board.getSpikes()) {
             assertFalse(spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(11).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(11).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
 
         flashed.clear();
@@ -439,7 +439,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(18).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(18).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
         flashed.clear();
         flashed.add(20);
@@ -464,7 +464,7 @@ class BoardTest {
         // When dies are rolled
         board.rollDies();
         // And mouse is hovering over spike 23, which belongs to white player and have two pieces at start
-        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint();
+        Point spikeMiddle = board.getSpikes().get(23).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
 
         ArrayList<Integer> flashed = new ArrayList<>();
@@ -474,7 +474,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(12).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(12).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
         flashed.clear();
         flashed.add(9);
@@ -484,14 +484,14 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(11).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(11).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
 
         for (Spike spike: board.getSpikes()) {
             assertFalse(spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(7).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(7).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
         flashed.clear();
         flashed.add(4);
@@ -501,14 +501,14 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(6).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(6).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
 
         for (Spike spike: board.getSpikes()) {
             assertFalse(spike.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(5).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(5).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(),true, spikeMiddle.x, spikeMiddle.y);
         flashed.clear();
         flashed.add(2);
@@ -553,7 +553,7 @@ class BoardTest {
         ArrayList<Integer> flashed = new ArrayList<>();
         flashed.add(22);
         for (Spike spike: board.getSpikes()) {
-            Point spikeMiddle = spike.getMiddlePoint();
+            Point spikeMiddle = spike.getMiddlePoint(geometry);
             board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
             for (Spike spike1 : board.getSpikes()) {
                 assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
@@ -561,7 +561,7 @@ class BoardTest {
         }
 
         board.setCurrentPlayer(board.getBlackPlayer());
-        Point spikeMiddle = board.getSpikes().get(20).getMiddlePoint();
+        Point spikeMiddle = board.getSpikes().get(20).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
 
         flashed.clear();
@@ -570,7 +570,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(0).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(0).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
 
         flashed.clear();
@@ -580,7 +580,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike1.getSpikeNumber()), spike1.isFlashed());
         }
 
-        spikeMiddle = board.getSpikes().get(2).getMiddlePoint();
+        spikeMiddle = board.getSpikes().get(2).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, spikeMiddle.x, spikeMiddle.y);
 
         flashed.clear();
@@ -637,7 +637,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
 
         // When destination spike is clicked
-        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
 
@@ -733,7 +733,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
 
         // When destination spike is clicked
-        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
 
@@ -751,7 +751,7 @@ class BoardTest {
         }
 
         // And placed to the possible spike
-        destinatioinSpike = board.getSpikes().get(19).getMiddlePoint();
+        destinatioinSpike = board.getSpikes().get(19).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
 
@@ -806,7 +806,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
 
         // When destination spike is clicked
-        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
 
@@ -884,7 +884,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
 
         // When destination spike is clicked
-        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint();
+        Point destinatioinSpike = board.getSpikes().get(21).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, 0, 0);
 
@@ -913,7 +913,7 @@ class BoardTest {
         assertEquals(2, board.getSpikes().get(21).getAmountOfPieces(PlayerColor.WHITE));
 
         // When the mouse points spike with white  pieces
-        Point sourceSpike = board.getSpikes().get(6).getMiddlePoint();
+        Point sourceSpike = board.getSpikes().get(6).getMiddlePoint(geometry);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, sourceSpike.x,sourceSpike.y);
 
         flashed.clear();
@@ -931,7 +931,7 @@ class BoardTest {
             assertEquals(flashed.contains(spike.getSpikeNumber()), spike.isFlashed());
         }
 
-        destinatioinSpike = board.getSpikes().get(3).getMiddlePoint();
+        destinatioinSpike = board.getSpikes().get(3).getMiddlePoint(geometry);
         board.checkIfSpikeClickedOn(destinatioinSpike.x, destinatioinSpike.y);
         board.paint(graphics, geometry.boardHeight(), geometry.boardWidth(), true, sourceSpike.x, sourceSpike.y);
         // Now only one spike is flashed

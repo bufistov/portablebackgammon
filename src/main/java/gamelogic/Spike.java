@@ -82,16 +82,17 @@ public class Spike {
         return position == thatSpike.getPosition();
     }
 
-    Point firstPieceCenter() {
+    Point firstPieceCenter(Geometry geometry) {
         return new Point(x2, y1 + ysign() * geometry.pieceRadius());
     }
+
     boolean isEmpty() {
         return pieces.isEmpty();
     }
 
-    boolean userClickedOnThis(int mouseX, int mouseY) {
-        return (mouseX >= collision_x && mouseX <= collision_x + width()) &&
-            (mouseY >= collision_y && mouseY <= collision_y + height());
+    boolean userClickedOnThis(int mouseX, int mouseY, Geometry geometry) {
+        return (mouseX >= collision_x && mouseX <= collision_x + geometry.spikeWidth()) &&
+            (mouseY >= collision_y && mouseY <= collision_y + geometry.spikeHeight());
     }
 
     DieType flashDieType() {
@@ -114,13 +115,13 @@ public class Spike {
         return pieces.size();
     }
 
-    void paint(Graphics g) {
+    void paint(Graphics g, Geometry geometry, Color color, int numPieces) {
         workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
             geometry.spikeWidth());
         drawSpike(g);
         drawPieces(g);
         if (flash) {
-            drawPotentialDieMoves(g);
+            drawPotentialDieMoves(g, geometry, flashDieType, die1, die2);
         }
         flash = false;
         die1.noOptions();
@@ -165,12 +166,19 @@ public class Spike {
         return type == SpikeType.BAR;
     }
 
-    Point getMiddlePoint() {
-        return new Point(x2, y2 - ysign() * height() / 2);
+    Point getMiddlePoint(Geometry geometry) {
+        return new Point(x2, y2 - ysign() * geometry.spikeHeight() / 2);
     }
 
     Point leftMostPoint() {
         return new Point(x1, y1);
+    }
+
+    Color getColor(GameColour colours, boolean flash, boolean allPiecesAtHome) {
+        if (flash) {
+            return colours.flash();
+        }
+        return paintBlackColour() ? colours.getBlackSpike() : colours.getWhiteSpike();
     }
 
     private void drawPieces(Graphics g) {
@@ -213,22 +221,22 @@ public class Spike {
         Utils.drawTriangle(g, Color.BLACK, x1, y1, x2, y2, x3, y3);
     }
 
-    private void drawPotentialDieMoves(Graphics g) {
+    private void drawPotentialDieMoves(Graphics g, Geometry geometry, DieType dieType, Die die1, Die die2) {
         final int miniDieX = x2 - geometry.miniDieSize() / 2;
         final int miniDieHeight = geometry.miniDieSize();
-        if (flashDieType == DIE1) {
+        if (dieType == DIE1) {
             if (getType() == STALECMITE) {
                 die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
                 die1.drawMiniDie(g, miniDieX, y1);
             }
-        } else if (flashDieType == DIE2) {
+        } else if (dieType == DIE2) {
             if (getType() == STALECMITE) {
                 die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
             } else {
                 die2.drawMiniDie(g, miniDieX, y1);
             }
-        } else if (flashDieType == DIE1AND2) {
+        } else if (dieType == DIE1AND2) {
             if (getType() == STALECMITE) {
                 die1.drawMiniDie(g, miniDieX, y1 - miniDieHeight * 2);
                 die2.drawMiniDie(g, miniDieX, y1 - miniDieHeight);
@@ -270,22 +278,14 @@ public class Spike {
         y3 = y1;
 
         x2 = x1 + TRIANGLE_WIDTH / 2;
-        y2 = y1 + ysign() * height();
+        y2 = y1 + ysign() * geometry.spikeHeight();
 
         collision_x = x1;
-        collision_y = (type == STALECTITE) ? y1 : y1 - height();
+        collision_y = (type == STALECTITE) ? y1 : y1 - geometry.spikeHeight();
     }
 
     private void log(String s) {
         Utils.log("Spike{}:" + s);
-    }
-
-    private int height() {
-        return geometry.spikeHeight();
-    }
-
-    private int width() {
-        return geometry.spikeWidth();
     }
 
     private int ysign() {

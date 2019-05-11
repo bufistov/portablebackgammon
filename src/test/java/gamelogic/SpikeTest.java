@@ -31,13 +31,13 @@ class SpikeTest {
         assertEquals(SpikeType.STALECTITE, spike.getType());
 
         Graphics graphics = Mockito.mock(Graphics.class);
-        spike.paint(graphics);
+        spike.paint(graphics, geometry, Color.WHITE, 0);
         int middleX = geometry.boardWidth() - 2 * geometry.spikeWidth() -
             geometry.borderWidth() + geometry.spikeWidth() / 2;
         int middleY = geometry.borderWidth() + geometry.spikeHeight() / 2;
-        assertEquals(middleX, spike.getMiddlePoint().x);
-        assertEquals(middleY, spike.getMiddlePoint().y);
-        assertTrue(spike.userClickedOnThis(middleX, middleY));
+        assertEquals(middleX, spike.getMiddlePoint(geometry).x);
+        assertEquals(middleY, spike.getMiddlePoint(geometry).y);
+        assertTrue(spike.userClickedOnThis(middleX, middleY, geometry));
     }
 
     @Test
@@ -47,17 +47,17 @@ class SpikeTest {
         int canvasHeight = 500;
         Geometry geometry = new Geometry(canvasWidth, canvasHeight);
         Spike spike = new Spike(new GameColour(), geometry, 2);
-        spike.paint(Mockito.mock(Graphics.class));
-        Point actual = spike.firstPieceCenter();
-        Point expected = spike.getMiddlePoint();
+        spike.paint(Mockito.mock(Graphics.class), geometry, Color.WHITE, spike.pieces.size());
+        Point actual = spike.firstPieceCenter(geometry);
+        Point expected = spike.getMiddlePoint(geometry);
         expected.y -= geometry.spikeHeight() / 2;
         expected.y += geometry.pieceRadius();
         assertEquals(expected, actual);
 
         Spike spike2 = new Spike(new GameColour(), geometry, 14);
-        spike2.paint(Mockito.mock(Graphics.class));
+        spike2.paint(Mockito.mock(Graphics.class), geometry, Color.WHITE, 0);
 
-        actual = spike2.firstPieceCenter();
+        actual = spike2.firstPieceCenter(geometry);
         expected.x = geometry.borderWidth() + geometry.spikeWidth() * 3 / 2;
         expected.y = geometry.boardHeight() - geometry.borderWidth() - geometry.pieceRadius();
         assertEquals(expected, actual);
