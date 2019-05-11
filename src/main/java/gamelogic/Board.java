@@ -127,34 +127,34 @@ public class Board {
         for (int i = 1; i <= 24; ++i) {
             whitePiecesOnBoard += whiteInitPositions[i];
             for (int j = 0; j < whiteInitPositions[i]; ++j) {
-                spikes.get(i - 1).addPiece(new Piece(geometry, PlayerColor.WHITE));
+                spikes.get(i - 1).addPiece(new Piece(PlayerColor.WHITE));
             }
         }
         whitePiecesOnBoard += whiteInitPositions[0];
         for (int j = 0; j < whiteInitPositions[0]; ++j) {
-            Piece containerPiece = new Piece(geometry, PlayerColor.WHITE);
+            Piece containerPiece = new Piece(PlayerColor.WHITE);
             whitePiecesSafelyInContainer.add(containerPiece);
         }
         int blackPiecesOnBoard = 0;
         for (int i = 1; i <= 24; ++i) {
             blackPiecesOnBoard += blackInitPositions[i];
             for (int j = 0; j < blackInitPositions[i]; ++j) {
-                Piece newPiece = new Piece(geometry, PlayerColor.BLACK);
+                Piece newPiece = new Piece(PlayerColor.BLACK);
                 spikes.get(24 - i).addPiece(newPiece);
             }
         }
         blackPiecesOnBoard += blackInitPositions[0];
         for (int j = 0; j < blackInitPositions[0]; ++j) {
-            Piece containerPiece = new Piece(geometry, PlayerColor.BLACK);
+            Piece containerPiece = new Piece(PlayerColor.BLACK);
             blackPiecesSafelyInContainer.add(containerPiece);
         }
         assert 15 - whitePiecesOnBoard == whiteInitPositions[25];
         for (int j = whitePiecesOnBoard; j < 15; ++j) {
-            theBarWHITE.addPiece(new Piece(geometry, PlayerColor.WHITE));
+            theBarWHITE.addPiece(new Piece(PlayerColor.WHITE));
         }
         assert 15 - blackPiecesOnBoard == blackInitPositions[25];
         for (int j = blackPiecesOnBoard; j < 15; ++j) {
-            theBarBLACK.addPiece(new Piece(geometry, PlayerColor.BLACK));
+            theBarBLACK.addPiece(new Piece(PlayerColor.BLACK));
         }
         whitePieces = Arrays.copyOf(whiteInitPositions, whiteInitPositions.length);
         blackPieces = Arrays.copyOf(blackInitPositions, blackInitPositions.length);

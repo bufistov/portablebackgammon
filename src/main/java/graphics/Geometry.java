@@ -74,8 +74,8 @@ public class Geometry {
         return pieceDiameter();
     }
 
-    public int dieDotDiameter() {
-        return  dieSize() / 5;
+    public int dieDotDiameter(int dieSize) {
+        return  dieSize / 5;
     }
 
     public int miniDieSize() {

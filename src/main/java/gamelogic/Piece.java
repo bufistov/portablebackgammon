@@ -15,7 +15,7 @@ class Piece {
     private boolean stickToMouse;
     private int sourceSpikeId;
 
-    Piece(Geometry geometry, PlayerColor playerColor) {
+    Piece(PlayerColor playerColor) {
         log("Piece made. father is " + playerColor);
         colour = playerColor;
     }

@@ -99,7 +99,7 @@ class BoardTest {
         board.initialiseBoardForNewGame(whiteHome, blackHome);
         Field theBarWHITE = Board.class.getDeclaredField("theBarWHITE");
         theBarWHITE.setAccessible(true);
-        ((Spike)theBarWHITE.get(board)).addPiece(new Piece(geometry, PlayerColor.WHITE));
+        ((Spike)theBarWHITE.get(board)).addPiece(new Piece(PlayerColor.WHITE));
         board.setCurrentPlayer(board.getWhitePlayer());
         board.rollDies();
         ArrayList<Spike> spikes = board.spikesToMoveToFromBar();
@@ -178,7 +178,7 @@ class BoardTest {
         ((Spike)theBarWHITE.get(board)).pieces.remove(0);
         Field whitePiecesSafelyInContainer = Board.class.getDeclaredField("whitePiecesSafelyInContainer");
         whitePiecesSafelyInContainer.setAccessible(true);
-        ((Vector) whitePiecesSafelyInContainer.get(board)).add(new Piece(geometry, PlayerColor.WHITE));
+        ((Vector) whitePiecesSafelyInContainer.get(board)).add(new Piece(PlayerColor.WHITE));
         board.checkConsistent();
 
         Method allPiecesAreHome = Board.class.getDeclaredMethod("allPiecesAreHome", Player.class);

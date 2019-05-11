@@ -65,18 +65,15 @@ class Die {
     }
 
     void paint(Graphics g, int x, int y) {
-        int dotDiameter = geometry.dieDotDiameter();
-        int halfDotDiameter = dotDiameter / 2;
+        int dotDiameter = geometry.dieDotDiameter(geometry.dieSize());
         drawOutline(g, x, y, geometry.dieSize(), geometry.dieSize());
-        drawDots(g, x, y, geometry.dieSize(), geometry.dieSize(), dotDiameter, halfDotDiameter);
+        drawDots(g, x, y, geometry.dieSize(), geometry.dieSize(), dotDiameter);
     }
 
     void drawMiniDie(Graphics g, int x, int y) {
-        int miniDotDiameter = geometry.miniDieSize() / 5;
-        int miniHalfDotDiameter = geometry.dieDotDiameter() / 2;
+        int miniDotDiameter = geometry.dieDotDiameter(geometry.miniDieSize());
         drawOutline(g,x, y, geometry.miniDieSize(), geometry.miniDieSize());
-        drawDots(g, x, y, geometry.miniDieSize(), geometry.miniDieSize(),
-            miniDotDiameter, miniHalfDotDiameter);
+        drawDots(g, x, y, geometry.miniDieSize(), geometry.miniDieSize(), miniDotDiameter);
     }
 
     private void drawOutline(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT) {
@@ -85,9 +82,10 @@ class Die {
     }
 
     private void drawDots(Graphics g, int x, int y, int DIE_WIDTH, int DIE_HEIGHT,
-                          int DOT_DIAMETER, int HALF_DOT_DIAMETER) {
-        int dots = value;
-        int tinyGap = geometry.tinyGap();
+                          int DOT_DIAMETER) {
+        final int dots = value;
+        final int HALF_DOT_DIAMETER = DOT_DIAMETER / 2;
+        final int tinyGap = geometry.tinyGap();
         switch(dots) {
             case 1:
                 //draw single dot in middle

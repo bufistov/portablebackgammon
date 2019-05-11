@@ -24,7 +24,8 @@ class GeometryTest {
         assertEquals(207, geometry.spikeHeight());
         assertEquals(32, geometry.pieceDiameter());
         assertEquals(32, geometry.dieSize());
-        assertEquals(6, geometry.dieDotDiameter());
+        assertEquals(6, geometry.dieDotDiameter(geometry.dieSize()));
+        assertEquals(5, geometry.dieDotDiameter(geometry.miniDieSize()));
         assertEquals(26, geometry.miniDieSize());
         assertEquals(0,
             (geometry.boardWidth() - 2 * geometry.borderWidth() - geometry.centralBarWidth()) % 12);
