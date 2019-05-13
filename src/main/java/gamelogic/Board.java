@@ -252,7 +252,8 @@ public class Board {
 
     // given the die this method will add spikes to spikesAllowedToMoveToFromBar
     // for current player so that the spikes available will flash and be ready to have a piece added to them
-    private boolean canWeGetOffTheBarWithThisDie(Die die, DieType whichDie, ArrayList<Spike> spikesAllowedToMoveToFromBar) {
+    private boolean canWeGetOffTheBarWithThisDie(Die die, DieType whichDie,
+                                                 ArrayList<Spike> spikesAllowedToMoveToFromBar) {
         Spike barSpike = currentPlayer.isWhite() ? theBarWHITE : theBarBLACK;
         if (barSpike.isEmpty()) {
             return false;
@@ -728,7 +729,7 @@ public class Board {
         while (eW.hasMoreElements()) {
             Piece p = (Piece) eW.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, gameColour.getWhitePiece(), geometry, pieceX, pieceOnBarY);
+                p.paint(g, gameColour.getWhitePiece(), geometry.pieceDiameter(), pieceX, pieceOnBarY);
                 pieceOnBarY -= geometry.pieceDiameter();
             }
         }
@@ -737,7 +738,7 @@ public class Board {
         while (eB.hasMoreElements()) {
             Piece p = (Piece) eB.nextElement();
             if (!p.stickToMouse()) {
-                p.paint(g, gameColour.getBlackPiece(), geometry, pieceX, pieceOnBarY);
+                p.paint(g, gameColour.getBlackPiece(), geometry.pieceDiameter(), pieceX, pieceOnBarY);
                 pieceOnBarY += geometry.pieceDiameter();
             }
         }
@@ -747,7 +748,7 @@ public class Board {
         Piece piece = pieceStuckToMouse();
         if (piece != null) {
             piece.paint(g, currentPlayer.isWhite() ? gameColour.getWhitePiece() : gameColour.getBlackPiece(),
-                geometry, mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
+                geometry.pieceDiameter(), mouseX - geometry.pieceRadius(), mouseY - geometry.pieceRadius());
         }
     }
 

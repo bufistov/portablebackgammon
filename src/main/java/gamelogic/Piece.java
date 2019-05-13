@@ -1,7 +1,6 @@
 package gamelogic;
 
 import data.PlayerColor;
-import graphics.Geometry;
 import lowlevel.Utils;
 
 import java.awt.*;
@@ -24,13 +23,12 @@ class Piece {
         return colour;
     }
 
-    void paint(Graphics g, Color color, Geometry geometry, int upperLeftX, int upperLeftY) {
-        int pieceDiameter = geometry.pieceDiameter();
+    void paint(Graphics g, Color color, int pieceDiameter, int upperLeftX, int upperLeftY) {
         Utils.fillCircle(g, color, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
         Utils.drawCircle(g, Color.BLACK, upperLeftX, upperLeftY, pieceDiameter, pieceDiameter);
 
-        centerX = upperLeftX + geometry.pieceRadius();
-        centerY = upperLeftY + geometry.pieceRadius();
+        centerX = upperLeftX + pieceDiameter / 2;
+        centerY = upperLeftY + pieceDiameter / 2;
     }
 
     void stickToMouse(int spikeId) {

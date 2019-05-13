@@ -25,7 +25,6 @@ public class Spike {
     private final SpikeType type;
     private final String spikeName;
     private GameColour colours;
-    private Geometry geometry;
 
     // these variables (along with TRIANGLE_WIDTH & TRIANGLE_HEIGHT) are used to work out if the player has clicked on the piece
     private int collision_x;
@@ -43,7 +42,6 @@ public class Spike {
 
     Spike(GameColour colours, Geometry geometry, int position) {
         this.colours = colours;
-        this.geometry = geometry;
         this.die1 = new Die(colours, geometry);
         this.die2 = new Die(colours, geometry);
         if (position < 0) {
@@ -116,10 +114,10 @@ public class Spike {
     }
 
     void paint(Graphics g, Geometry geometry, Color color, int numPieces) {
-        workOutPositionsOfSpike(geometry.boardHeight() - 2 * geometry.borderWidth(),
+        workOutPositionsOfSpike(geometry,geometry.boardHeight() - 2 * geometry.borderWidth(),
             geometry.spikeWidth());
-        drawSpike(g);
-        drawPieces(g);
+        drawSpike(g, color);
+        drawPieces(g, geometry.pieceDiameter());
         if (flash) {
             drawPotentialDieMoves(g, geometry, flashDieType, die1, die2);
         }
@@ -181,41 +179,37 @@ public class Spike {
         return paintBlackColour() ? colours.getBlackSpike() : colours.getWhiteSpike();
     }
 
-    private void drawPieces(Graphics g) {
+    private void drawPieces(Graphics g, int pieceDiameter) {
         Enumeration e = pieces.elements();
-        int piecey = y1 - geometry.pieceDiameter();
+        int piecey = y1 - pieceDiameter;
         if (getType() == STALECMITE) {
            piecey = y1;
         }
 
         int overlapOnPieces = 0;
         if (pieces.size() > 5) {
-            overlapOnPieces = geometry.pieceDiameter() / 3;
+            overlapOnPieces = pieceDiameter / 3;
         }
         if (pieces.size() > 7) {
-            overlapOnPieces = geometry.pieceDiameter() / 2;
+            overlapOnPieces = pieceDiameter / 2;
         }
         if (pieces.size() > 9) {
-            overlapOnPieces = geometry.pieceDiameter() / 2 + pieces.size() / 3;
+            overlapOnPieces = pieceDiameter / 2 + pieces.size() / 3;
         }
-        final int piecex = x2 - geometry.pieceDiameter() / 2;
+        final int piecex = x2 - pieceDiameter / 2;
         while (e.hasMoreElements()) {
             Piece p = (Piece) e.nextElement();
             if (!p.stickToMouse()) {
-                piecey += ysign() * (geometry.pieceDiameter() - overlapOnPieces);
+                piecey += ysign() * (pieceDiameter - overlapOnPieces);
                 p.paint(g, p.getColour() == PlayerColor.WHITE ? colours.getWhitePiece() : colours.getBlackPiece(),
-                    geometry, piecex, piecey + ysign() * overlapOnPieces);
+                    pieceDiameter, piecex, piecey + ysign() * overlapOnPieces);
             }
         }
     }
 
-    private void drawSpike(Graphics g) {
+    private void drawSpike(Graphics g, Color triangleColor) {
         if (isContainer()) {
             throw new RuntimeException("Wrong method to draw container");
-        }
-        Color triangleColor = paintBlackColour() ? colours.getBlackSpike() : colours.getWhiteSpike();
-        if (flash) {
-            triangleColor = colours.flash();
         }
         Utils.fillTriangle(g, triangleColor, x1, y1, x2, y2, x3, y3);
         Utils.drawTriangle(g, Color.BLACK, x1, y1, x2, y2, x3, y3);
@@ -253,7 +247,7 @@ public class Spike {
 
     // this calculates the 3 points for this spike, each with x,y value
     // and boundaries for mouse click event
-    private void workOutPositionsOfSpike(int boardHeight, int TRIANGLE_WIDTH) {
+    private void workOutPositionsOfSpike(Geometry geometry, int boardHeight, int TRIANGLE_WIDTH) {
         int widthMinusBorderAndPieceComponent = geometry.boardWidth() - geometry.borderWidth();
         int total = geometry.spikeWidth() * 12 + geometry.centralBarWidth() + 2 * geometry.borderWidth();
         assert total == geometry.boardWidth();
