@@ -318,16 +318,18 @@ public class Board {
         }
     }
 
-    void checkConsistent() {
-        final int whitePieces = calculateAmountOfPiecesOnBoard(PlayerColor.WHITE) +
+    synchronized void checkConsistent() {
+        final int numWhitePieces = calculateAmountOfPiecesOnBoard(PlayerColor.WHITE) +
             whitePiecesSafelyInContainer.size() + theBarWHITE.pieces.size();
-        if (whitePieces != 15) {
-            throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR WHITE its " + whitePieces);
+        assert whitePiecesSafelyInContainer.size() == whitePieces[0];
+        if (numWhitePieces != 15) {
+            throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR WHITE its " + numWhitePieces);
         }
-        final int blackPieces = calculateAmountOfPiecesOnBoard(PlayerColor.BLACK) +
+        final int numBlackPieces = calculateAmountOfPiecesOnBoard(PlayerColor.BLACK) +
             blackPiecesSafelyInContainer.size() + theBarBLACK.pieces.size();
-        if (blackPieces != 15) {
-            throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR BLACK its " + blackPieces);
+        assert blackPiecesSafelyInContainer.size() == blackPieces[0];
+        if (numBlackPieces != 15) {
+            throw new RuntimeException("PIECES NOT EQUAL TO 15 FOR BLACK its " + numBlackPieces);
         }
     }
 
@@ -367,6 +369,12 @@ public class Board {
         int piecesOnBoard = 0;
         for (Spike spike: spikes) {
             piecesOnBoard += spike.getAmountOfPieces(player);
+            if (spike.pieces.size() != numPieces(spike.getPosition())) {
+                System.err.println(spike + " actual count: " + spike.pieces.size() + " array count: " +
+                    numPieces(spike.getPosition()));
+                System.exit(1);
+            }
+            assert spike.pieces.size() == numPieces(spike.getPosition());
         }
         return piecesOnBoard;
     }
@@ -770,7 +778,7 @@ public class Board {
         return spikeId;
     }
 
-    public void checkIfPieceContainerClickedOn(int x, int y) throws Exception {
+    synchronized public void checkIfPieceContainerClickedOn(int x, int y) throws Exception {
         final int myX = geometry.containerX();
         final int myY = currentPlayer.isWhite() ? geometry.whiteContainerY() : geometry.blackContainerY();
         if (x >= myX && x < (myX + geometry.containerWidth())) {
@@ -787,7 +795,7 @@ public class Board {
         }
     }
 
-    public void checkIfSpikeClickedOn(int x, int y) {
+    synchronized public void checkIfSpikeClickedOn(int x, int y) {
         Piece pieceStuckToMouse = pieceStuckToMouse();
         if (pieceStuckToMouse == null) {
             return;
@@ -808,16 +816,25 @@ public class Board {
             PlayerColor otherPlayer = currentPlayer.isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
             Spike toRemoveFrom = currentPlayer.isWhite() ? theBarWHITE : theBarBLACK;
             Spike toPutOn = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
+            int[] toRemoveFromArray = currentPlayer.isWhite() ? whitePieces : blackPieces;
+
             log(String.format("%s PIECE REMOVED FROM BAR", currentPlayer.getColour()));
             toRemoveFrom.removePiece(pieceStuckToMouse);
+            --toRemoveFromArray[25];
             if (spike.getAmountOfPieces(otherPlayer) == 1) {
                 log(String.format("%s KILLED A %s WHILE GETTING OFF BAR", thisPlayer, otherPlayer));
                 Piece piece = (Piece) spike.pieces.firstElement();
                 toPutOn.addPiece(piece);
+                if (currentPlayer.isWhite()) {
+                    whiteKillsBlack(spike.getPosition());
+                } else {
+                    blackKillsWhite(spike.getPosition());
+                }
                 spike.removePiece(piece);
                 sfxKilled.playSound();
             }
             spike.addPiece(pieceStuckToMouse);
+            addPieceToSpike(spike.getPosition());
             unstickPieceFromMouse();
             DieType theDieThatGotUsHere = dieThatGotAsHere(null, spike);
             log(String.format("%s USED GETTING OFF BAR ", theDieThatGotUsHere));
@@ -873,27 +890,39 @@ public class Board {
             " destinationSpikeId: " + destinationSpikeId);
         Piece pieceStuckToMouse = pieceStuckToMouse();
         assert pieceStuckToMouse != null;
+        int sourceSpikeId = pieceStuckToMouse.sourceSpikeId() + 1;
         spikes.get(pieceStuckToMouse.sourceSpikeId()).removePiece(pieceStuckToMouse);
-
+        removePieceFromSpike(sourceSpikeId);
         if (destinationSpikeId == currentPlayer.containerId()) {
             Vector container = (whoseTurnIsIt() == PlayerColor.WHITE) ? whitePiecesSafelyInContainer :
             blackPiecesSafelyInContainer;
             container.add(pieceStuckToMouse);
+            if (currentPlayer.isWhite()) {
+                ++whitePieces[0];
+            } else {
+                ++blackPieces[0];
+            }
             log(String.format("%s Container HAS HAD ONE ADDED TO IT, NEW SIZE: %d", whoseTurnIsIt(), container.size()));
             sfxPutPieceInContainer.playSound();
         } else {
             Spike destinationSpike = spikes.get(destinationSpikeId);
             PlayerColor thisColor = currentPlayer.getColour();
             PlayerColor otherColor = currentPlayer.isWhite() ? PlayerColor.BLACK : PlayerColor.WHITE;
-            Spike piecesOnBar = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
             if (destinationSpike.getAmountOfPieces(otherColor) > 0) {
+                Spike piecesOnBar = currentPlayer.isWhite() ? theBarBLACK : theBarWHITE;
                 log(String.format("%s KILLED A %s", thisColor, otherColor));
                 Piece firstPiece = (Piece) destinationSpike.pieces.firstElement();
                 destinationSpike.removePiece(firstPiece);
                 piecesOnBar.addPiece(firstPiece);
+                if (currentPlayer.isWhite()) {
+                    whiteKillsBlack(destinationSpike.getPosition());
+                } else {
+                    blackKillsWhite(destinationSpike.getPosition());
+                }
                 sfxKilled.playSound();
             }
             destinationSpike.addPiece(pieceStuckToMouse);
+            addPieceToSpike(destinationSpikeId + 1);
         }
         if (dieToSetUnused == DieType.DIE1) {
             disableDie1();
@@ -995,7 +1024,42 @@ public class Board {
         return null;
     }
 
-    private int numPieces(int spikePosition) {
-        return spikes.get(spikePosition - 1).pieces.size();
+    /**
+     *
+     * @param spikeId id of the normal spike
+     * @return the number of the pieces in the given spicke
+     */
+    private int numPieces(int spikeId) {
+        return whitePieces[spikeId] + blackPieces[25 - spikeId];
+    }
+
+    private boolean isWhite(int spikeId) {
+        return whitePieces[spikeId] > 0;
+    }
+
+    private void whiteKillsBlack(int spikeId) {
+        ++blackPieces[25];
+        --blackPieces[25 - spikeId];
+    }
+
+    private void blackKillsWhite(int spikeId) {
+        ++whitePieces[25];
+        --whitePieces[spikeId];
+    }
+
+    private void addPieceToSpike(int spikeId) {
+        if (currentPlayer.isWhite()) {
+            ++whitePieces[spikeId];
+        } else {
+            ++blackPieces[25 - spikeId];
+        }
+    }
+
+    private void removePieceFromSpike(int spikeId) {
+        if (currentPlayer.isWhite()) {
+            --whitePieces[spikeId];
+        } else {
+            --blackPieces[25 - spikeId];
+        }
     }
 }

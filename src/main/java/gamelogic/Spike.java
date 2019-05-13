@@ -278,8 +278,8 @@ public class Spike {
         collision_y = (type == STALECTITE) ? y1 : y1 - geometry.spikeHeight();
     }
 
-    private void log(String s) {
-        Utils.log("Spike{}:" + s);
+    private void log(String message) {
+        Utils.log(String.format("%s Spike{}: %s", Thread.currentThread().getName(), message));
     }
 
     private int ysign() {
