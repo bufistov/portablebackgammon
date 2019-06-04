@@ -321,9 +321,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         if (INFO) {
             paintAboutBox(g);
         }
-        if (Utils.CANVAS_LOGGING) {
-            paintStringsToCanvas(g);
-        }
         //all of this in aid of a loop that lasts for x amount of seconds not a cpu dependent tick,
         //could be a bit over the top for what im doign (todo optimise?)
         long playerMessageTimePassedLong = System.currentTimeMillis() - playerMessageSetTimeLong;
@@ -446,7 +443,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
             "P = PAUSE (bot dead? " + Bot.dead + ")",
             "D = DEBUG CONSOLE (" + DEBUG_CONSOLE + ")",
             "T = THEME (" + themeName + ")", "C = COLLISIONS (" + showBoundaryBoxes + ")",
-            "L = CANVAS LOGGING (" + Utils.CANVAS_LOGGING + ")", "S = SOUND (" + soundOn + ")", "X = TEST SOUND",
             "J = JUMP TO DESTINATION: unknown",
             "F = FULL_AUTO_PLAY: unknwon"};
         for (String message : helpMessages) {
@@ -1375,13 +1371,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
         if (!RELEASE_BUILD && e.getKeyChar() == 'c' || e.getKeyChar() == 'C') {
             showBoundaryBoxes = !showBoundaryBoxes;
         }
-        if (!RELEASE_BUILD && e.getKeyChar() == 'l' || e.getKeyChar() == 'L') {
-            Utils.CANVAS_LOGGING = !Utils.CANVAS_LOGGING;
-        }
-
-        if (!RELEASE_BUILD && e.getKeyChar() == 'd' || e.getKeyChar() == 'D') {
-            DEBUG_CONSOLE = !DEBUG_CONSOLE;
-        }
 
         if (e.getKeyChar() == 't' || e.getKeyChar() == 'T') {
             theme++;
@@ -1481,17 +1470,6 @@ public class CustomCanvas extends Canvas implements MouseClickAndMoveListener, K
                 land, 32, 93, GAP, gap, this);
         } catch (Exception e) {
             Utils._E("== error loading fonts " + e.getMessage());
-        }
-    }
-
-    //for debugging, paints sytem.out to screen
-    private void paintStringsToCanvas(Graphics g) {
-        Enumeration e = Utils.systemOuts.elements();
-        int x = 3;
-        int y = 3;
-        while (e.hasMoreElements()) {
-             String printthis = (String)e.nextElement();
-             fontwhite.drawString(g, printthis, x, y, 0);y+=fontwhite.getHeight();
         }
     }
 
