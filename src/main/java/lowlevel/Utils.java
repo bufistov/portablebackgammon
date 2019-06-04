@@ -14,26 +14,6 @@ public class Utils {
     private static int LINES_THAT_FIT_VERTICALLY = 25;
     static Vector systemOuts = new Vector(0);
 
-    /*private Color colour;
-
-    public void setColor(Graphics g, Color colour_) {
-        colour = colour_;
-        g.setColor(colour_);
-    }
-
-    static void setColor(Graphics g, int c) {
-        Color cl = new Color(c);
-        g.setColor(cl);
-    }
-
-    void setColor(Graphics g, int red, int green, int blue, int alpha) {
-        g.setColor(new Color(red, green, blue, alpha));
-    }
-
-    public Color getColor() {
-        return colour;
-    }*/
-
     public static void drawRect(Graphics g, Color color, int x, int y, int WIDTH, int HEIGHT) {
         g.setColor(color);
         g.drawRect(x, y, WIDTH, HEIGHT);
